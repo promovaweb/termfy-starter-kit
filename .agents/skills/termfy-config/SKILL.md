@@ -17,8 +17,8 @@ credenciais, mudar a política da chave mestra ou depurar a pasta
 - `docs/configuration.md`.
 - `src/config/paths.ts`, `src/config/settings.ts`, `src/config/crypto.ts`
   e `src/config/credentials.ts`.
-- `references/modelo-de-seguranca.md`: o que a cifra cobre e o que não cobre.
-- `references/chaves-de-configuracao.md`: como declarar uma chave nova.
+- `references/security-model.md`: o que a cifra cobre e o que não cobre.
+- `references/settings-keys.md`: como declarar uma chave nova.
 
 ## Regras
 

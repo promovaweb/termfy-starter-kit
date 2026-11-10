@@ -16,8 +16,8 @@ argumentos e opções, ou para mudar o formato de saída e os códigos de saída
 - `docs/cli.md` e `docs/exit-codes.md`.
 - `src/cli/registry.ts` (tipos) e `src/cli/commands/config.ts` (exemplo
   completo com subcomandos).
-- `references/contrato-de-comando.md`: regras que todo comando cumpre.
-- `references/saida-texto-json.md`: envelope JSON, stdout e stderr.
+- `references/command-contract.md`: regras que todo comando cumpre.
+- `references/text-json-output.md`: envelope JSON, stdout e stderr.
 - `references/opencli.md` e `references/opencli/schema-draft.json` quando a
   mudança tocar a árvore pública de comandos.
 

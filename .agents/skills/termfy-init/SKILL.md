@@ -1,5 +1,5 @@
 ---
-name: termfy-iniciar
+name: termfy-init
 description: Cria um binário novo a partir do starter kit do Termfy, renomeia o executável, atualiza as skills instaladas, confere os três modos (TUI, CLI, MCP) e prepara o primeiro commit.
 ---
 

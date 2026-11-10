@@ -16,10 +16,10 @@ interação por teclado da interface de terminal.
 - `docs/tui.md`.
 - `src/tui/index.ts` (montagem), `src/tui/screen.ts` (contrato),
   `src/tui/components.ts` e `src/tui/theme.ts`.
-- `references/design-modern-unix.md`: o padrão visual que toda tela segue.
+- `references/modern-unix-design.md`: o padrão visual que toda tela segue.
 - `references/opentui/README.md`: índice da documentação oficial do OpenTUI
   copiada nesta skill; abra as páginas indicadas para o componente em uso.
-- `references/testes-de-tela.md` para escrever o teste da tela.
+- `references/screen-tests.md` para escrever o teste da tela.
 
 ## Regras
 

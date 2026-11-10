@@ -23,7 +23,7 @@ do OpenMCP é a disciplina de economia:
 Se a API tem OpenAPI, avalie gerar o servidor pelo OpenMCP e manter o
 Termfy focado no que a API não oferece (estado local, credenciais,
 orquestração). Se a API não tem especificação, escreva as tools à mão
-seguindo `contrato-de-tool.md`.
+seguindo `tool-contract.md`.
 
 ## Configuração de cliente para servidores remotos OpenMCP
 

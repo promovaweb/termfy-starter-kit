@@ -2,6 +2,14 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.3.1] - 2026-11-10
+
+### Alterado
+
+- Skills do framework 0.4.0: `termfy-iniciar` substituída por `termfy-init`
+  em `.agents/skills/`, `skills-lock.json`, `scripts/check-skills.ts`,
+  `AGENTS.md`, `README.md` e `docs/customize-template.md`.
+
 ## [0.3.0] - 2026-11-10
 
 ### Alterado

@@ -16,7 +16,7 @@ arquivo na raiz, `CLISPEC.md`, que as skills `termfy-cli`, `termfy-tui`,
 - `AGENTS.md` do repositório.
 - `CLISPEC.md` atual, se existir.
 - `references/clispec-template.md`: o formato do arquivo.
-- `references/entrevista.md`: as perguntas, em ordem, e o que cada resposta
+- `references/interview.md`: as perguntas, em ordem, e o que cada resposta
   define.
 - `docs/cli.md`, `docs/tui.md`, `docs/mcp.md` e `docs/configuration.md` do
   starter kit, para conhecer o que o esqueleto já oferece e não especificar
@@ -47,7 +47,7 @@ arquivo na raiz, `CLISPEC.md`, que as skills `termfy-cli`, `termfy-tui`,
 ## Passos
 
 1. Rode `git status --short` e leia o `CLISPEC.md` atual.
-2. Conduza a entrevista de `references/entrevista.md` na ordem: identidade,
+2. Conduza a entrevista de `references/interview.md` na ordem: identidade,
    propósito e públicos, modos, commands, TUI, MCP, configuração e
    credenciais, fora de escopo, checagens de aceite.
 3. A cada bloco respondido, escreva a seção correspondente no `CLISPEC.md`

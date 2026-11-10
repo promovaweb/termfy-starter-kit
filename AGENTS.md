@@ -37,7 +37,7 @@ não existir ou não cobrir o pedido, rode a skill `termfy-spec` primeiro.
 3. `docs/architecture.md` para entender as camadas.
 4. A skill compatível com a tarefa em `.agents/skills/`:
    - `termfy-spec`: montar ou revisar o `CLISPEC.md`;
-   - `termfy-iniciar`: personalizar este starter kit para um binário novo;
+   - `termfy-init`: personalizar este starter kit para um binário novo;
    - `termfy-cli`: commands, options, saída e exit codes;
    - `termfy-tui`: screens, tema e interação por teclado;
    - `termfy-mcp`: tools, resources e prompts;

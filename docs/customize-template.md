@@ -46,7 +46,7 @@ Elas ensinam um agente a evoluir o projeto:
 | Skill | Uso |
 | --- | --- |
 | `termfy-spec` | entrevistar a pessoa e montar o `CLISPEC.md` |
-| `termfy-iniciar` | criar o binário a partir do template e fazer o primeiro commit |
+| `termfy-init` | criar o binário a partir do template e fazer o primeiro commit |
 | `termfy-cli` | commands, options, saída texto/JSON, exit codes e OpenCLI |
 | `termfy-tui` | screens, componentes, tema e o visual modern unix |
 | `termfy-mcp` | tools, resources, prompts e testes com o Inspector |

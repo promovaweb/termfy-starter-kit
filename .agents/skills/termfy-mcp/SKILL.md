@@ -16,7 +16,7 @@ Model Context Protocol, ou para revisar o que já está exposto.
 - `docs/mcp.md`.
 - `src/mcp/server.ts`, `src/mcp/tools/base.ts`, `src/mcp/resources/base.ts`
   e `src/mcp/prompts.ts`.
-- `references/contrato-de-tool.md`: regras de nome, schema, descrição e
+- `references/tool-contract.md`: regras de nome, schema, descrição e
   resposta.
 - `references/mcp-sdk/server.md`: API do `McpServer` (v1.x do SDK).
 - `references/mcp-spec/server-concepts.md` e `references/mcp-spec/transports.md`
@@ -55,7 +55,7 @@ Model Context Protocol, ou para revisar o que já está exposto.
    CLI. Não duplique lógica de comando dentro da tool.
 4. Registre a função em `registerAll` (`src/mcp/server.ts`).
 5. Teste com o `Client` do SDK em `tests/mcp.test.ts` (ver
-   `references/testes-mcp.md`) e, manualmente, com
+   `references/mcp-tests.md`) e, manualmente, com
    `npx @modelcontextprotocol/inspector bun run src/main.ts mcp`.
 6. Rode `bun run validate`.
 7. Atualize a tabela de tools em `docs/mcp.md` e a `longDescription` do

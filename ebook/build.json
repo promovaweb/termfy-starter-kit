@@ -4,8 +4,8 @@
   "edition": "v0.2.0",
   "bin": "termfy",
   "title": "Termfy",
-  "generated_at": "2026-11-10T12:13:17Z",
-  "source_sha256": "ed30946871c9fac3cc01152afa26531e73e1252d3ffe3321984847ee1b07f26e",
+  "generated_at": "2026-11-10T12:22:44Z",
+  "source_sha256": "1b126c647e525828fba127e99931b893b5b89296cf01d9a773fe1c7d1bf817ad",
   "sources": [
     ".ebook/assets/logo.png",
     ".ebook/build-ebook.mjs",
@@ -30,11 +30,11 @@
   "artifacts": {
     "pdf": {
       "file": "Termfy-User-Guide-v0.2.0.pdf",
-      "sha256": "deabacaf669d535c4ff641dd877a196bb272d8f1fbc642b8ed7ad6fe0fd65e08"
+      "sha256": "85a25380eb5fe36c25966a69f58a7de553a899a8bded8a29ffdd3e5988ac4115"
     },
     "epub": {
       "file": "Termfy-User-Guide-v0.2.0.epub",
-      "sha256": "74d6ca5d67abe4d3894ea7f6c4506765aba689e89be128904f5accdfecabb986"
+      "sha256": "a504e13f38da702e08e95ff5fc17d41bad4fc671e61a5a4e8d1320845efca7ab"
     }
   }
 }

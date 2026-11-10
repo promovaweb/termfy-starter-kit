@@ -1,6 +1,6 @@
 {
   "name": "termfy-starter-kit",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "CLI, TUI and MCP stdio server skeleton in Bun, with the Termfy framework skills installed.",
   "type": "module",
   "private": true,
