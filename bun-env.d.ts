@@ -1,10 +1,9 @@
 /**
- * Declarações de módulo para os imports de texto usados pelo Bun.
- * Arquivos Markdown entram no binário com `with { type: "text" }` e chegam
- * ao código como string. O TypeScript precisa desta declaração para aceitar
- * o import sem erro de tipo.
+ * Module declarations for the text imports used by Bun.
+ * Markdown files enter the binary with `with { type: "text" }` and reach the
+ * code as strings. TypeScript needs this declaration to accept the import.
  */
 declare module "*.md" {
-  const conteudo: string;
-  export default conteudo;
+  const content: string;
+  export default content;
 }

@@ -1,120 +1,120 @@
-/** Execução ponta a ponta do CLI em subprocesso, com pasta de dados isolada. */
+/** End-to-end CLI runs in a subprocess with an isolated data directory. */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { VARIAVEL_HOME } from "../src/config/caminhos.ts";
-import { manifesto } from "../src/app/manifesto.ts";
+import { HOME_VARIABLE } from "../src/config/paths.ts";
+import { manifest } from "../src/app/manifest.ts";
 
-let pasta: string;
+let dir: string;
 
 beforeAll(() => {
-  pasta = mkdtempSync(join(tmpdir(), "termfy-cli-"));
+  dir = mkdtempSync(join(tmpdir(), "termfy-cli-"));
 });
-afterAll(() => rmSync(pasta, { recursive: true, force: true }));
+afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
-async function rodar(args: string[], stdin?: string) {
+async function run(args: string[], stdin?: string) {
   const proc = Bun.spawn(["bun", "run", "src/main.ts", ...args], {
     cwd: join(import.meta.dir, ".."),
-    env: { ...process.env, [VARIAVEL_HOME]: pasta, NO_COLOR: "1" },
+    env: { ...process.env, [HOME_VARIABLE]: dir, NO_COLOR: "1" },
     stdin: stdin === undefined ? "ignore" : new Response(stdin),
     stdout: "pipe",
     stderr: "pipe",
   });
   const [stdout, stderr] = await Promise.all([new Response(proc.stdout).text(), new Response(proc.stderr).text()]);
-  const codigo = await proc.exited;
-  return { codigo, stdout, stderr };
+  const code = await proc.exited;
+  return { code, stdout, stderr };
 }
 
 describe("cli", () => {
   test("--version", async () => {
-    const r = await rodar(["--version"]);
-    expect(r.codigo).toBe(0);
-    expect(r.stdout.trim()).toBe(`${manifesto.bin} ${manifesto.versao}`);
+    const r = await run(["--version"]);
+    expect(r.code).toBe(0);
+    expect(r.stdout.trim()).toBe(`${manifest.bin} ${manifest.version}`);
   });
 
-  test("--help lista comandos e códigos de saída", async () => {
-    const r = await rodar(["--help"]);
-    expect(r.codigo).toBe(0);
+  test("--help lists commands and exit codes", async () => {
+    const r = await run(["--help"]);
+    expect(r.code).toBe(0);
     for (const c of ["about", "config", "credentials", "mcp", "skill", "tui"]) expect(r.stdout).toContain(c);
-    expect(r.stdout).toContain("TERMINAL_INDISPONIVEL");
+    expect(r.stdout).toContain("NO_TTY");
   });
 
-  test("sem argumentos e sem TTY imprime ajuda e sai com 2", async () => {
-    const r = await rodar([]);
-    expect(r.codigo).toBe(2);
-    expect(r.stdout).toContain("Uso");
+  test("no arguments and no TTY prints help and exits with 2", async () => {
+    const r = await run([]);
+    expect(r.code).toBe(2);
+    expect(r.stdout).toContain("Usage");
   });
 
-  test("about --json devolve envelope", async () => {
-    const r = await rodar(["about", "--json"]);
-    expect(r.codigo).toBe(0);
+  test("about --json returns the envelope", async () => {
+    const r = await run(["about", "--json"]);
+    expect(r.code).toBe(0);
     const json = JSON.parse(r.stdout);
     expect(json.ok).toBe(true);
-    expect(json.comando).toBe(`${manifesto.bin} about`);
-    expect(json.dados.versao).toBe(manifesto.versao);
+    expect(json.command).toBe(`${manifest.bin} about`);
+    expect(json.data.version).toBe(manifest.version);
   });
 
-  test("config set/get e erro de configuração em JSON", async () => {
-    expect((await rodar(["config", "set", "tui.tema", "dia"])).codigo).toBe(0);
-    const get = await rodar(["config", "get", "tui.tema"]);
-    expect(get.stdout.trim()).toBe("dia");
-    const erroJson = await rodar(["config", "get", "nao.existe", "--json"]);
-    expect(erroJson.codigo).toBe(3);
-    expect(JSON.parse(erroJson.stdout).erro.nome).toBe("CONFIGURACAO");
+  test("config set/get and a config error as JSON", async () => {
+    expect((await run(["config", "set", "tui.theme", "day"])).code).toBe(0);
+    const get = await run(["config", "get", "tui.theme"]);
+    expect(get.stdout.trim()).toBe("day");
+    const errorJson = await run(["config", "get", "does.not.exist", "--json"]);
+    expect(errorJson.code).toBe(3);
+    expect(JSON.parse(errorJson.stdout).error.name).toBe("CONFIG");
   });
 
-  test("credentials set via stdin, list e get mascarado", async () => {
-    const set = await rodar(["credentials", "set", "github.token", "--stdin"], "ghp_abcdefghijklmnop\n");
-    expect(set.codigo).toBe(0);
-    const list = await rodar(["credentials", "list", "--json"]);
-    expect(JSON.parse(list.stdout).dados.nomes).toEqual(["github.token"]);
-    const get = await rodar(["credentials", "get", "github.token"]);
+  test("credentials set via stdin, list and masked get", async () => {
+    const set = await run(["credentials", "set", "github.token", "--stdin"], "ghp_abcdefghijklmnop\n");
+    expect(set.code).toBe(0);
+    const list = await run(["credentials", "list", "--json"]);
+    expect(JSON.parse(list.stdout).data.names).toEqual(["github.token"]);
+    const get = await run(["credentials", "get", "github.token"]);
     expect(get.stdout.trim()).not.toContain("abcdefghijklmnop");
-    const reveal = await rodar(["credentials", "get", "github.token", "--reveal"]);
+    const reveal = await run(["credentials", "get", "github.token", "--reveal"]);
     expect(reveal.stdout.trim()).toBe("ghp_abcdefghijklmnop");
-    const falta = await rodar(["credentials", "get", "x.y"]);
-    expect(falta.codigo).toBe(4);
+    const missing = await run(["credentials", "get", "x.y"]);
+    expect(missing.code).toBe(4);
   });
 
-  test("opção desconhecida sai com 2", async () => {
-    const r = await rodar(["about", "--nada"]);
-    expect(r.codigo).toBe(2);
-    expect(r.stderr).toContain("Opção desconhecida");
+  test("an unknown option exits with 2", async () => {
+    const r = await run(["about", "--nothing"]);
+    expect(r.code).toBe(2);
+    expect(r.stderr).toContain("Unknown option");
   });
 
-  test("tui sem TTY sai com 8", async () => {
-    const r = await rodar(["tui"]);
-    expect(r.codigo).toBe(8);
+  test("tui without a TTY exits with 8", async () => {
+    const r = await run(["tui"]);
+    expect(r.code).toBe(8);
   });
 
-  test("--skill imprime a documentação com a referência gerada", async () => {
-    const r = await rodar(["--skill"]);
-    expect(r.codigo).toBe(0);
+  test("--skill prints the documentation with the generated reference", async () => {
+    const r = await run(["--skill"]);
+    expect(r.code).toBe(0);
     expect(r.stdout).toContain("# CLI");
     expect(r.stdout).toContain("# MCP");
-    expect(r.stdout).toContain(`\`${manifesto.bin} credentials set\``);
-    const topico = await rodar(["--skill", "codigos", "--json"]);
-    expect(JSON.parse(topico.stdout).dados.topico).toBe("codigos");
+    expect(r.stdout).toContain(`\`${manifest.bin} credentials set\``);
+    const topic = await run(["--skill", "exit-codes", "--json"]);
+    expect(JSON.parse(topic.stdout).data.topic).toBe("exit-codes");
   });
 
-  test("--opencli devolve documento válido", async () => {
-    const r = await rodar(["--opencli"]);
+  test("--opencli returns a valid document", async () => {
+    const r = await run(["--opencli"]);
     const doc = JSON.parse(r.stdout);
     expect(doc.opencli).toBe("0.1");
-    expect(doc.command.name).toBe(manifesto.bin);
+    expect(doc.command.name).toBe(manifest.bin);
     expect(doc.command.commands.map((c: { name: string }) => c.name)).toContain("credentials");
     expect(doc.command.exitCodes.find((e: { code: number }) => e.code === 0)).toBeTruthy();
   });
 
-  test("mcp --list enumera tools, resources e prompts", async () => {
-    const r = await rodar(["mcp", "--list", "--json"]);
-    expect(r.codigo).toBe(0);
-    const d = JSON.parse(r.stdout).dados;
-    expect(d.tools.map((t: { nome: string }) => t.nome)).toEqual(
+  test("mcp --list enumerates tools, resources and prompts", async () => {
+    const r = await run(["mcp", "--list", "--json"]);
+    expect(r.code).toBe(0);
+    const d = JSON.parse(r.stdout).data;
+    expect(d.tools.map((t: { name: string }) => t.name)).toEqual(
       expect.arrayContaining(["about", "exit_codes", "skill", "config_list", "config_get", "credentials_status"]),
     );
     expect(d.resources.length).toBeGreaterThanOrEqual(4);
-    expect(d.prompts[0].nome).toBe("operar");
+    expect(d.prompts[0].name).toBe("operate");
   });
 });

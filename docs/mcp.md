@@ -20,12 +20,12 @@ Para desenvolvimento, sem compilar: `"command": "bun", "args": ["run", "src/main
 
 | Tool | Entrada | Saída |
 | --- | --- | --- |
-| `about` | nenhuma | identidade, runtime, plataforma, pasta de dados e créditos |
-| `exit_codes` | nenhuma | tabela de códigos de saída |
-| `skill` | `topico?` (`cli`, `tui`, `mcp`, `config`, `codigos`) | documentação em Markdown |
-| `config_list` | nenhuma | chaves de settings.json em vigor e o esquema |
-| `config_get` | `chave` | valor da chave; `isError` quando não existe |
-| `credentials_status` | nenhuma | arquivo, origem da chave mestra, quantidade e nomes |
+| `about` | nenhuma | identity, runtime, platform, data directory e credits |
+| `exit_codes` | nenhuma | tabela de exit codes |
+| `skill` | `topic?` (`cli`, `tui`, `mcp`, `config`, `exit-codes`) | documentação em Markdown |
+| `config_list` | nenhuma | keys de settings.json em vigor e o schema |
+| `config_get` | `key` | valor da key; `isError` quando não existe |
+| `credentials_status` | nenhuma | file, master key source, count e names |
 
 Nenhuma tool devolve o valor de uma credencial, e nenhuma tool grava. Escrita
 continua no CLI, onde há confirmação humana.
@@ -34,16 +34,16 @@ continua no CLI, onde há confirmação humana.
 
 | URI | Conteúdo |
 | --- | --- |
-| `{{bin}}://about` | identidade em JSON |
-| `{{bin}}://exit-codes` | códigos de saída em JSON |
+| `{{bin}}://about` | identity em JSON |
+| `{{bin}}://exit-codes` | exit codes em JSON |
 | `{{bin}}://skill` | documentação completa em Markdown |
-| `{{bin}}://skill/{topico}` | uma seção; o template lista os tópicos |
+| `{{bin}}://skill/{topic}` | uma seção; o template lista os topics |
 
 ## Prompts
 
-| Prompt | Argumentos | Função |
+| Prompt | Arguments | Função |
 | --- | --- | --- |
-| `operar` | `tarefa` | instrui o agente a ler `skill cli` e executar a tarefa pelo CLI com `--json` |
+| `operate` | `task` | instrui o agente a ler `skill cli` e executar a task pelo CLI com `--json` |
 
 ## Listar sem iniciar
 
@@ -63,14 +63,14 @@ inspecionar as mensagens JSON-RPC.
 
 ## Como adicionar uma tool
 
-1. Copie `template/tool/exemplo.ts` para `src/mcp/tools/<nome>.ts`.
+1. Copie `template/tool/example.ts` para `src/mcp/tools/<name>.ts`.
 2. Declare `inputSchema` com Zod e descreva cada campo com `.describe()`. A
-   descrição da tool diz quando usar e o que ela devolve.
+   description da tool diz quando usar e o que ela devolve.
 3. Devolva `content` em texto e, quando a saída for estruturada,
    `structuredContent` com o mesmo objeto.
-4. Acrescente a tool ao `catalogo.tools` para que `mcp --list` a enxergue.
-5. Registre a função em `registrarTudo` em `src/mcp/servidor.ts`.
+4. Acrescente a tool ao `catalog.tools` para que `mcp --list` a enxergue.
+5. Registre a função em `registerAll` em `src/mcp/server.ts`.
 6. Teste com o Inspector e com `bun test`.
 
 Nomes de tools usam `snake_case`. Tools que gravam ou chamam APIs externas
-precisam dizer isso na descrição e nunca devem ecoar segredos na resposta.
+precisam dizer isso na description e nunca devem ecoar segredos na resposta.

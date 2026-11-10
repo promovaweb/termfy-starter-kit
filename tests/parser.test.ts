@@ -1,52 +1,52 @@
-/** Testes do parser de argv e do registro. */
+/** argv parser and registry tests. */
 import { describe, expect, test } from "bun:test";
-import { analisar } from "../src/cli/parser.ts";
-import { raiz } from "../src/cli/comandos.ts";
-import { ErroApp } from "../src/app/erros.ts";
-import { CodigoSaida } from "../src/app/saida.ts";
+import { parse } from "../src/cli/parser.ts";
+import { root } from "../src/cli/commands.ts";
+import { AppError } from "../src/app/errors.ts";
+import { ExitCode } from "../src/app/exit-codes.ts";
 
 describe("parser", () => {
-  test("resolve subcomandos aninhados, argumentos e opções", () => {
-    const a = analisar(raiz, ["config", "set", "saida.formato", "json", "--json"]);
-    expect(a.caminho).toEqual(["config", "set"]);
-    expect(a.args).toEqual(["saida.formato", "json"]);
-    expect(a.opcoes.json).toBe(true);
+  test("resolves nested subcommands, arguments and options", () => {
+    const p = parse(root, ["config", "set", "output.format", "json", "--json"]);
+    expect(p.path).toEqual(["config", "set"]);
+    expect(p.args).toEqual(["output.format", "json"]);
+    expect(p.options.json).toBe(true);
   });
 
-  test("aceita --chave=valor e aliases", () => {
-    const a = analisar(raiz, ["tui", "--aba=about"]);
-    expect(a.opcoes.aba).toBe("about");
-    const b = analisar(raiz, ["-h"]);
-    expect(b.opcoes.help).toBe(true);
+  test("accepts --key=value and aliases", () => {
+    const p = parse(root, ["tui", "--tab=about"]);
+    expect(p.options.tab).toBe("about");
+    const h = parse(root, ["-h"]);
+    expect(h.options.help).toBe(true);
   });
 
-  test("--skill aceita valor opcional", () => {
-    expect(analisar(raiz, ["--skill"]).opcoes.skill).toBe(true);
-    expect(analisar(raiz, ["--skill", "mcp"]).opcoes.skill).toBe("mcp");
+  test("--skill accepts an optional value", () => {
+    expect(parse(root, ["--skill"]).options.skill).toBe(true);
+    expect(parse(root, ["--skill", "mcp"]).options.skill).toBe("mcp");
   });
 
-  test("rejeita opção desconhecida com USO_INVALIDO", () => {
+  test("rejects an unknown option with USAGE", () => {
     try {
-      analisar(raiz, ["about", "--nada"]);
-      throw new Error("deveria falhar");
+      parse(root, ["about", "--nothing"]);
+      throw new Error("should fail");
     } catch (e) {
-      expect(e).toBeInstanceOf(ErroApp);
-      expect((e as ErroApp).codigo).toBe(CodigoSaida.USO_INVALIDO);
+      expect(e).toBeInstanceOf(AppError);
+      expect((e as AppError).code).toBe(ExitCode.USAGE);
     }
   });
 
-  test("rejeita argumento obrigatório ausente", () => {
-    expect(() => analisar(raiz, ["config", "get"])).toThrow(/Faltam argumentos/);
+  test("rejects a missing required argument", () => {
+    expect(() => parse(root, ["config", "get"])).toThrow(/Missing arguments/);
   });
 
-  test("rejeita valor fora da lista", () => {
-    expect(() => analisar(raiz, ["tui", "--aba", "nada"])).toThrow(/Aceitos/);
-    expect(() => analisar(raiz, ["skill", "nada"])).toThrow(/Aceitos/);
+  test("rejects a value outside the accepted list", () => {
+    expect(() => parse(root, ["tui", "--tab", "nothing"])).toThrow(/Accepted/);
+    expect(() => parse(root, ["skill", "nothing"])).toThrow(/Accepted/);
   });
 
-  test("-- encerra opções", () => {
-    const a = analisar(raiz, ["config", "get", "--", "--json"]);
-    expect(a.args).toEqual(["--json"]);
-    expect(a.opcoes.json).toBeUndefined();
+  test("-- ends option parsing", () => {
+    const p = parse(root, ["config", "get", "--", "--json"]);
+    expect(p.args).toEqual(["--json"]);
+    expect(p.options.json).toBeUndefined();
   });
 });

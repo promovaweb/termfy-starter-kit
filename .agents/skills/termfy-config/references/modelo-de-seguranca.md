@@ -6,11 +6,11 @@
 
 | Campo | Conteúdo |
 | --- | --- |
-| `versao` | `1` |
-| `algoritmo` | `aes-256-gcm` |
+| `version` | `1` |
+| `algorithm` | `aes-256-gcm` |
 | `iv` | 12 bytes aleatórios em base64 |
 | `tag` | tag de autenticação de 16 bytes em base64 |
-| `dados` | JSON `{ nome: valor }` cifrado, em base64 |
+| `data` | JSON `{ name: value }` cifrado, em base64 |
 
 A tag garante integridade: um arquivo editado ou cifrado com outra chave
 falha ao decifrar e o comando encerra com código 4.
@@ -44,11 +44,11 @@ não gravar `master.key`.
 
 ## Regras de código
 
-- Nunca `console.log(valor)`, nem em modo debug.
+- Nunca `console.log(value)`, nem em modo debug.
 - Mensagens de erro citam o nome da credencial, nunca o valor.
-- `mascarar()` para qualquer exibição sem `--reveal`.
-- Em `--json`, `credentials get` sem `--reveal` devolve `mascarado` e
-  `tamanho`, não `valor`.
-- Tools MCP expõem só `statusCofre()`.
+- `mask()` para qualquer exibição sem `--reveal`.
+- Em `--json`, `credentials get` sem `--reveal` devolve `masked` e
+  `length`, não `value`.
+- Tools MCP expõem só `vaultStatus()`.
 - Testes usam `<BIN>_HOME` apontando para pasta temporária e nunca tocam em
   `~/.<bin>/` da máquina.

@@ -1,16 +1,16 @@
 /**
- * Gera e confere o guia do usuário do binário em PDF e EPUB.
+ * Builds and checks the binary user guide as PDF and EPUB.
  *
- * Fonte: `docs/`, na ordem de `docs/reading-order.txt`. É a mesma pasta
- * embutida no binário e impressa por `--skill`; aqui os placeholders
- * `{{bin}}`, `{{titulo}}`, `{{versao}}` e `{{BIN}}` são resolvidos pelo
- * manifesto do `package.json`, como o binário faz em tempo de execução.
- * Saída: `ebook/<Titulo>-Guia-do-Usuario-v<versão>.{pdf,epub}`, os aliases
- * `ebook/ebook-<bin>.{pdf,epub}` e o manifesto `ebook/build.json`.
- * A versão do ebook vem de `ebook/VERSION` e é independente da versão do
- * binário. Roda com `bun run .ebook/build-ebook.mjs`; `--check` só confere
- * versão, hashes, XML, links internos, seções e fontes.
- * Requer Pandoc, WeasyPrint, ImageMagick, xmllint, poppler-utils e unzip.
+ * Source: `docs/`, in the order of `docs/reading-order.txt`. It is the same folder
+ * embedded in the binary and printed by `--skill`; here the placeholders
+ * `{{bin}}`, `{{title}}`, `{{version}}` and `{{BIN}}` are resolved from the
+ * `package.json` manifest, as the binary does at runtime.
+ * Output: `ebook/<Title>-User-Guide-v<version>.{pdf,epub}`, the aliases
+ * `ebook/ebook-<bin>.{pdf,epub}` and the `ebook/build.json` manifest.
+ * The ebook version comes from `ebook/VERSION` and is independent of the
+ * binary version. Runs with `bun run .ebook/build-ebook.mjs`; `--check` only verifies
+ * version, hashes, XML, internal links, sections and fonts.
+ * Requires Pandoc, WeasyPrint, ImageMagick, xmllint, poppler-utils and unzip.
  */
 
 import { createHash } from "node:crypto";
@@ -35,7 +35,7 @@ const EPUB_STYLE = join(SCRIPT_DIR, "epub.css");
 const TEMPLATE = join(SCRIPT_DIR, "template.html");
 const METADATA = join(SCRIPT_DIR, "metadata.yaml");
 const LOGO = join(SCRIPT_DIR, "assets", "logo.png");
-const PACOTE = join(ROOT, "package.json");
+const PACKAGE_JSON = join(ROOT, "package.json");
 const SCRIPT = fileURLToPath(import.meta.url);
 const REQUIRE = createRequire(import.meta.url);
 const FONT_FILES = [
@@ -49,8 +49,8 @@ function fail(message) { throw new Error(message); }
 function rel(path) { return relative(ROOT, path).split("\\").join("/"); }
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, { cwd: options.cwd ?? ROOT, encoding: "utf8", input: options.input, maxBuffer: 32 * 1024 * 1024 });
-  if (result.error) fail(`${command} não pôde ser executado: ${result.error.message}`);
-  if (result.status !== 0) fail(`${command} falhou: ${(result.stderr || result.stdout).trim()}`);
+  if (result.error) fail(`${command} could not run: ${result.error.message}`);
+  if (result.status !== 0) fail(`${command} failed: ${(result.stderr || result.stdout).trim()}`);
   return result.stdout || "";
 }
 async function sha256(path) { return createHash("sha256").update(await readFile(path)).digest("hex"); }
@@ -64,44 +64,44 @@ async function filesIn(directory) {
   return result.sort();
 }
 
-/** Identidade do binário, lida do package.json como o manifesto faz. */
-function manifesto() {
-  const pacote = JSON.parse(readFileSync(PACOTE, "utf8"));
-  const bloco = pacote.termfy ?? {};
-  const bin = bloco.bin ?? pacote.name;
+/** Binary identity, read from package.json as the manifest does. */
+function manifest() {
+  const pkg = JSON.parse(readFileSync(PACKAGE_JSON, "utf8"));
+  const block = pkg.termfy ?? {};
+  const bin = block.bin ?? pkg.name;
   return {
     bin,
-    titulo: bloco.titulo ?? bin,
-    versao: pacote.version,
-    descricao: pacote.description ?? "",
-    autor: bloco.autor ?? "",
-    repositorio: bloco.repositorio ?? "",
-    prefixoEnv: bin.replace(/[^a-z0-9]/gi, "_").toUpperCase(),
-    slugTitulo: (bloco.titulo ?? bin).replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+    title: block.title ?? bin,
+    version: pkg.version,
+    description: pkg.description ?? "",
+    author: block.author ?? "",
+    repository: block.repository ?? "",
+    envPrefix: bin.replace(/[^a-z0-9]/gi, "_").toUpperCase(),
+    titleSlug: (block.title ?? bin).replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, ""),
   };
 }
-function substituir(texto, m) {
-  return texto.replaceAll("{{bin}}", m.bin).replaceAll("{{titulo}}", m.titulo).replaceAll("{{versao}}", m.versao).replaceAll("{{BIN}}", m.prefixoEnv);
+function substitute(text, m) {
+  return text.replaceAll("{{bin}}", m.bin).replaceAll("{{title}}", m.title).replaceAll("{{version}}", m.version).replaceAll("{{BIN}}", m.envPrefix);
 }
 function version() {
   const value = readFileSync(VERSION_FILE, "utf8").trim();
-  if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(value)) fail("ebook/VERSION deve conter SemVer estável.");
+  if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(value)) fail("ebook/VERSION must contain a stable SemVer.");
   return value;
 }
 async function pages() {
   const ordered = (await readFile(ORDER_FILE, "utf8")).split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
-  if (!ordered.length) fail("docs/reading-order.txt está vazio.");
+  if (!ordered.length) fail("docs/reading-order.txt is empty.");
   const seen = new Set();
   const paths = [];
   for (const value of ordered) {
-    if (!/^docs\/.*\.md$/.test(value) || seen.has(value)) fail(`entrada inválida na ordem de leitura: ${value}`);
+    if (!/^docs\/.*\.md$/.test(value) || seen.has(value)) fail(`invalid reading-order entry: ${value}`);
     const path = join(ROOT, value);
     await readFile(path);
     seen.add(value);
     paths.push(path);
   }
   for (const path of (await filesIn(DOCS_ROOT)).filter((item) => item.endsWith(".md"))) {
-    if (!seen.has(rel(path))) fail(`página fora da ordem de leitura: ${rel(path)}`);
+    if (!seen.has(rel(path))) fail(`page missing from reading order: ${rel(path)}`);
   }
   return paths;
 }
@@ -111,7 +111,7 @@ async function sourceHash(paths) {
   return createHash("sha256").update(records.join(""), "utf8").digest("hex");
 }
 function outputs(value, m) {
-  const stem = `${m.slugTitulo}-Guia-do-Usuario-v${value}`;
+  const stem = `${m.titleSlug}-User-Guide-v${value}`;
   return {
     stem,
     pdf: join(EBOOK_ROOT, `${stem}.pdf`),
@@ -129,8 +129,8 @@ async function preparedPages(paths, m) {
   await copyFile(LOGO, join(htmlAssets, "logo.png"));
   for (const path of paths) {
     const name = path.split(/[\\/]/).pop();
-    let text = substituir(await readFile(path, "utf8"), m);
-    // Links entre páginas viram texto: no ebook tudo é um documento só.
+    let text = substitute(await readFile(path, "utf8"), m);
+    // Links between pages become plain text: the ebook is a single document.
     text = text.replace(/(?<!!)\[([^\]]+)\]\((?!https?:|mailto:|tel:)[^)]+\)/g, "$1");
     await writeFile(join(directory, name), text);
     inputs.push(name);
@@ -179,13 +179,13 @@ function datePtBr() {
 async function check(value, sources, m) {
   const paths = outputs(value, m);
   const manifest = JSON.parse(await readFile(MANIFEST, "utf8"));
-  if (manifest.version !== value || manifest.source_sha256 !== await sourceHash(sources)) fail("ebook/build.json está desatualizado; execute bun run ebook.");
-  if (manifest.bin !== m.bin || manifest.titulo !== m.titulo) fail("ebook/build.json foi gerado para outra identidade; execute bun run ebook.");
+  if (manifest.version !== value || manifest.source_sha256 !== await sourceHash(sources)) fail("ebook/build.json is out of date; run bun run ebook.");
+  if (manifest.bin !== m.bin || manifest.title !== m.title) fail("ebook/build.json was generated for another identity; run bun run ebook.");
   for (const [kind, path, alias] of [["pdf", paths.pdf, paths.pdfAlias], ["epub", paths.epub, paths.epubAlias]]) {
     const binary = await readFile(path);
     const aliasBinary = await readFile(alias);
-    if (!binary.equals(aliasBinary)) fail(`alias ${kind} diverge da edição vigente.`);
-    if (manifest.artifacts[kind].sha256 !== await sha256(path)) fail(`hash de ${kind} diverge do manifesto.`);
+    if (!binary.equals(aliasBinary)) fail(`${kind} alias differs from the current edition.`);
+    if (manifest.artifacts[kind].sha256 !== await sha256(path)) fail(`${kind} hash differs from the manifest.`);
   }
   run("unzip", ["-tqq", paths.epub]);
   for (const entry of zipEntries(paths.epub).filter((name) => /\.(xhtml|opf|ncx|xml)$/.test(name))) {
@@ -193,14 +193,14 @@ async function check(value, sources, m) {
     run("xmllint", [entry.endsWith(".xhtml") ? "--html" : "--noout", ...(entry.endsWith(".xhtml") ? ["--noout"] : []), "-"], { input: xml });
   }
   const linkFailures = [...pdfLinkFailures(paths.pdf), ...epubLinkFailures(paths.epub)];
-  if (linkFailures.length) fail(`links internos inválidos:\n${linkFailures.join("\n")}`);
+  if (linkFailures.length) fail(`invalid internal links:\n${linkFailures.join("\n")}`);
   const text = run("pdftotext", [paths.pdf, "-"]);
-  for (const title of [m.titulo, "Guia do usuário", "CLI", "TUI", "MCP", "Configuração e credenciais", "Códigos de saída", "Arquitetura"]) {
-    if (!text.includes(title)) fail(`PDF não contém a seção: ${title}`);
+  for (const title of [m.title, "Guia do usuário", "CLI", "TUI", "MCP", "Configuração e credenciais", "Exit codes", "Arquitetura"]) {
+    if (!text.includes(title)) fail(`PDF does not contain the section: ${title}`);
   }
   const fonts = run("pdffonts", [paths.pdf]);
-  for (const font of ["Inter", "Manrope"]) if (!fonts.includes(font)) fail(`PDF não incorporou a fonte ${font}.`);
-  console.log(`OK: ebook v${value} de ${m.bin} sincronizado com docs/.`);
+  for (const font of ["Inter", "Manrope"]) if (!fonts.includes(font)) fail(`PDF did not embed the ${font} font.`);
+  console.log(`OK: ebook v${value} of ${m.bin} in sync with docs/.`);
 }
 async function build(value, sources, pagePaths, m) {
   await mkdir(BUILD_ROOT, { recursive: true });
@@ -209,31 +209,31 @@ async function build(value, sources, pagePaths, m) {
   const paths = outputs(value, m);
   const html = join(BUILD_ROOT, `${paths.stem}.html`);
   const cover = join(BUILD_ROOT, `${paths.stem}-cover.png`);
-  const rodape = join(BUILD_ROOT, "rodape.css");
-  // O rodapé do PDF leva o título do binário; a regra fica fora do pdf.css
-  // para que o design system continue genérico entre projetos derivados.
-  await writeFile(rodape, `@page { @bottom-center { content: "${m.titulo.replace(/"/g, "'")} · Guia do usuário · " counter(page) " / " counter(pages); } }\n`);
+  const footerCss = join(BUILD_ROOT, "footer.css");
+  // The PDF footer carries the binary title; the rule lives outside pdf.css
+  // so the design system stays generic across derived projects.
+  await writeFile(footerCss, `@page { @bottom-center { content: "${m.title.replace(/"/g, "'")} · Guia do usuário · " counter(page) " / " counter(pages); } }\n`);
   run("magick", [LOGO, "-background", "white", "-gravity", "center", "-resize", "1100x", "-extent", "1600x2560", cover]);
   const common = [
     "--from=markdown", "--standalone", "--file-scope", "--toc", "--toc-depth=2",
     `--metadata-file=${METADATA}`,
-    "--metadata", `title=${m.titulo}: guia do usuário`,
-    "--metadata", `subtitle=${m.descricao}`,
-    "--metadata", `description=Guia do usuário do ${m.titulo}: CLI, TUI, servidor MCP, configuração, credenciais e códigos de saída.`,
-    "--metadata", `author=${m.autor || m.titulo}`,
-    "--metadata", `identifier=${m.repositorio || m.bin}`,
-    "--metadata", `rights=Documentação do ${m.titulo}`,
+    "--metadata", `title=${m.title}: guia do usuário`,
+    "--metadata", `subtitle=${m.description}`,
+    "--metadata", `description=Guia do usuário do ${m.title}: CLI, TUI, servidor MCP, configuração, credenciais e códigos de saída.`,
+    "--metadata", `author=${m.author || m.title}`,
+    "--metadata", `identifier=${m.repository || m.bin}`,
+    "--metadata", `rights=Documentação do ${m.title}`,
     "--metadata", `version=${value}`,
   ];
-  run("pandoc", [...prepared.inputs, "--to=html5", ...common, `--template=${TEMPLATE}`, "--variable", `kicker=${m.titulo}`, "--metadata", `date=${datePtBr()}`, "--output", html], { cwd: prepared.directory });
-  run("weasyprint", [html, paths.pdf, "--base-url", SCRIPT_DIR, "--stylesheet", PDF_STYLE, "--stylesheet", rodape]);
+  run("pandoc", [...prepared.inputs, "--to=html5", ...common, `--template=${TEMPLATE}`, "--variable", `kicker=${m.title}`, "--metadata", `date=${datePtBr()}`, "--output", html], { cwd: prepared.directory });
+  run("weasyprint", [html, paths.pdf, "--base-url", SCRIPT_DIR, "--stylesheet", PDF_STYLE, "--stylesheet", footerCss]);
   run("pandoc", [...prepared.inputs, "--to=epub3", ...common, `--css=${EPUB_STYLE}`, `--epub-cover-image=${cover}`, ...FONT_FILES.flatMap((font) => [`--epub-embed-font=${font}`]), "--output", paths.epub], { cwd: prepared.directory });
   const manifest = {
     schema_version: 1,
     version: value,
     edition: `v${value}`,
     bin: m.bin,
-    titulo: m.titulo,
+    title: m.title,
     generated_at: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
     source_sha256: await sourceHash(sources),
     sources: sources.map(rel).sort(),
@@ -249,13 +249,13 @@ async function build(value, sources, pagePaths, m) {
 }
 async function main() {
   const onlyCheck = process.argv[2] === "--check";
-  if (process.argv.length > (onlyCheck ? 3 : 2)) fail("uso: bun run .ebook/build-ebook.mjs [--check]");
-  const m = manifesto();
+  if (process.argv.length > (onlyCheck ? 3 : 2)) fail("usage: bun run .ebook/build-ebook.mjs [--check]");
+  const m = manifest();
   const value = version();
   const pagePaths = await pages();
-  const sources = [...(await filesIn(DOCS_ROOT)).filter((p) => p.endsWith(".md") || p.endsWith(".txt")), VERSION_FILE, PDF_STYLE, EPUB_STYLE, TEMPLATE, METADATA, LOGO, PACOTE, SCRIPT].sort();
+  const sources = [...(await filesIn(DOCS_ROOT)).filter((p) => p.endsWith(".md") || p.endsWith(".txt")), VERSION_FILE, PDF_STYLE, EPUB_STYLE, TEMPLATE, METADATA, LOGO, PACKAGE_JSON, SCRIPT].sort();
   if (onlyCheck) await check(value, sources, m);
   else await build(value, sources, pagePaths, m);
 }
 
-main().catch((error) => { console.error(`Erro: ${error.message}`); process.exitCode = 1; });
+main().catch((error) => { console.error(`Error: ${error.message}`); process.exitCode = 1; });

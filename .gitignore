@@ -1,23 +1,23 @@
-# Dependências
+# Dependencies
 node_modules/
 
-# Artefatos de build
+# Build artifacts
 dist/
 .ebook/build/
 *.tsbuildinfo
 
-# Logs e temporários
+# Logs and temporary files
 *.log
 .DS_Store
 tmp/
 
-# Variáveis locais
+# Local variables
 .env
 .env.*
 !.env.example
 
-# Dados locais de desenvolvimento (a pasta real fica em ~/.<bin>/)
+# Local development data (the real directory is ~/.<bin>/)
 .termfy-home/
 
-# As skills ficam versionadas em .agents/skills/ e skills-lock.json.
-# Os links por agente (.claude/skills etc.) também entram no repositório.
+# Skills are versioned in .agents/skills/ and skills-lock.json.
+# Per-agent links (.claude/skills etc.) are committed too.

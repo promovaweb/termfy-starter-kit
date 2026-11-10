@@ -1,108 +1,108 @@
 /**
- * Execução do CLI.
+ * CLI execution.
  *
- * `executarCli(argv)` analisa os argumentos, trata as opções globais
- * (`--help`, `--version`, `--skill`, `--opencli`), roda o comando e devolve
- * o código de saída. A impressão segue a convenção: texto para humanos,
- * `--json` para máquinas, com envelope estável em sucesso e em erro.
+ * `runCli(argv)` parses the arguments, handles the global options
+ * (`--help`, `--version`, `--skill`, `--opencli`), runs the command and
+ * returns the exit code. Printing follows the convention: text for people,
+ * `--json` for machines, with a stable envelope on success and on error.
  */
-import { ErroApp } from "../app/erros.ts";
-import { manifesto } from "../app/manifesto.ts";
-import { CodigoSaida, nomeDoCodigo } from "../app/saida.ts";
-import { lerSettings, obterCaminho } from "../config/settings.ts";
-import { textoDaSkill } from "../skill/index.ts";
-import { renderizarAjuda } from "./ajuda.ts";
-import { raiz } from "./comandos.ts";
-import { cor, forcarCores } from "./formato.ts";
-import { gerarOpenCli } from "./opencli.ts";
-import { analisar } from "./parser.ts";
-import type { Contexto, Resultado } from "./registro.ts";
+import { AppError } from "../app/errors.ts";
+import { manifest } from "../app/manifest.ts";
+import { ExitCode, exitCodeName } from "../app/exit-codes.ts";
+import { readSettings, getPath } from "../config/settings.ts";
+import { skillText } from "../skill/index.ts";
+import { renderHelp } from "./help.ts";
+import { root } from "./commands.ts";
+import { color, forceColors } from "./format.ts";
+import { generateOpenCli } from "./opencli.ts";
+import { parse } from "./parser.ts";
+import type { Context, Result } from "./registry.ts";
 
-const escrever = (texto: string) => {
-  if (texto.length) process.stdout.write(texto.endsWith("\n") ? texto : `${texto}\n`);
+const write = (text: string) => {
+  if (text.length) process.stdout.write(text.endsWith("\n") ? text : `${text}\n`);
 };
-const escreverErro = (texto: string) => {
-  if (texto.length) process.stderr.write(texto.endsWith("\n") ? texto : `${texto}\n`);
+const writeError = (text: string) => {
+  if (text.length) process.stderr.write(text.endsWith("\n") ? text : `${text}\n`);
 };
 
-function preferenciaJson(): boolean {
+function prefersJson(): boolean {
   try {
-    return obterCaminho(lerSettings(), "saida.formato") === "json";
+    return getPath(readSettings(), "output.format") === "json";
   } catch {
     return false;
   }
 }
 
-/** Imprime o envelope JSON de sucesso. */
-export function imprimirJson(comando: string, dados: unknown): void {
-  escrever(JSON.stringify({ ok: true, comando, dados }, null, 2));
+/** Prints the JSON success envelope. */
+export function printJson(command: string, data: unknown): void {
+  write(JSON.stringify({ ok: true, command, data }, null, 2));
 }
 
-/** Imprime o envelope JSON de erro. */
-export function imprimirErroJson(comando: string, e: ErroApp): void {
-  escrever(JSON.stringify({ ok: false, comando, erro: e.paraJson() }, null, 2));
+/** Prints the JSON error envelope. */
+export function printErrorJson(command: string, e: AppError): void {
+  write(JSON.stringify({ ok: false, command, error: e.toJSON() }, null, 2));
 }
 
-/** Roda o CLI e devolve o código de saída, sem encerrar o processo. */
-export async function executarCli(argv: readonly string[]): Promise<number> {
-  let json = argv.includes("--json") || preferenciaJson();
-  let nomeComando = manifesto.bin;
+/** Runs the CLI and returns the exit code without exiting the process. */
+export async function runCli(argv: readonly string[]): Promise<number> {
+  let json = argv.includes("--json") || prefersJson();
+  let commandName = manifest.bin;
 
   try {
-    const analise = analisar(raiz, argv);
-    const { comando, caminho, args, opcoes } = analise;
-    nomeComando = [manifesto.bin, ...caminho].join(" ");
-    json = opcoes.json === true || (opcoes.json === undefined && preferenciaJson());
-    if (opcoes["no-color"] === true) forcarCores(false);
+    const parsed = parse(root, argv);
+    const { command, path, args, options } = parsed;
+    commandName = [manifest.bin, ...path].join(" ");
+    json = options.json === true || (options.json === undefined && prefersJson());
+    if (options["no-color"] === true) forceColors(false);
 
-    if (opcoes.version === true) {
-      if (json) imprimirJson(nomeComando, { bin: manifesto.bin, versao: manifesto.versao });
-      else escrever(`${manifesto.bin} ${manifesto.versao}`);
-      return CodigoSaida.SUCESSO;
+    if (options.version === true) {
+      if (json) printJson(commandName, { bin: manifest.bin, version: manifest.version });
+      else write(`${manifest.bin} ${manifest.version}`);
+      return ExitCode.SUCCESS;
     }
 
-    if (opcoes.opencli === true) {
-      escrever(JSON.stringify(gerarOpenCli(raiz), null, 2));
-      return CodigoSaida.SUCESSO;
+    if (options.opencli === true) {
+      write(JSON.stringify(generateOpenCli(root), null, 2));
+      return ExitCode.SUCCESS;
     }
 
-    if (opcoes.skill !== undefined) {
-      const topico = typeof opcoes.skill === "string" ? opcoes.skill : undefined;
-      const texto = textoDaSkill(raiz, topico);
-      if (json) imprimirJson(nomeComando, { topico: topico ?? "todos", markdown: texto });
-      else escrever(texto);
-      return CodigoSaida.SUCESSO;
+    if (options.skill !== undefined) {
+      const topic = typeof options.skill === "string" ? options.skill : undefined;
+      const text = skillText(root, topic);
+      if (json) printJson(commandName, { topic: topic ?? "all", markdown: text });
+      else write(text);
+      return ExitCode.SUCCESS;
     }
 
-    if (opcoes.help === true || !comando.executar) {
-      const ajuda = renderizarAjuda(raiz, caminho, comando);
-      if (json) imprimirJson(nomeComando, { ajuda: ajuda.replace(/\u001b\[[0-9;]*m/g, "") });
-      else escrever(ajuda);
-      return opcoes.help === true ? CodigoSaida.SUCESSO : CodigoSaida.USO_INVALIDO;
+    if (options.help === true || !command.run) {
+      const help = renderHelp(root, path, command);
+      if (json) printJson(commandName, { help: help.replace(/\u001b\[[0-9;]*m/g, "") });
+      else write(help);
+      return options.help === true ? ExitCode.SUCCESS : ExitCode.USAGE;
     }
 
-    const ctx: Contexto = {
+    const ctx: Context = {
       args,
-      opcoes,
+      options,
       json,
-      caminho,
-      stdout: escrever,
-      stderr: escreverErro,
-      interativo: Boolean(process.stdin.isTTY && process.stdout.isTTY),
+      path,
+      stdout: write,
+      stderr: writeError,
+      interactive: Boolean(process.stdin.isTTY && process.stdout.isTTY),
     };
 
-    const resultado: Resultado = await comando.executar(ctx);
-    if (json) imprimirJson(nomeComando, resultado.dados);
-    else escrever(typeof resultado.texto === "function" ? resultado.texto() : resultado.texto);
-    return resultado.codigo ?? CodigoSaida.SUCESSO;
+    const result: Result = await command.run(ctx);
+    if (json) printJson(commandName, result.data);
+    else write(typeof result.text === "function" ? result.text() : result.text);
+    return result.code ?? ExitCode.SUCCESS;
   } catch (e) {
-    const erroApp = e instanceof ErroApp ? e : new ErroApp(CodigoSaida.ERRO_GENERICO, e instanceof Error ? e.message : String(e));
+    const appError = e instanceof AppError ? e : new AppError(ExitCode.GENERIC_ERROR, e instanceof Error ? e.message : String(e));
     if (json) {
-      imprimirErroJson(nomeComando, erroApp);
+      printErrorJson(commandName, appError);
     } else {
-      escreverErro(`${cor.erro("erro")} ${erroApp.message} ${cor.sutil(`[${erroApp.codigo} ${nomeDoCodigo(erroApp.codigo)}]`)}`);
-      if (erroApp.codigo === CodigoSaida.USO_INVALIDO) escreverErro(cor.sutil(`Use "${nomeComando} --help".`));
+      writeError(`${color.error("error")} ${appError.message} ${color.dim(`[${appError.code} ${exitCodeName(appError.code)}]`)}`);
+      if (appError.code === ExitCode.USAGE) writeError(color.dim(`Use "${commandName} --help".`));
     }
-    return erroApp.codigo;
+    return appError.code;
   }
 }

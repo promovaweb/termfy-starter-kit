@@ -1,30 +1,40 @@
 # Contrato de uma tool
 
+Exemplo para `src/mcp/tools/example.ts`:
+
 ```ts
-servidor.registerTool(
-  "grupo_acao",                                   // snake_case, verbo no fim
-  {
-    title: "Ação do grupo",                        // nome legível para o cliente
-    description: "Use quando ... Devolve ...",     // quando usar + o que devolve
-    inputSchema: {
-      alvo: z.string().min(1).describe("..."),     // cada campo com describe()
-      limite: z.number().int().positive().max(100).optional().describe("Padrão 10."),
+import { z } from "zod";
+import type { Registrar } from "../server.ts";
+
+export function registerExampleTools({ server, catalog }: Registrar): void {
+  const name = "items_preview";
+  const description = "Preview a target and its item limit. Returns the requested values.";
+  catalog.tools.push({ name, description });
+  server.registerTool(
+    name,                                   // snake_case, verbo no fim
+    {
+      title: "Preview items",                        // nome legível para o cliente
+      description,     // quando usar + o que devolve
+      inputSchema: {
+        target: z.string().min(1).describe("Target to preview."),     // cada campo com describe()
+        limit: z.number().int().positive().max(100).optional().describe("Maximum item count. Defaults to 10."),
+      },
     },
-  },
-  async ({ alvo, limite }) => {
-    const d = { ... };
-    return {
-      content: [{ type: "text", text: JSON.stringify(d, null, 2) }],
-      structuredContent: d,
-      // isError: true  em falha prevista
-    };
-  },
-);
+    async ({ target, limit }) => {
+      const data = { target, limit: limit ?? 10 };
+      return {
+        content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+        structuredContent: data,
+        // isError: true  em falha prevista
+      };
+    },
+  );
+}
 ```
 
 ## Nome
 
-`<grupo>_<acao>`: `config_get`, `credentials_status`, `pedidos_listar`.
+`<group>_<action>`: `config_get`, `credentials_status`, `orders_list`.
 Grupo é o domínio; ação é verbo ou substantivo curto. Sem prefixo do binário:
 o cliente já sabe de qual servidor a tool veio.
 
@@ -63,5 +73,6 @@ pré-requisitos (`exige a credencial github.token`).
 
 ## Catálogo
 
-Antes de `registerTool`, acrescente `{ nome, descricao }` em
-`catalogo.tools` (ou `resources`, `prompts`). `mcp --list` lê esse catálogo.
+Antes de `registerTool`, acrescente `{ name, description }` em
+`catalog.tools`. Use os mesmos campos em `catalog.prompts` e inclua
+`uri` em `catalog.resources`. `mcp --list` lê esse catálogo.

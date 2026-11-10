@@ -1,16 +1,16 @@
 /**
- * Montagem da TUI.
+ * TUI assembly.
  *
- * Estrutura da tela:
+ * Screen layout:
  *
- *   ┌ cabeçalho: título, versão e descrição ─────────────────────────────┐
- *   │ abas (TabSelect)                                                   │
- *   │ conteúdo da aba ativa (flexGrow)                                   │
- *   └ barra de status: teclas disponíveis ───────────────────────────────┘
+ *   ┌ header: title, version and description ────────────────────────────┐
+ *   │ tabs (TabSelect)                                                   │
+ *   │ active tab content (flexGrow)                                      │
+ *   └ status bar: available keys ────────────────────────────────────────┘
  *
- * Teclas globais: Esquerda/Direita ou [ ] trocam a aba, 1..9 pulam para a
- * aba de mesmo número, Tab avança, q ou Esc encerram, ? alterna a ajuda.
- * O renderer é destruído em todas as saídas para devolver o terminal.
+ * Global keys: Left/Right or [ ] switch tabs, 1..9 jump to the tab with
+ * that number, Tab moves forward, q or Esc quit, ? toggles the help box.
+ * The renderer is destroyed on every exit path to hand the terminal back.
  */
 import {
   BoxRenderable,
@@ -23,83 +23,82 @@ import {
   type KeyEvent,
   type Renderable,
 } from "@opentui/core";
-import { manifesto } from "../app/manifesto.ts";
-import { lerSettings, obterCaminho } from "../config/settings.ts";
-import { glifos, temaAtual, type Tema } from "./tema.ts";
-import { telas } from "./telas/index.ts";
-import type { ContextoTela, Tela } from "./tela.ts";
+import { manifest } from "../app/manifest.ts";
+import { readSettings, getPath } from "../config/settings.ts";
+import { glyphs, currentTheme, type Theme } from "./theme.ts";
+import { screens } from "./screens/index.ts";
+import type { ScreenContext, Screen } from "./screen.ts";
 
-export interface OpcoesTui {
-  abaInicial?: string;
+export interface TuiOptions {
+  initialTab?: string;
 }
 
-function abaInicialPadrao(): string {
+function defaultInitialTab(): string {
   try {
-    const valor = obterCaminho(lerSettings(), "tui.abaInicial");
-    if (typeof valor === "string") return valor;
+    const value = getPath(readSettings(), "tui.initialTab");
+    if (typeof value === "string") return value;
   } catch {
-    // Sem settings, usa a primeira aba.
+    // Without settings, use the first tab.
   }
-  return telas[0]?.id ?? "overview";
+  return screens[0]?.id ?? "overview";
 }
 
-function barraDeTeclas(renderer: CliRenderer, tema: Tema, pares: ReadonlyArray<{ tecla: string; acao: string }>): BoxRenderable {
-  const barra = new BoxRenderable(renderer, {
+function keyBar(renderer: CliRenderer, theme: Theme, pairs: ReadonlyArray<{ key: string; action: string }>): BoxRenderable {
+  const bar = new BoxRenderable(renderer, {
     height: 1,
     flexDirection: "row",
-    backgroundColor: tema.barraFundo,
+    backgroundColor: theme.barBackground,
     paddingLeft: 1,
     gap: 2,
   });
-  for (const { tecla, acao } of pares) {
+  for (const { key, action } of pairs) {
     const item = new BoxRenderable(renderer, { flexDirection: "row" });
-    item.add(new TextRenderable(renderer, { content: ` ${tecla} `, fg: tema.teclaTexto, bg: tema.teclaFundo, selectable: false }));
-    item.add(new TextRenderable(renderer, { content: ` ${acao}`, fg: tema.barraTexto, selectable: false }));
-    barra.add(item);
+    item.add(new TextRenderable(renderer, { content: ` ${key} `, fg: theme.keyText, bg: theme.keyBackground, selectable: false }));
+    item.add(new TextRenderable(renderer, { content: ` ${action}`, fg: theme.barText, selectable: false }));
+    bar.add(item);
   }
-  return barra;
+  return bar;
 }
 
-/** Abre a TUI em um terminal real e só devolve quando o usuário sair. */
-export async function iniciarTui(opcoes: OpcoesTui = {}): Promise<void> {
-  const tema = temaAtual();
-  const renderer = await createCliRenderer({ exitOnCtrlC: true, backgroundColor: tema.fundo, targetFps: 30 });
-  await montarTui(renderer, opcoes, tema);
+/** Opens the TUI on a real terminal and returns only when the user quits. */
+export async function startTui(options: TuiOptions = {}): Promise<void> {
+  const theme = currentTheme();
+  const renderer = await createCliRenderer({ exitOnCtrlC: true, backgroundColor: theme.background, targetFps: 30 });
+  await mountTui(renderer, options, theme);
 }
 
 /**
- * Monta a interface em um renderer já criado e devolve quando ele for
- * destruído. Separado de `iniciarTui` para que os testes usem o renderer de
- * `@opentui/core/testing` e capturem frames sem um terminal real.
+ * Mounts the interface on an existing renderer and returns when it is
+ * destroyed. Separated from `startTui` so tests can use the renderer from
+ * `@opentui/core/testing` and capture frames without a real terminal.
  */
-export async function montarTui(renderer: CliRenderer, opcoes: OpcoesTui = {}, tema: Tema = temaAtual()): Promise<void> {
-
-  const encerrado = new Promise<void>((resolver) => renderer.once("destroy", () => resolver()));
-  const sair = () => renderer.destroy();
+export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, theme: Theme = currentTheme()): Promise<void> {
+  const closed = new Promise<void>((resolve) => renderer.once("destroy", () => resolve()));
+  const quit = () => renderer.destroy();
 
   const app = new BoxRenderable(renderer, {
     width: "100%",
     height: "100%",
     flexDirection: "column",
-    backgroundColor: tema.fundo,
+    backgroundColor: theme.background,
   });
 
-  const cabecalho = new BoxRenderable(renderer, {
+  const header = new BoxRenderable(renderer, {
     height: 1,
     flexDirection: "row",
     paddingLeft: 1,
     paddingRight: 1,
     gap: 2,
   });
-  const marca = new BoxRenderable(renderer, { flexDirection: "row", flexShrink: 0 });
-  marca.add(new TextRenderable(renderer, { content: `${glifos.bloco} `, fg: tema.acento, selectable: false }));
-  marca.add(new TextRenderable(renderer, { content: manifesto.titulo, fg: tema.textoForte, attributes: TextAttributes.BOLD }));
-  marca.add(new TextRenderable(renderer, { content: ` v${manifesto.versao}`, fg: tema.textoSutil }));
-  cabecalho.add(marca);
-  cabecalho.add(
+  const brand = new BoxRenderable(renderer, { flexDirection: "row", flexShrink: 0 });
+  brand.add(new TextRenderable(renderer, { content: `${glyphs.block} `, fg: theme.accent, selectable: false }));
+  brand.add(new TextRenderable(renderer, { content: manifest.title, fg: theme.textStrong, attributes: TextAttributes.BOLD }));
+  brand.add(new TextRenderable(renderer, { content: ` v${manifest.version}`, fg: theme.textDim }));
+  header.add(brand);
+  header.add(
     new TextRenderable(renderer, {
-      content: `${glifos.separador}  ${manifesto.descricao}`,
-      fg: tema.textoSutil,
+      content: `${glyphs.separator}  ${manifest.description}`,
+      fg: theme.textDim,
       wrapMode: "none",
       flexGrow: 1,
       flexShrink: 1,
@@ -107,161 +106,161 @@ export async function montarTui(renderer: CliRenderer, opcoes: OpcoesTui = {}, t
       height: 1,
     }),
   );
-  cabecalho.add(
+  header.add(
     new TextRenderable(renderer, {
-      content: `${process.platform}-${process.arch} ${glifos.ponto} Bun ${Bun.version}`,
-      fg: tema.textoSutil,
+      content: `${process.platform}-${process.arch} ${glyphs.bullet} Bun ${Bun.version}`,
+      fg: theme.textDim,
       flexShrink: 0,
       wrapMode: "none",
     }),
   );
-  app.add(cabecalho);
+  app.add(header);
 
-  const filete = new BoxRenderable(renderer, { height: 1, paddingLeft: 1, paddingRight: 1 });
-  filete.add(new TextRenderable(renderer, { content: "─".repeat(400), fg: tema.borda, wrapMode: "none", height: 1, selectable: false }));
-  app.add(filete);
+  const rule = new BoxRenderable(renderer, { height: 1, paddingLeft: 1, paddingRight: 1 });
+  rule.add(new TextRenderable(renderer, { content: "─".repeat(400), fg: theme.border, wrapMode: "none", height: 1, selectable: false }));
+  app.add(rule);
 
-  const abas = new TabSelectRenderable(renderer, {
+  const tabs = new TabSelectRenderable(renderer, {
     width: "100%",
     height: 2,
     tabWidth: 14,
-    options: telas.map((t) => ({ name: t.titulo, description: t.descricao })),
-    backgroundColor: tema.fundo,
-    textColor: tema.textoSutil,
-    focusedBackgroundColor: tema.fundo,
-    focusedTextColor: tema.textoSutil,
-    selectedBackgroundColor: tema.superficieAlta,
-    selectedTextColor: tema.acento,
-    selectedDescriptionColor: tema.textoSutil,
+    options: screens.map((s) => ({ name: s.title, description: s.description })),
+    backgroundColor: theme.background,
+    textColor: theme.textDim,
+    focusedBackgroundColor: theme.background,
+    focusedTextColor: theme.textDim,
+    selectedBackgroundColor: theme.surfaceHigh,
+    selectedTextColor: theme.accent,
+    selectedDescriptionColor: theme.textDim,
     showDescription: false,
     showScrollArrows: false,
     wrapSelection: true,
   });
-  app.add(abas);
+  app.add(tabs);
 
-  const conteudo = new BoxRenderable(renderer, { flexGrow: 1, flexDirection: "column", paddingLeft: 1, paddingRight: 1 });
-  app.add(conteudo);
+  const content = new BoxRenderable(renderer, { flexGrow: 1, flexDirection: "column", paddingLeft: 1, paddingRight: 1 });
+  app.add(content);
 
-  const teclasGlobais = [
-    { tecla: "←/→", acao: "aba" },
-    { tecla: "1-9", acao: "ir" },
-    { tecla: "?", acao: "ajuda" },
-    { tecla: "q", acao: "sair" },
+  const globalKeys = [
+    { key: "←/→", action: "tab" },
+    { key: "1-9", action: "go" },
+    { key: "?", action: "help" },
+    { key: "q", action: "quit" },
   ];
-  let rodape = barraDeTeclas(renderer, tema, teclasGlobais);
-  app.add(rodape);
+  let footer = keyBar(renderer, theme, globalKeys);
+  app.add(footer);
   renderer.root.add(app);
 
-  const montadas = new Map<string, Renderable>();
-  let ativa: Tela | undefined;
-  let ajudaVisivel = false;
-  let caixaAjuda: BoxRenderable | undefined;
+  const mounted = new Map<string, Renderable>();
+  let active: Screen | undefined;
+  let helpVisible = false;
+  let helpBox: BoxRenderable | undefined;
 
-  const contexto: ContextoTela = {
+  const context: ScreenContext = {
     renderer,
-    tema,
-    irPara: (id) => {
-      const indice = telas.findIndex((t) => t.id === id);
-      if (indice >= 0) abas.setSelectedIndex(indice);
+    theme,
+    goTo: (id) => {
+      const index = screens.findIndex((s) => s.id === id);
+      if (index >= 0) tabs.setSelectedIndex(index);
     },
-    sair,
+    quit,
   };
 
-  const atualizarRodape = (tela: Tela) => {
-    app.remove(rodape);
-    rodape = barraDeTeclas(renderer, tema, [...(tela.teclas ?? []), ...teclasGlobais]);
-    app.add(rodape);
+  const refreshFooter = (screen: Screen) => {
+    app.remove(footer);
+    footer = keyBar(renderer, theme, [...(screen.keys ?? []), ...globalKeys]);
+    app.add(footer);
   };
 
-  const exibir = (indice: number) => {
-    const tela = telas[indice];
-    if (!tela || tela === ativa) return;
-    if (ativa) {
-      ativa.aoSair?.(contexto);
-      const anterior = montadas.get(ativa.id);
-      if (anterior) conteudo.remove(anterior);
+  const show = (index: number) => {
+    const screen = screens[index];
+    if (!screen || screen === active) return;
+    if (active) {
+      active.onLeave?.(context);
+      const previous = mounted.get(active.id);
+      if (previous) content.remove(previous);
     }
-    let montada = montadas.get(tela.id);
-    if (!montada) {
-      montada = tela.montar(contexto);
-      montadas.set(tela.id, montada);
+    let node = mounted.get(screen.id);
+    if (!node) {
+      node = screen.mount(context);
+      mounted.set(screen.id, node);
     }
-    conteudo.add(montada);
-    ativa = tela;
-    tela.aoEntrar?.(contexto);
-    atualizarRodape(tela);
+    content.add(node);
+    active = screen;
+    screen.onEnter?.(context);
+    refreshFooter(screen);
   };
 
-  const alternarAjuda = () => {
-    ajudaVisivel = !ajudaVisivel;
-    if (ajudaVisivel) {
-      caixaAjuda = new BoxRenderable(renderer, {
+  const toggleHelp = () => {
+    helpVisible = !helpVisible;
+    if (helpVisible) {
+      helpBox = new BoxRenderable(renderer, {
         position: "absolute",
         right: 2,
         top: 4,
         width: 46,
         flexDirection: "column",
         borderStyle: "rounded",
-        borderColor: tema.bordaAtiva,
-        backgroundColor: tema.superficieAlta,
-        title: " Teclas ",
-        titleColor: tema.acento,
+        borderColor: theme.borderActive,
+        backgroundColor: theme.surfaceHigh,
+        title: " Keys ",
+        titleColor: theme.accent,
         paddingLeft: 1,
         paddingRight: 1,
         zIndex: 10,
       });
-      const linhas: Array<[string, string]> = [
-        ["←  →  [  ]", "aba anterior / seguinte"],
-        ["Tab", "próxima aba"],
-        ["1 … 9", "ir para a aba de mesmo número"],
-        ["?", "mostrar ou esconder esta ajuda"],
-        ["q  Esc  Ctrl+C", "sair"],
+      const rows: Array<[string, string]> = [
+        ["←  →  [  ]", "previous / next tab"],
+        ["Tab", "next tab"],
+        ["1 … 9", "go to the tab with that number"],
+        ["?", "show or hide this help"],
+        ["q  Esc  Ctrl+C", "quit"],
       ];
-      for (const [k, v] of linhas) {
-        const linha = new BoxRenderable(renderer, { flexDirection: "row" });
-        linha.add(new TextRenderable(renderer, { content: k.padEnd(16), fg: tema.acento }));
-        linha.add(new TextRenderable(renderer, { content: v, fg: tema.texto }));
-        caixaAjuda.add(linha);
+      for (const [k, v] of rows) {
+        const row = new BoxRenderable(renderer, { flexDirection: "row" });
+        row.add(new TextRenderable(renderer, { content: k.padEnd(16), fg: theme.accent }));
+        row.add(new TextRenderable(renderer, { content: v, fg: theme.text }));
+        helpBox.add(row);
       }
-      renderer.root.add(caixaAjuda);
-    } else if (caixaAjuda) {
-      renderer.root.remove(caixaAjuda);
-      caixaAjuda = undefined;
+      renderer.root.add(helpBox);
+    } else if (helpBox) {
+      renderer.root.remove(helpBox);
+      helpBox = undefined;
     }
   };
 
-  abas.on(TabSelectRenderableEvents.SELECTION_CHANGED, (indice: number) => exibir(indice));
-  abas.on(TabSelectRenderableEvents.ITEM_SELECTED, (indice: number) => exibir(indice));
+  tabs.on(TabSelectRenderableEvents.SELECTION_CHANGED, (index: number) => show(index));
+  tabs.on(TabSelectRenderableEvents.ITEM_SELECTED, (index: number) => show(index));
 
-  const aoTecla = (key: KeyEvent) => {
-    if (ativa?.aoTecla?.(key.name, contexto)) return;
+  const onKey = (key: KeyEvent) => {
+    if (active?.onKey?.(key.name, context)) return;
     switch (key.name) {
       case "q":
       case "escape":
-        sair();
+        quit();
         return;
       case "?":
-        alternarAjuda();
+        toggleHelp();
         return;
       case "tab":
-        abas.setSelectedIndex((abas.getSelectedIndex() + 1) % telas.length);
+        tabs.setSelectedIndex((tabs.getSelectedIndex() + 1) % screens.length);
         return;
       default:
         break;
     }
     if (/^[1-9]$/.test(key.name)) {
-      const indice = Number(key.name) - 1;
-      if (indice < telas.length) abas.setSelectedIndex(indice);
+      const index = Number(key.name) - 1;
+      if (index < screens.length) tabs.setSelectedIndex(index);
     }
   };
-  renderer.keyInput.on("keypress", aoTecla);
-  renderer.once("destroy", () => renderer.keyInput.off("keypress", aoTecla));
+  renderer.keyInput.on("keypress", onKey);
+  renderer.once("destroy", () => renderer.keyInput.off("keypress", onKey));
 
-  const inicial = opcoes.abaInicial ?? abaInicialPadrao();
-  const indiceInicial = Math.max(0, telas.findIndex((t) => t.id === inicial));
-  abas.focus();
-  abas.setSelectedIndex(indiceInicial);
-  exibir(indiceInicial);
+  const initial = options.initialTab ?? defaultInitialTab();
+  const initialIndex = Math.max(0, screens.findIndex((s) => s.id === initial));
+  tabs.focus();
+  tabs.setSelectedIndex(initialIndex);
+  show(initialIndex);
 
-  await encerrado;
+  await closed;
 }

@@ -1,33 +1,33 @@
 /**
- * Prompts: modelos de conversa que ajudam o agente a operar o binário.
- * O esqueleto traz um único prompt de orientação; projetos derivados
- * acrescentam prompts específicos do domínio.
+ * Prompts: conversation templates that help the agent operate the binary.
+ * The skeleton ships a single guidance prompt; derived projects add
+ * domain-specific ones.
  */
 import { z } from "zod";
-import { manifesto } from "../app/manifesto.ts";
-import type { Registrador } from "./servidor.ts";
+import { manifest } from "../app/manifest.ts";
+import type { Registrar } from "./server.ts";
 
-export function registrarPrompts({ servidor, catalogo }: Registrador): void {
-  catalogo.prompts.push({ nome: "operar", descricao: "Orienta o agente a ler a documentação e executar uma tarefa pelo CLI." });
-  servidor.registerPrompt(
-    "operar",
+export function registerPrompts({ server, catalog }: Registrar): void {
+  catalog.prompts.push({ name: "operate", description: "Guides the agent to read the documentation and run a task through the CLI." });
+  server.registerPrompt(
+    "operate",
     {
-      title: `Operar o ${manifesto.titulo}`,
-      description: "Monta uma instrução para o agente ler a documentação embutida e cumprir uma tarefa usando o CLI com --json.",
-      argsSchema: { tarefa: z.string().describe("O que o usuário quer fazer com o binário.") },
+      title: `Operate ${manifest.title}`,
+      description: "Builds an instruction for the agent to read the embedded documentation and complete a task using the CLI with --json.",
+      argsSchema: { task: z.string().describe("What the user wants to do with the binary.") },
     },
-    ({ tarefa }) => ({
+    ({ task }) => ({
       messages: [
         {
           role: "user",
           content: {
             type: "text",
             text:
-              `Você vai operar o binário "${manifesto.bin}" (v${manifesto.versao}). ` +
-              `Primeiro chame a tool "skill" com o tópico "cli" para conhecer os comandos, opções e códigos de saída. ` +
-              `Depois execute os comandos necessários sempre com a opção --json e trate o código de saída: 0 é sucesso, ` +
-              `2 é uso inválido, 3 configuração, 4 credenciais. Nunca peça ao usuário o valor de uma credencial no chat; ` +
-              `oriente a rodar "${manifesto.bin} credentials set <nome>" no próprio terminal.\n\nTarefa: ${tarefa}`,
+              `You will operate the "${manifest.bin}" binary (v${manifest.version}). ` +
+              `First call the "skill" tool with topic "cli" to learn the commands, options and exit codes. ` +
+              `Then run the needed commands always with the --json option and handle the exit code: 0 is success, ` +
+              `2 is usage error, 3 configuration, 4 credentials. Never ask the user for a credential value in chat; ` +
+              `tell them to run "${manifest.bin} credentials set <name>" in their own terminal.\n\nTask: ${task}`,
           },
         },
       ],

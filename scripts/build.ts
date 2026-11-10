@@ -1,39 +1,39 @@
 /**
- * Compila o binário com `bun build --compile`.
+ * Compiles the binary with `bun build --compile`.
  *
- * Sem argumentos, gera `dist/<bin>` para a plataforma atual. Com `--todos`,
- * gera um executável por alvo suportado, nomeado `dist/<bin>-<alvo>`.
- * O OpenTUI exige que o pacote nativo do alvo esteja instalado; para builds
- * cruzados rode antes `bun install --os="*" --cpu="*" @opentui/core`.
+ * Without arguments, produces `dist/<bin>` for the current platform. With
+ * `--all`, produces one executable per supported target, named
+ * `dist/<bin>-<target>`. OpenTUI requires the target's native package to be
+ * installed; for cross builds run `bun install --os="*" --cpu="*" @opentui/core` first.
  */
 import { mkdirSync } from "node:fs";
-import { manifesto } from "../src/app/manifesto.ts";
+import { manifest } from "../src/app/manifest.ts";
 
-const alvos = [
-  { alvo: "bun-linux-x64", sufixo: "linux-x64" },
-  { alvo: "bun-linux-arm64", sufixo: "linux-arm64" },
-  { alvo: "bun-darwin-x64", sufixo: "darwin-x64" },
-  { alvo: "bun-darwin-arm64", sufixo: "darwin-arm64" },
-  { alvo: "bun-windows-x64", sufixo: "windows-x64" },
+const targets = [
+  { target: "bun-linux-x64", suffix: "linux-x64" },
+  { target: "bun-linux-arm64", suffix: "linux-arm64" },
+  { target: "bun-darwin-x64", suffix: "darwin-x64" },
+  { target: "bun-darwin-arm64", suffix: "darwin-arm64" },
+  { target: "bun-windows-x64", suffix: "windows-x64" },
 ] as const;
 
-const todos = process.argv.includes("--todos");
+const all = process.argv.includes("--all");
 mkdirSync("dist", { recursive: true });
 
-async function compilar(saida: string, alvo?: string): Promise<void> {
-  const args = ["build", "src/main.ts", "--compile", "--minify", `--outfile=${saida}`];
-  if (alvo) args.push(`--target=${alvo}`);
+async function compile(outfile: string, target?: string): Promise<void> {
+  const args = ["build", "src/main.ts", "--compile", "--minify", `--outfile=${outfile}`];
+  if (target) args.push(`--target=${target}`);
   const proc = Bun.spawn(["bun", ...args], { stdout: "inherit", stderr: "inherit" });
-  const codigo = await proc.exited;
-  if (codigo !== 0) throw new Error(`Falha ao compilar ${saida} (código ${codigo}).`);
-  console.log(`✓ ${saida}`);
+  const code = await proc.exited;
+  if (code !== 0) throw new Error(`Failed to compile ${outfile} (exit code ${code}).`);
+  console.log(`✓ ${outfile}`);
 }
 
-if (todos) {
-  for (const { alvo, sufixo } of alvos) {
-    const ext = sufixo.startsWith("windows") ? ".exe" : "";
-    await compilar(`dist/${manifesto.bin}-${sufixo}${ext}`, alvo);
+if (all) {
+  for (const { target, suffix } of targets) {
+    const ext = suffix.startsWith("windows") ? ".exe" : "";
+    await compile(`dist/${manifest.bin}-${suffix}${ext}`, target);
   }
 } else {
-  await compilar(`dist/${manifesto.bin}`);
+  await compile(`dist/${manifest.bin}`);
 }

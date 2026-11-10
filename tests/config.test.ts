@@ -1,102 +1,102 @@
-/** settings.json e credentials.json em uma pasta temporária. */
+/** settings.json and credentials.json in a temporary directory. */
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { mkdtempSync, rmSync, readFileSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { VARIAVEL_CHAVE_MESTRA, VARIAVEL_HOME, caminhos } from "../src/config/caminhos.ts";
-import { converterValor, gravarSettings, lerSettings, obterCaminho, definirCaminho, removerCaminho, achatar } from "../src/config/settings.ts";
-import { definirCredencial, listarCredenciais, mascarar, obterCredencial, removerCredencial, statusCofre, validarNome } from "../src/config/credenciais.ts";
-import { cifrar, decifrar } from "../src/config/cripto.ts";
-import { ErroApp } from "../src/app/erros.ts";
-import { CodigoSaida } from "../src/app/saida.ts";
+import { MASTER_KEY_VARIABLE, HOME_VARIABLE, paths } from "../src/config/paths.ts";
+import { convertValue, writeSettings, readSettings, getPath, setPath, removePath, flatten } from "../src/config/settings.ts";
+import { setCredential, listCredentials, mask, getCredential, removeCredential, vaultStatus, validateName } from "../src/config/credentials.ts";
+import { encrypt, decrypt } from "../src/config/crypto.ts";
+import { AppError } from "../src/app/errors.ts";
+import { ExitCode } from "../src/app/exit-codes.ts";
 
-let pasta: string;
+let dir: string;
 
 beforeEach(() => {
-  pasta = mkdtempSync(join(tmpdir(), "termfy-teste-"));
-  process.env[VARIAVEL_HOME] = pasta;
-  delete process.env[VARIAVEL_CHAVE_MESTRA];
+  dir = mkdtempSync(join(tmpdir(), "termfy-test-"));
+  process.env[HOME_VARIABLE] = dir;
+  delete process.env[MASTER_KEY_VARIABLE];
 });
 
 afterEach(() => {
-  rmSync(pasta, { recursive: true, force: true });
-  delete process.env[VARIAVEL_HOME];
+  rmSync(dir, { recursive: true, force: true });
+  delete process.env[HOME_VARIABLE];
 });
 
 describe("settings", () => {
-  test("lê padrões sem arquivo e grava com notação de ponto", () => {
-    const s = lerSettings();
-    expect(obterCaminho(s, "saida.formato")).toBe("texto");
-    definirCaminho(s, "saida.formato", "json");
-    gravarSettings(s);
-    expect(obterCaminho(lerSettings(), "saida.formato")).toBe("json");
-    expect(caminhos.settings()).toBe(join(pasta, "settings.json"));
+  test("reads defaults without a file and writes with dot notation", () => {
+    const s = readSettings();
+    expect(getPath(s, "output.format")).toBe("text");
+    setPath(s, "output.format", "json");
+    writeSettings(s);
+    expect(getPath(readSettings(), "output.format")).toBe("json");
+    expect(paths.settings()).toBe(join(dir, "settings.json"));
   });
 
-  test("converte tipos e rejeita enum inválido", () => {
-    expect(converterValor("saida.cores", "nao")).toBe(false);
-    expect(converterValor("saida.cores", "1")).toBe(true);
-    expect(() => converterValor("tui.tema", "roxo")).toThrow(/aceita apenas/);
-    expect(converterValor("livre.chave", "x")).toBe("x");
+  test("converts types and rejects invalid enum values", () => {
+    expect(convertValue("output.colors", "no")).toBe(false);
+    expect(convertValue("output.colors", "1")).toBe(true);
+    expect(() => convertValue("tui.theme", "purple")).toThrow(/accepts only/);
+    expect(convertValue("free.key", "x")).toBe("x");
   });
 
-  test("remove e achata", () => {
+  test("removes and flattens", () => {
     const s = { a: { b: 1, c: 2 }, d: true };
-    expect(removerCaminho(s, "a.b")).toBe(true);
-    expect(removerCaminho(s, "a.b")).toBe(false);
-    expect(achatar(s)).toEqual([["a.c", 2], ["d", true]]);
+    expect(removePath(s, "a.b")).toBe(true);
+    expect(removePath(s, "a.b")).toBe(false);
+    expect(flatten(s)).toEqual([["a.c", 2], ["d", true]]);
   });
 });
 
-describe("cripto", () => {
-  test("cifra e decifra com a mesma chave; chave errada falha com CREDENCIAIS", () => {
-    const chave = Buffer.alloc(32, 7);
-    const env = cifrar("segredo", chave);
-    expect(env.algoritmo).toBe("aes-256-gcm");
-    expect(decifrar(env, chave)).toBe("segredo");
+describe("crypto", () => {
+  test("encrypts and decrypts with the same key; a wrong key fails with CREDENTIALS", () => {
+    const key = Buffer.alloc(32, 7);
+    const env = encrypt("secret", key);
+    expect(env.algorithm).toBe("aes-256-gcm");
+    expect(decrypt(env, key)).toBe("secret");
     try {
-      decifrar(env, Buffer.alloc(32, 8));
-      throw new Error("deveria falhar");
+      decrypt(env, Buffer.alloc(32, 8));
+      throw new Error("should fail");
     } catch (e) {
-      expect((e as ErroApp).codigo).toBe(CodigoSaida.CREDENCIAIS);
+      expect((e as AppError).code).toBe(ExitCode.CREDENTIALS);
     }
   });
 });
 
-describe("credenciais", () => {
-  test("grava cifrado, lista, lê, mascara e remove", () => {
-    definirCredencial("openai.api_key", "sk-1234567890abcdef");
-    const bruto = readFileSync(caminhos.credentials(), "utf8");
-    expect(bruto).not.toContain("sk-1234567890abcdef");
-    expect(JSON.parse(bruto).algoritmo).toBe("aes-256-gcm");
-    expect(listarCredenciais()).toEqual(["openai.api_key"]);
-    expect(obterCredencial("openai.api_key")).toBe("sk-1234567890abcdef");
-    expect(mascarar("sk-1234567890abcdef")).toMatch(/^sk-1\*+ef$/);
-    expect(statusCofre().origemChave).toBe("arquivo");
-    expect(statSync(caminhos.chaveMestra()).mode & 0o777).toBe(0o600);
-    expect(removerCredencial("openai.api_key")).toBe(true);
-    expect(listarCredenciais()).toEqual([]);
+describe("credentials", () => {
+  test("saves encrypted, lists, reads, masks and removes", () => {
+    setCredential("openai.api_key", "sk-1234567890abcdef");
+    const raw = readFileSync(paths.credentials(), "utf8");
+    expect(raw).not.toContain("sk-1234567890abcdef");
+    expect(JSON.parse(raw).algorithm).toBe("aes-256-gcm");
+    expect(listCredentials()).toEqual(["openai.api_key"]);
+    expect(getCredential("openai.api_key")).toBe("sk-1234567890abcdef");
+    expect(mask("sk-1234567890abcdef")).toMatch(/^sk-1\*+ef$/);
+    expect(vaultStatus().masterKeySource).toBe("file");
+    expect(statSync(paths.masterKey()).mode & 0o777).toBe(0o600);
+    expect(removeCredential("openai.api_key")).toBe(true);
+    expect(listCredentials()).toEqual([]);
   });
 
-  test("credencial ausente encerra com código 4", () => {
-    definirCredencial("a.b", "x");
+  test("a missing credential exits with code 4", () => {
+    setCredential("a.b", "x");
     try {
-      obterCredencial("nao.existe");
-      throw new Error("deveria falhar");
+      getCredential("does.not.exist");
+      throw new Error("should fail");
     } catch (e) {
-      expect((e as ErroApp).codigo).toBe(CodigoSaida.CREDENCIAIS);
+      expect((e as AppError).code).toBe(ExitCode.CREDENTIALS);
     }
   });
 
-  test("usa a chave da variável de ambiente quando definida", () => {
-    process.env[VARIAVEL_CHAVE_MESTRA] = "ab".repeat(32);
-    definirCredencial("x.y", "valor");
-    expect(statusCofre().origemChave).toBe("env");
-    expect(obterCredencial("x.y")).toBe("valor");
+  test("uses the environment key when set", () => {
+    process.env[MASTER_KEY_VARIABLE] = "ab".repeat(32);
+    setCredential("x.y", "value");
+    expect(vaultStatus().masterKeySource).toBe("env");
+    expect(getCredential("x.y")).toBe("value");
   });
 
-  test("valida nomes", () => {
-    expect(validarNome("GitHub.Token")).toBe("github.token");
-    expect(() => validarNome("com espaço")).toThrow(/inválido/);
+  test("validates names", () => {
+    expect(validateName("GitHub.Token")).toBe("github.token");
+    expect(() => validateName("with space")).toThrow(/Invalid/);
   });
 });

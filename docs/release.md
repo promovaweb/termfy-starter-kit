@@ -6,7 +6,7 @@ Toda alteração publicada sai com versão, changelog, tag e GitHub Release.
 2. Registre a mudança em `CHANGELOG.md`, no formato Keep a Changelog.
 3. Se `docs/` mudou, avance `ebook/VERSION` e rode `bun run ebook`. O PDF e o
    EPUB em `ebook/` entram no commit.
-4. Rode `bun run validar`.
+4. Rode `bun run validate`.
 5. Commit: `release: <bin> vX.Y.Z`.
 6. Tag: `git tag vX.Y.Z`.
 7. Push: `git push origin main --tags`.
@@ -21,18 +21,18 @@ Uma tag publicada nunca é movida. Correção posterior recebe nova versão.
 
 ```bash
 bun run build          # dist/<bin> para a plataforma atual
-bun run build:todos    # dist/<bin>-<plataforma> para todas
+bun run build:all      # dist/<bin>-<platform> para todas
 ./dist/<bin> --version
 ```
 
 ## Ebook do guia
 
 ```bash
-bun run ebook          # ebook/<Titulo>-Guia-do-Usuario-v<versão>.{pdf,epub}
-bun run ebook:verify   # confere sem gerar; entra em bun run validar
+bun run ebook          # ebook/<Title>-User-Guide-v<version>.{pdf,epub}
+bun run ebook:verify   # confere sem gerar; entra em bun run validate
 ```
 
-A fonte é a própria `docs/`, com os placeholders resolvidos pelo manifesto.
-Depois de `bun run iniciar`, regenere o ebook para a capa e o rodapé levarem
-o título novo. Requer Pandoc, WeasyPrint, ImageMagick, xmllint, poppler-utils
+A fonte é a própria `docs/`, com os placeholders resolvidos pelo manifest.
+Depois de `bun run init`, regenere o ebook para a capa e o rodapé levarem o
+título novo. Requer Pandoc, WeasyPrint, ImageMagick, xmllint, poppler-utils
 e unzip.

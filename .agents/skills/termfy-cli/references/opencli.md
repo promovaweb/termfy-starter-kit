@@ -13,16 +13,16 @@ Termfy gera esse documento a partir do registro de comandos
 
 | Registro Termfy | OpenCLI |
 | --- | --- |
-| `Comando.nome` | `command.name` (raiz usa o nome do binário) |
-| `descricao` | `description` |
-| `argumentos[]` | `arguments[]` com `required`, `arity` e `acceptedValues` |
-| `opcoes[]` | `options[]` com `aliases`, `arguments[]`, `recursive` |
-| `padrao` | `metadata[{ name: "x-default" }]` |
-| `subcomandos[]` | `commands[]` |
-| `codigosSaida` | `exitCodes[]`; a raiz lista todos |
-| `exemplos` | `examples[]` |
-| `interativo` | `interactive` |
-| `oculto` | omitido do documento |
+| `Command.name` | `command.name` (raiz usa o nome do binário) |
+| `description` | `description` |
+| `arguments[]` | `arguments[]` com `required`, `arity` e `acceptedValues` |
+| `options[]` | `options[]` com `aliases`, `arguments[]`, `recursive` |
+| `default` | `metadata[{ name: "x-default" }]` |
+| `subcommands[]` | `commands[]` |
+| `exitCodes` | `exitCodes[]`; a raiz lista todos |
+| `examples` | `examples[]` |
+| `interactive` | `interactive` |
+| `hidden` | omitido do documento |
 
 `conventions.groupOptions` é `false`: o parser não agrupa flags curtas.
 

@@ -8,34 +8,37 @@ skills do framework instaladas em `.agents/skills/`.
 | Modo | Entrada | Para quem |
 | --- | --- | --- |
 | TUI | `termfy` sem argumentos, em terminal interativo | pessoas |
-| CLI | `termfy <comando> [opções]`, saída em texto ou `--json` | pessoas, scripts e agentes |
+| CLI | `termfy <command> [options]`, saída em texto ou `--json` | pessoas, scripts e agentes |
 | MCP | `termfy mcp`, servidor Model Context Protocol via stdio | agentes de IA |
 
 Os três modos compartilham identidade, configuração (`~/.termfy/settings.json`),
 cofre de credenciais cifrado (`~/.termfy/credentials.json`) e a tabela de
-códigos de saída. A TUI usa o [OpenTUI](https://opentui.com); o CLI publica
-sua interface no formato [OpenCLI](https://opencli.org); o MCP usa o
+exit codes. A TUI usa o [OpenTUI](https://opentui.com); o CLI publica sua
+interface no formato [OpenCLI](https://opencli.org); o MCP usa o
 [SDK oficial](https://github.com/modelcontextprotocol/typescript-sdk).
 
+Todo o código é em inglês: arquivos, identificadores, comentários, mensagens,
+commands, options, keys e campos do `--json`. A documentação é em português.
+
 ```text
- ▌ Termfy v0.1.0  │  Framework de skills e esqueleto de CLI, TUI e servidor MCP stdio  linux-x64 • Bun 1.3.14
- ────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ ▌ Termfy v0.3.0  │  CLI, TUI and MCP stdio server skeleton in Bun            linux-x64 • Bun 1.3.14
+ ───────────────────────────────────────────────────────────────────────────────────────────────────
  Overview      About
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬
- ╭─ Ambiente ─────────────────────────────────────────────────╮╭─ Estado ───────────────────────────────────╮
- │ Binário     termfy v0.1.0                                  ││ settings.json     • padrões                │
- │ Runtime     Bun 1.3.14                                     ││ credentials.json  • vazio                  │
- │ Plataforma  linux-x64                                      ││ chave mestra      não criada               │
+ ╭─ Environment ──────────────────────────────────────────────╮╭─ State ────────────────────────────────────╮
+ │ Binary      termfy v0.3.0                                  ││ settings.json     • defaults               │
+ │ Runtime     Bun 1.3.14                                     ││ credentials.json  • empty                  │
+ │ Platform    linux-x64                                      ││ master key        not created              │
  │ Terminal    110×30  xterm-256color                         ││ MCP               termfy mcp               │
- │ Dados       /home/voce/.termfy                             ││                                            │
+ │ Data        /home/you/.termfy                              ││                                            │
  ╰────────────────────────────────────────────────────────────╯╰────────────────────────────────────────────╯
- ╭─ Configuração em vigor ────────────────────────────────────╮╭─ Próximos passos ──────────────────────────╮
- │ saida.cores       true                                     ││ No terminal                                │
- │ saida.formato     "texto"                                  ││ → termfy --help                            │
- │ tui.abaInicial    "overview"                               ││ → termfy credentials set <nome>            │
- │ tui.tema          "noite"                                  ││ → termfy --skill                           │
+ ╭─ Settings in effect ───────────────────────────────────────╮╭─ Next steps ───────────────────────────────╮
+ │ output.colors     true                                     ││ In the terminal                            │
+ │ output.format     "text"                                   ││ → termfy --help                            │
+ │ tui.initialTab    "overview"                               ││ → termfy credentials set <name>            │
+ │ tui.theme         "night"                                  ││ → termfy --skill                           │
  ╰────────────────────────────────────────────────────────────╯╰────────────────────────────────────────────╯
-  ←/→  aba   1-9  ir   ?  ajuda   q  sair
+  ←/→  tab   1-9  go   ?  help   q  quit
 ```
 
 ## Sobre o template
@@ -45,14 +48,15 @@ clone e personalize:
 
 ```bash
 bun install
-bun run iniciar -- --nome meucli --titulo "Meu CLI" --descricao "O que ele faz." --autor "Sua empresa" --repositorio https://github.com/org/meucli
+bun run init -- --name mycli --title "My CLI" --description "What it does." --author "Your company" --repository https://github.com/org/mycli
 bun run dev -- --help
 ```
 
-O guia completo está em [docs/personalizar-template.md](docs/personalizar-template.md).
-Agentes de IA leem [AGENTS.md](AGENTS.md) e as skills instaladas em
-`.agents/skills/termfy-*`. Atualize-as com `bun run skills:update`; o guia do
-método e o ebook ficam no [framework](https://github.com/promovaweb/termfy).
+O guia completo está em [docs/customize-template.md](docs/customize-template.md).
+Agentes de IA leem [AGENTS.md](AGENTS.md), o [CLISPEC.md](CLISPEC.md) e as
+skills instaladas em `.agents/skills/termfy-*`. Atualize-as com
+`bun run skills:update`; o guia do método e o ebook ficam no
+[framework](https://github.com/promovaweb/termfy).
 
 ## Requisitos
 
@@ -63,32 +67,32 @@ Bun 1.3.14 ou superior. Node.js não é usado.
 ```bash
 bun install
 bun run dev                 # TUI
-bun run dev -- --help       # ajuda do CLI
+bun run dev -- --help       # help do CLI
 bun run dev -- about --json
 bun run dev -- mcp --list
 ```
 
-## Comandos
+## Commands
 
-| Comando | Função |
+| Command | Função |
 | --- | --- |
 | `termfy` | abre a TUI (abas Overview e About) |
-| `termfy tui [--aba overview\|about]` | abre a TUI em uma aba |
-| `termfy about` | versão, executável, runtime, plataforma e créditos |
+| `termfy tui [--tab overview\|about]` | abre a TUI em uma aba |
+| `termfy about` | version, executable, runtime, platform e credits |
 | `termfy config list\|get\|set\|unset\|path\|schema` | preferências em `settings.json` |
 | `termfy credentials set\|get\|list\|remove\|status\|clear` | segredos cifrados em `credentials.json` |
 | `termfy mcp [--list]` | servidor MCP via stdio |
-| `termfy skill [topico]` | documentação embutida |
+| `termfy skill [topic]` | documentação embutida |
 
-Opções globais: `--help`, `--version`, `--json`, `--skill [topico]`,
+Options globais: `--help`, `--version`, `--json`, `--skill [topic]`,
 `--opencli`, `--no-color`. Referência completa em [docs/cli.md](docs/cli.md).
 
 ## Documentação embutida
 
 ```bash
-termfy --skill          # tudo, em Markdown
-termfy --skill mcp      # uma seção: cli, tui, mcp, config, codigos
-termfy --opencli        # descrição OpenCLI em JSON
+termfy --skill            # tudo, em Markdown
+termfy --skill mcp        # uma seção: cli, tui, mcp, config, exit-codes
+termfy --opencli          # descrição OpenCLI em JSON
 ```
 
 A pasta [docs/](docs/README.md) entra no binário em tempo de build. Um agente
@@ -96,36 +100,36 @@ lê a documentação sem acesso ao repositório. A mesma pasta vira o guia do
 usuário em PDF e EPUB em [ebook/](ebook/README.md), gerado por `bun run ebook`
 com o design system de PDF da Promovaweb.
 
-## Códigos de saída
+## Exit codes
 
-| Código | Nome |
+| Code | Name |
 | --- | --- |
-| 0 | `SUCESSO` |
-| 1 | `ERRO_GENERICO` |
-| 2 | `USO_INVALIDO` |
-| 3 | `CONFIGURACAO` |
-| 4 | `CREDENCIAIS` |
-| 5 | `REDE_OU_API` |
-| 6 | `NAO_ENCONTRADO` |
-| 7 | `PERMISSAO` |
-| 8 | `TERMINAL_INDISPONIVEL` |
+| 0 | `SUCCESS` |
+| 1 | `GENERIC_ERROR` |
+| 2 | `USAGE` |
+| 3 | `CONFIG` |
+| 4 | `CREDENTIALS` |
+| 5 | `NETWORK_OR_API` |
+| 6 | `NOT_FOUND` |
+| 7 | `PERMISSION` |
+| 8 | `NO_TTY` |
 | 9 | `MCP` |
-| 130 | `INTERROMPIDO` |
+| 130 | `INTERRUPTED` |
 
-Detalhes em [docs/codigos-de-saida.md](docs/codigos-de-saida.md).
+Detalhes em [docs/exit-codes.md](docs/exit-codes.md).
 
 ## Configuração e credenciais
 
 ```bash
-termfy config set tui.tema dia
+termfy config set tui.theme day
 termfy credentials set openai.api_key        # digita sem eco
 printf '%s' "$TOKEN" | termfy credentials set github.token --stdin
 termfy credentials status
 ```
 
 Os arquivos ficam em `~/.termfy/` com permissão 0600. As credenciais são
-cifradas com AES-256-GCM; a chave mestra vem de `TERMFY_MASTER_KEY` ou de
-`~/.termfy/master.key`. Veja [docs/configuracao.md](docs/configuracao.md).
+cifradas com AES-256-GCM; a master key vem de `TERMFY_MASTER_KEY` ou de
+`~/.termfy/master.key`. Veja [docs/configuration.md](docs/configuration.md).
 
 ## MCP
 
@@ -135,7 +139,7 @@ cifradas com AES-256-GCM; a chave mestra vem de `TERMFY_MASTER_KEY` ou de
 
 Tools: `about`, `exit_codes`, `skill`, `config_list`, `config_get`,
 `credentials_status`. Resources: `termfy://about`, `termfy://exit-codes`,
-`termfy://skill`, `termfy://skill/{topico}`. Prompt: `operar`.
+`termfy://skill`, `termfy://skill/{topic}`. Prompt: `operate`.
 Detalhes em [docs/mcp.md](docs/mcp.md).
 
 ## Estrutura
@@ -144,27 +148,28 @@ Detalhes em [docs/mcp.md](docs/mcp.md).
 src/        código do binário (app, cli, config, mcp, tui, skill)
 docs/       documentação embutida, opencli.json e fonte do ebook
 ebook/      guia do usuário em PDF e EPUB
-template/   stubs de comando, tela e tool
+template/   stubs de command, screen e tool
 .agents/    skills do framework instaladas via npx skills (skills-lock.json)
-scripts/    build, bootstrap e validações
+scripts/    build, init e checks
 tests/      bun test
+CLISPEC.md  especificação do binário, montada com a skill termfy-spec
 ```
 
-Arquitetura em [docs/arquitetura.md](docs/arquitetura.md).
+Arquitetura em [docs/architecture.md](docs/architecture.md).
 
 ## Validar, compilar e publicar
 
 ```bash
-bun run validar       # typecheck, testes, skills:check, opencli:check, ebook:verify, build
-bun run ebook         # guia do usuário em PDF e EPUB a partir de docs/
+bun run validate      # typecheck, testes, skills:check, opencli:check, ebook:verify, build
 bun run skills:update # atualiza as skills do framework
+bun run ebook         # guia do usuário em PDF e EPUB a partir de docs/
 bun run build         # dist/termfy
-bun run build:todos   # linux-x64, linux-arm64, darwin-x64, darwin-arm64, windows-x64
+bun run build:all     # linux-x64, linux-arm64, darwin-x64, darwin-arm64, windows-x64
 ```
 
 Releases seguem [docs/release.md](docs/release.md): versão em
 `package.json`, entrada no `CHANGELOG.md`, tag `vX.Y.Z` e GitHub Release com
-binários gerados pelo workflow.
+binários e ebook gerados pelo workflow.
 
 ## Licença
 

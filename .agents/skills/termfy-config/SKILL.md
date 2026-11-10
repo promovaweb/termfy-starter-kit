@@ -11,9 +11,12 @@ credenciais, mudar a política da chave mestra ou depurar a pasta
 
 ## Leia antes
 
-- `docs/configuracao.md`.
-- `src/config/caminhos.ts`, `src/config/settings.ts`, `src/config/cripto.ts`
-  e `src/config/credenciais.ts`.
+- `CLISPEC.md` na raiz do projeto: a seção que descreve o que será
+  implementado. Se o arquivo não existir ou não cobrir o pedido, rode a
+  skill `termfy-spec` antes de continuar.
+- `docs/configuration.md`.
+- `src/config/paths.ts`, `src/config/settings.ts`, `src/config/crypto.ts`
+  e `src/config/credentials.ts`.
 - `references/modelo-de-seguranca.md`: o que a cifra cobre e o que não cobre.
 - `references/chaves-de-configuracao.md`: como declarar uma chave nova.
 
@@ -21,39 +24,40 @@ credenciais, mudar a política da chave mestra ou depurar a pasta
 
 1. Preferência vai para `settings.json`; segredo vai para `credentials.json`.
    Nada que dê acesso a um serviço entra em settings.
-2. Toda chave de configuração nova entra em `ESQUEMA_SETTINGS` com tipo,
+2. Toda chave de configuração nova entra em `SETTINGS_SCHEMA` com tipo,
    padrão e descrição. Sem isso ela é aceita como texto livre e não aparece
    em `config schema`.
 3. Segredos nunca passam por argumento de linha de comando, log, mensagem de
-   erro, `dados` do `--json` sem `--reveal`, resposta de tool MCP ou frame da
+   erro, `data` do `--json` sem `--reveal`, resposta de tool MCP ou frame da
    TUI.
-4. Leitura de credencial em código usa `obterCredencial(nome)`, que encerra
+4. Leitura de credencial em código usa `getCredential(name)`, que encerra
    com código 4 quando o valor não existe. Não capture esse erro para
    seguir sem o valor.
-5. Nomes de credencial seguem `servico.finalidade` em minúsculas:
-   `github.token`, `openai.api_key`, `smtp.senha`.
+5. Nomes de credencial seguem `service.purpose` em minúsculas:
+   `github.token`, `openai.api_key`, `smtp.password`.
 6. Arquivos continuam com permissão 0600 e a pasta com 0700. Não relaxe.
 7. A variável `<BIN>_MASTER_KEY` tem prioridade sobre `master.key`. Em CI e
    em servidores, use a variável e não grave a chave em disco.
 
 ## Passos para uma chave de configuração
 
-1. Acrescente a definição em `ESQUEMA_SETTINGS`.
-2. Leia o valor com `obterCaminho(lerSettings(), "grupo.chave")`.
-3. Se a chave alimentar `--aba`, `--tema` ou outra opção, atualize os
-   `valores` da opção correspondente.
+1. Acrescente a definição em `SETTINGS_SCHEMA`.
+2. Leia o valor com `getPath(readSettings(), "group.key")`.
+3. Se a chave alimentar `--tab` ou outra opção, atualize os `values`
+   correspondentes. Para `tui.theme`, mantenha os valores do esquema
+   alinhados às paletas de `src/tui/theme.ts`.
 4. Teste em `tests/config.test.ts` (conversão e padrão).
-5. Atualize a tabela em `docs/configuracao.md`, avance `ebook/VERSION` e rode
+5. Atualize a tabela em `docs/configuration.md`, avance `ebook/VERSION` e rode
    `bun run ebook`.
 
 ## Passos para consumir uma credencial
 
-1. Defina o nome e documente-o em `docs/configuracao.md` e na
-   `descricaoLonga` do comando que a usa.
-2. No comando ou na tool, chame `obterCredencial(nome)` no início de
-   `executar`, antes de qualquer efeito.
-3. Em `--help`, acrescente `CodigoSaida.CREDENCIAIS` em `codigosSaida`.
-4. Oriente a gravação com `<bin> credentials set <nome>` na mensagem de erro.
+1. Defina o nome e documente-o em `docs/configuration.md` e na
+   `longDescription` do comando que a usa.
+2. No comando ou na tool, chame `getCredential(name)` no início de
+   `run`, antes de qualquer efeito.
+3. Em `--help`, acrescente `ExitCode.CREDENTIALS` em `exitCodes`.
+4. Oriente a gravação com `<bin> credentials set <name>` na mensagem de erro.
 
 ## Marcos
 
@@ -67,6 +71,6 @@ executados. Nunca cole valores de credenciais na resposta.
 
 ## Compatibilidade
 
-Starter kit 0.2.x. Caminhos citados: `src/config/caminhos.ts`,
-`src/config/settings.ts`, `src/config/cripto.ts`,
-`src/config/credenciais.ts`, `tests/config.test.ts` e `docs/configuracao.md`.
+Starter kit 0.3.x. Caminhos citados: `src/config/paths.ts`,
+`src/config/settings.ts`, `src/config/crypto.ts`,
+`src/config/credentials.ts`, `tests/config.test.ts` e `docs/configuration.md`.

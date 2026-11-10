@@ -1,107 +1,101 @@
 /**
- * Parser de argv.
+ * argv parser.
  *
- * Caminha pela árvore de comandos consumindo subcomandos, depois separa
- * opções e argumentos posicionais. Aceita `--chave valor`, `--chave=valor`,
- * aliases curtos e `--` para encerrar a leitura de opções. Opções
- * desconhecidas, valores fora da lista e argumentos obrigatórios ausentes
- * geram `ErroApp` com USO_INVALIDO, para que o processo saia com código 2.
+ * Walks the command tree consuming subcommands, then separates options from
+ * positional arguments. Accepts `--key value`, `--key=value`, short aliases
+ * and `--` to end option parsing. Unknown options, values outside the
+ * accepted list and missing required arguments raise `AppError` with USAGE,
+ * so the process exits with code 2.
  */
-import { erro } from "../app/erros.ts";
-import {
-  OPCOES_GLOBAIS,
-  chaveDaOpcao,
-  encontrarSubcomando,
-  type Comando,
-  type DefinicaoOpcao,
-  type Opcoes,
-} from "./registro.ts";
+import { error } from "../app/errors.ts";
+import { GLOBAL_OPTIONS, optionKey, findSubcommand, type Command, type OptionDefinition, type Options } from "./registry.ts";
 
-/** Resultado do parse: comando alvo, caminho, argumentos e opções. */
-export interface Analise {
-  comando: Comando;
-  caminho: string[];
+/** Parse result: target command, path, arguments and options. */
+export interface Parsed {
+  command: Command;
+  path: string[];
   args: string[];
-  opcoes: Opcoes;
+  options: Options;
 }
 
-function opcoesVisiveis(cadeia: Comando[]): DefinicaoOpcao[] {
-  const lista: DefinicaoOpcao[] = [...OPCOES_GLOBAIS];
-  cadeia.forEach((cmd, indice) => {
-    for (const op of cmd.opcoes ?? []) {
-      const ehUltimo = indice === cadeia.length - 1;
-      if (ehUltimo || op.recursiva) lista.push(op);
+function visibleOptions(chain: Command[]): OptionDefinition[] {
+  const list: OptionDefinition[] = [...GLOBAL_OPTIONS];
+  chain.forEach((cmd, index) => {
+    for (const op of cmd.options ?? []) {
+      const isLast = index === chain.length - 1;
+      if (isLast || op.recursive) list.push(op);
     }
   });
-  return lista;
+  return list;
 }
 
-function localizarOpcao(lista: DefinicaoOpcao[], token: string): DefinicaoOpcao | undefined {
-  return lista.find((op) => op.nome === token || op.aliases?.includes(token));
+function findOption(list: OptionDefinition[], token: string): OptionDefinition | undefined {
+  return list.find((op) => op.name === token || op.aliases?.includes(token));
 }
 
-/** Analisa `argv` (sem o executável) contra a raiz do registro. */
-export function analisar(raiz: Comando, argv: readonly string[]): Analise {
-  const cadeia: Comando[] = [raiz];
-  const caminho: string[] = [];
+/** Parses `argv` (without the executable) against the registry root. */
+export function parse(root: Command, argv: readonly string[]): Parsed {
+  const chain: Command[] = [root];
+  const path: string[] = [];
   const args: string[] = [];
-  const opcoes: Opcoes = {};
-  let lendoOpcoes = true;
+  const options: Options = {};
+  let readingOptions = true;
   let i = 0;
 
   while (i < argv.length) {
     const token = argv[i] as string;
 
-    if (lendoOpcoes && token === "--") {
-      lendoOpcoes = false;
+    if (readingOptions && token === "--") {
+      readingOptions = false;
       i += 1;
       continue;
     }
 
-    if (lendoOpcoes && token.startsWith("-") && token !== "-") {
-      const [nomeBruto, valorInline] = separarInline(token);
-      const def = localizarOpcao(opcoesVisiveis(cadeia), nomeBruto);
+    if (readingOptions && token.startsWith("-") && token !== "-") {
+      const [rawName, inlineValue] = splitInline(token);
+      const def = findOption(visibleOptions(chain), rawName);
       if (!def) {
-        throw erro.uso(`Opção desconhecida: ${nomeBruto}. Use --help para ver as opções.`, {
-          opcao: nomeBruto,
-          comando: caminho.join(" ") || raiz.nome,
+        throw error.usage(`Unknown option: ${rawName}. Use --help to see the options.`, {
+          option: rawName,
+          command: path.join(" ") || root.name,
         });
       }
-      const chave = chaveDaOpcao(def.nome);
-      if (def.argumento) {
-        let valor = valorInline;
-        if (valor === undefined) {
-          const proximo = argv[i + 1];
-          const proximoEhValor = proximo !== undefined && !proximo.startsWith("-");
-          if (proximoEhValor) {
-            valor = proximo;
+      const key = optionKey(def.name);
+      if (def.argument) {
+        let value = inlineValue;
+        if (value === undefined) {
+          const next = argv[i + 1];
+          const nextIsValue = next !== undefined && !next.startsWith("-");
+          if (nextIsValue) {
+            value = next;
             i += 1;
-          } else if (!def.argumento.opcional) {
-            throw erro.uso(`A opção ${def.nome} exige um valor <${def.argumento.nome}>.`, { opcao: def.nome });
+          } else if (!def.argument.optional) {
+            throw error.usage(`Option ${def.name} requires a value <${def.argument.name}>.`, { option: def.name });
           }
         }
-        if (valor !== undefined && def.argumento.valores && !def.argumento.valores.includes(valor)) {
-          throw erro.uso(
-            `Valor inválido para ${def.nome}: "${valor}". Aceitos: ${def.argumento.valores.join(", ")}.`,
-            { opcao: def.nome, valor, aceitos: def.argumento.valores },
-          );
+        if (value !== undefined && def.argument.values && !def.argument.values.includes(value)) {
+          throw error.usage(`Invalid value for ${def.name}: "${value}". Accepted: ${def.argument.values.join(", ")}.`, {
+            option: def.name,
+            value,
+            accepted: def.argument.values,
+          });
         }
-        opcoes[chave] = valor === undefined ? true : valor;
+        options[key] = value === undefined ? true : value;
       } else {
-        if (valorInline !== undefined) {
-          throw erro.uso(`A opção ${def.nome} não aceita valor.`, { opcao: def.nome });
+        if (inlineValue !== undefined) {
+          throw error.usage(`Option ${def.name} does not take a value.`, { option: def.name });
         }
-        opcoes[chave] = true;
+        options[key] = true;
       }
       i += 1;
       continue;
     }
 
-    const atual = cadeia[cadeia.length - 1] as Comando;
-    const sub = args.length === 0 ? encontrarSubcomando(atual, token) : undefined;
+    const current = chain[chain.length - 1] as Command;
+    const sub = args.length === 0 ? findSubcommand(current, token) : undefined;
     if (sub) {
-      cadeia.push(sub);
-      caminho.push(sub.nome);
+      chain.push(sub);
+      path.push(sub.name);
       i += 1;
       continue;
     }
@@ -110,52 +104,49 @@ export function analisar(raiz: Comando, argv: readonly string[]): Analise {
     i += 1;
   }
 
-  const comando = cadeia[cadeia.length - 1] as Comando;
-  const pedeAjuda = opcoes.help === true || opcoes.version === true || opcoes.skill !== undefined || opcoes.opencli === true;
-  if (!pedeAjuda) validarArgumentos(comando, args, caminho.join(" ") || raiz.nome);
+  const command = chain[chain.length - 1] as Command;
+  const asksMeta = options.help === true || options.version === true || options.skill !== undefined || options.opencli === true;
+  if (!asksMeta) validateArguments(command, args, path.join(" ") || root.name);
 
-  return { comando, caminho, args, opcoes };
+  return { command, path, args, options };
 }
 
-function separarInline(token: string): [string, string | undefined] {
+function splitInline(token: string): [string, string | undefined] {
   if (token.startsWith("--")) {
-    const igual = token.indexOf("=");
-    if (igual > 2) return [token.slice(0, igual), token.slice(igual + 1)];
+    const eq = token.indexOf("=");
+    if (eq > 2) return [token.slice(0, eq), token.slice(eq + 1)];
   }
   return [token, undefined];
 }
 
-function validarArgumentos(comando: Comando, args: string[], nomeCompleto: string): void {
-  const defs = comando.argumentos ?? [];
-  const obrigatorios = defs.filter((d) => d.obrigatorio).length;
-  if (args.length < obrigatorios) {
-    const faltando = defs.filter((d) => d.obrigatorio).slice(args.length).map((d) => `<${d.nome}>`);
-    throw erro.uso(`Faltam argumentos para "${nomeCompleto}": ${faltando.join(" ")}.`, {
-      comando: nomeCompleto,
-      faltando,
-    });
+function validateArguments(command: Command, args: string[], fullName: string): void {
+  const defs = command.arguments ?? [];
+  const required = defs.filter((d) => d.required).length;
+  if (args.length < required) {
+    const missing = defs.filter((d) => d.required).slice(args.length).map((d) => `<${d.name}>`);
+    throw error.usage(`Missing arguments for "${fullName}": ${missing.join(" ")}.`, { command: fullName, missing });
   }
-  const ultimo = defs[defs.length - 1];
-  const aceitaVariadico = ultimo?.variadico === true;
-  if (!aceitaVariadico && args.length > defs.length) {
-    if (comando.subcomandos?.length && defs.length === 0) {
-      throw erro.uso(`Subcomando desconhecido para "${nomeCompleto}": "${args[0]}". Use --help.`, {
-        comando: nomeCompleto,
-        recebido: args[0],
+  const last = defs[defs.length - 1];
+  const acceptsVariadic = last?.variadic === true;
+  if (!acceptsVariadic && args.length > defs.length) {
+    if (command.subcommands?.length && defs.length === 0) {
+      throw error.usage(`Unknown subcommand for "${fullName}": "${args[0]}". Use --help.`, {
+        command: fullName,
+        received: args[0],
       });
     }
-    throw erro.uso(`Argumentos a mais para "${nomeCompleto}": ${args.slice(defs.length).join(" ")}.`, {
-      comando: nomeCompleto,
-      excedentes: args.slice(defs.length),
+    throw error.usage(`Too many arguments for "${fullName}": ${args.slice(defs.length).join(" ")}.`, {
+      command: fullName,
+      extra: args.slice(defs.length),
     });
   }
-  defs.forEach((def, indice) => {
-    const valor = args[indice];
-    if (valor !== undefined && def.valores && !def.valores.includes(valor)) {
-      throw erro.uso(`Valor inválido para <${def.nome}>: "${valor}". Aceitos: ${def.valores.join(", ")}.`, {
-        argumento: def.nome,
-        valor,
-        aceitos: def.valores,
+  defs.forEach((def, index) => {
+    const value = args[index];
+    if (value !== undefined && def.values && !def.values.includes(value)) {
+      throw error.usage(`Invalid value for <${def.name}>: "${value}". Accepted: ${def.values.join(", ")}.`, {
+        argument: def.name,
+        value,
+        accepted: def.values,
       });
     }
   });

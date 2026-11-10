@@ -1,95 +1,98 @@
 /**
- * Documentação embutida no binário (`--skill`).
+ * Documentation embedded in the binary (`--skill`).
  *
- * Os arquivos de `docs/` entram no executável como texto em tempo de build.
- * Isso permite que um agente de IA rode `<bin> --skill` e receba toda a
- * documentação sem acesso ao repositório: visão geral, CLI, TUI, MCP,
- * configuração e códigos de saída. A seção da CLI ganha, ao final, a
- * referência gerada a partir do registro de comandos, para nunca divergir
- * do que o parser aceita.
+ * The files in `docs/` enter the executable as text at build time. An AI
+ * agent can run `<bin> --skill` and receive the whole documentation without
+ * access to the repository: overview, CLI, TUI, MCP, configuration and exit
+ * codes. The CLI section ends with the reference generated from the command
+ * registry, so it never drifts from what the parser accepts.
  */
-import visaoGeral from "../../docs/README.md" with { type: "text" };
-import docCli from "../../docs/cli.md" with { type: "text" };
-import docTui from "../../docs/tui.md" with { type: "text" };
-import docMcp from "../../docs/mcp.md" with { type: "text" };
-import docConfig from "../../docs/configuracao.md" with { type: "text" };
-import docCodigos from "../../docs/codigos-de-saida.md" with { type: "text" };
-import { manifesto } from "../app/manifesto.ts";
-import { descricoesSaida } from "../app/saida.ts";
-import { OPCOES_GLOBAIS, type Comando, type DefinicaoOpcao } from "../cli/registro.ts";
+import overview from "../../docs/README.md" with { type: "text" };
+import cliDoc from "../../docs/cli.md" with { type: "text" };
+import tuiDoc from "../../docs/tui.md" with { type: "text" };
+import mcpDoc from "../../docs/mcp.md" with { type: "text" };
+import configDoc from "../../docs/configuration.md" with { type: "text" };
+import exitCodesDoc from "../../docs/exit-codes.md" with { type: "text" };
+import { manifest } from "../app/manifest.ts";
+import { exitCodeDescriptions } from "../app/exit-codes.ts";
+import { GLOBAL_OPTIONS, type Command, type OptionDefinition } from "../cli/registry.ts";
 
-/** Tópicos aceitos por `--skill <topico>` e pela tool/resource MCP `skill`. */
-export const TOPICOS_SKILL = ["cli", "tui", "mcp", "config", "codigos"] as const;
-export type TopicoSkill = (typeof TOPICOS_SKILL)[number];
+/** Topics accepted by `--skill <topic>` and by the MCP tool/resource `skill`. */
+export const SKILL_TOPICS = ["cli", "tui", "mcp", "config", "exit-codes"] as const;
+export type SkillTopic = (typeof SKILL_TOPICS)[number];
 
-function substituir(texto: string): string {
-  return texto.replaceAll("{{bin}}", manifesto.bin).replaceAll("{{titulo}}", manifesto.titulo).replaceAll("{{versao}}", manifesto.versao);
+function substitute(text: string): string {
+  return text
+    .replaceAll("{{bin}}", manifest.bin)
+    .replaceAll("{{title}}", manifest.title)
+    .replaceAll("{{version}}", manifest.version)
+    .replaceAll("{{BIN}}", manifest.envPrefix);
 }
 
-function opcaoEmMarkdown(o: DefinicaoOpcao): string {
-  const nomes = [...(o.aliases ?? []), o.nome].map((n) => `\`${n}\``).join(", ");
-  const arg = o.argumento ? ` \`${o.argumento.opcional ? `[${o.argumento.nome}]` : `<${o.argumento.nome}>`}\`` : "";
-  const valores = o.argumento?.valores ? ` Valores: ${o.argumento.valores.join(", ")}.` : "";
-  return `- ${nomes}${arg}: ${o.descricao}${valores}`;
+function optionAsMarkdown(o: OptionDefinition): string {
+  const names = [...(o.aliases ?? []), o.name].map((n) => `\`${n}\``).join(", ");
+  const arg = o.argument ? ` \`${o.argument.optional ? `[${o.argument.name}]` : `<${o.argument.name}>`}\`` : "";
+  const values = o.argument?.values ? ` Values: ${o.argument.values.join(", ")}.` : "";
+  return `- ${names}${arg}: ${o.description}${values}`;
 }
 
-/** Referência de comandos em Markdown, gerada do registro. */
-export function referenciaDeComandos(raiz: Comando): string {
-  const linhas: string[] = ["## Referência gerada do registro de comandos", ""];
-  linhas.push("### Opções globais", "");
-  for (const o of OPCOES_GLOBAIS.filter((x) => !x.oculta)) linhas.push(opcaoEmMarkdown(o));
-  linhas.push("");
+/** Command reference in Markdown, generated from the registry. */
+export function commandReference(root: Command): string {
+  const lines: string[] = ["## Reference generated from the command registry", ""];
+  lines.push("### Global options", "");
+  for (const o of GLOBAL_OPTIONS.filter((x) => !x.hidden)) lines.push(optionAsMarkdown(o));
+  lines.push("");
 
-  const visitar = (c: Comando, caminho: string[]) => {
-    if (c.oculto) return;
-    const nome = [manifesto.bin, ...caminho].join(" ");
-    linhas.push(`### \`${nome}\``, "", c.descricao, "");
-    if (c.descricaoLonga) linhas.push(c.descricaoLonga.replace(/\n/g, " "), "");
-    if (c.argumentos?.length) {
-      linhas.push("Argumentos:", "");
-      for (const a of c.argumentos) {
-        const marca = a.obrigatorio ? `<${a.nome}>` : `[${a.nome}]`;
-        linhas.push(`- \`${marca}\`: ${a.descricao}${a.valores ? ` Valores: ${a.valores.join(", ")}.` : ""}`);
+  const visit = (c: Command, path: string[]) => {
+    if (c.hidden) return;
+    const name = [manifest.bin, ...path].join(" ");
+    lines.push(`### \`${name}\``, "", c.description, "");
+    if (c.longDescription) lines.push(c.longDescription.replace(/\n/g, " "), "");
+    if (c.arguments?.length) {
+      lines.push("Arguments:", "");
+      for (const a of c.arguments) {
+        const mark = a.required ? `<${a.name}>` : `[${a.name}]`;
+        lines.push(`- \`${mark}\`: ${a.description}${a.values ? ` Values: ${a.values.join(", ")}.` : ""}`);
       }
-      linhas.push("");
+      lines.push("");
     }
-    if (c.opcoes?.filter((o) => !o.oculta).length) {
-      linhas.push("Opções:", "");
-      for (const o of c.opcoes.filter((x) => !x.oculta)) linhas.push(opcaoEmMarkdown(o));
-      linhas.push("");
+    if (c.options?.filter((o) => !o.hidden).length) {
+      lines.push("Options:", "");
+      for (const o of c.options.filter((x) => !x.hidden)) lines.push(optionAsMarkdown(o));
+      lines.push("");
     }
-    if (c.codigosSaida?.length) {
-      const nomes = descricoesSaida.filter((d) => c.codigosSaida?.includes(d.codigo)).map((d) => `${d.codigo} (${d.nome})`);
-      linhas.push(`Códigos de saída além de 0, 1 e 2: ${nomes.join(", ")}.`, "");
+    if (c.exitCodes?.length) {
+      const names = exitCodeDescriptions.filter((d) => c.exitCodes?.includes(d.code)).map((d) => `${d.code} (${d.name})`);
+      lines.push(`Exit codes besides 0, 1 and 2: ${names.join(", ")}.`, "");
     }
-    if (c.interativo) linhas.push("Exige terminal interativo ou `--stdin`/`--yes` conforme o caso.", "");
-    if (c.exemplos?.length) {
-      linhas.push("Exemplos:", "", "```bash");
-      for (const e of c.exemplos) linhas.push(e);
-      linhas.push("```", "");
+    if (c.interactive) lines.push("Requires an interactive terminal or `--stdin`/`--yes` as applicable.", "");
+    if (c.examples?.length) {
+      lines.push("Examples:", "", "```bash");
+      for (const e of c.examples) lines.push(e);
+      lines.push("```", "");
     }
-    for (const s of c.subcomandos ?? []) visitar(s, [...caminho, s.nome]);
+    for (const s of c.subcommands ?? []) visit(s, [...path, s.name]);
   };
-  for (const s of raiz.subcomandos ?? []) visitar(s, [s.nome]);
-  return linhas.join("\n");
+  for (const s of root.subcommands ?? []) visit(s, [s.name]);
+  return lines.join("\n");
 }
 
-/** Devolve a seção pedida ou a documentação inteira. */
-export function textoDaSkill(raiz: Comando, topico?: string): string {
-  const secoes: Record<TopicoSkill, () => string> = {
-    cli: () => `${substituir(docCli)}\n\n${referenciaDeComandos(raiz)}`,
-    tui: () => substituir(docTui),
-    mcp: () => substituir(docMcp),
-    config: () => substituir(docConfig),
-    codigos: () => substituir(docCodigos),
+/** Returns the requested section or the whole documentation. */
+export function skillText(root: Command, topic?: string): string {
+  const sections: Record<SkillTopic, () => string> = {
+    cli: () => `${substitute(cliDoc)}\n\n${commandReference(root)}`,
+    tui: () => substitute(tuiDoc),
+    mcp: () => substitute(mcpDoc),
+    config: () => substitute(configDoc),
+    "exit-codes": () => substitute(exitCodesDoc),
   };
-  if (topico) {
-    const fn = secoes[topico as TopicoSkill];
-    if (!fn) throw new Error(`Tópico desconhecido: ${topico}. Aceitos: ${TOPICOS_SKILL.join(", ")}.`);
+  if (topic) {
+    const fn = sections[topic as SkillTopic];
+    if (!fn) throw new Error(`Unknown topic: ${topic}. Accepted: ${SKILL_TOPICS.join(", ")}.`);
     return fn().trimEnd();
   }
-  const cabecalho =
-    `<!-- Documentação embutida de ${manifesto.bin} v${manifesto.versao}. Gerada por "${manifesto.bin} --skill". -->\n\n` +
-    substituir(visaoGeral);
-  return [cabecalho, ...TOPICOS_SKILL.map((t) => secoes[t]())].join("\n\n---\n\n").trimEnd();
+  const header =
+    `<!-- Embedded documentation of ${manifest.bin} v${manifest.version}. Generated by "${manifest.bin} --skill". -->\n\n` +
+    substitute(overview);
+  return [header, ...SKILL_TOPICS.map((t) => sections[t]())].join("\n\n---\n\n").trimEnd();
 }

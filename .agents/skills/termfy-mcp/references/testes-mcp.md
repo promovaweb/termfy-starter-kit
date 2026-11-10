@@ -6,22 +6,27 @@
 o `Client` do SDK:
 
 ```ts
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
-const cliente = new Client({ name: "teste", version: "0.0.0" });
-await cliente.connect(new StdioClientTransport({
+const temporaryDir = mkdtempSync(join(tmpdir(), "termfy-mcp-"));
+const client = new Client({ name: "test", version: "0.0.0" });
+await client.connect(new StdioClientTransport({
   command: "bun",
   args: ["run", "src/main.ts", "mcp"],
-  env: { ...process.env, TERMFY_HOME: pastaTemporaria },
+  env: { ...process.env, TERMFY_HOME: temporaryDir },
   stderr: "ignore",
 }));
 
-const { tools } = await cliente.listTools();
-const r = await cliente.callTool({ name: "about", arguments: {} });
-const recurso = await cliente.readResource({ uri: "termfy://exit-codes" });
-const prompt = await cliente.getPrompt({ name: "operar", arguments: { tarefa: "x" } });
-await cliente.close();
+const { tools } = await client.listTools();
+const r = await client.callTool({ name: "about", arguments: {} });
+const resource = await client.readResource({ uri: "termfy://exit-codes" });
+const prompt = await client.getPrompt({ name: "operate", arguments: { task: "x" } });
+await client.close();
+rmSync(temporaryDir, { recursive: true, force: true });
 ```
 
 Para cada tool nova: um teste de sucesso, um de entrada inválida (o SDK
@@ -45,4 +50,4 @@ Claude Code:
 claude mcp add termfy-dev -- bun run /caminho/para/src/main.ts mcp
 ```
 
-Depois peça ao agente para chamar `skill` com `topico: "mcp"`.
+Depois peça ao agente para chamar `skill` com `topic: "mcp"`.

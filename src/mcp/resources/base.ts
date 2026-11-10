@@ -1,65 +1,65 @@
 /**
- * Resources: leitura passiva da identidade, dos códigos de saída e da
- * documentação. URIs usam o esquema `<bin>://` para não colidir com outros
- * servidores no mesmo cliente.
+ * Resources: passive reads of identity, exit codes and documentation. URIs
+ * use the `<bin>://` scheme to avoid collisions with other servers in the
+ * same client.
  */
 import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { manifesto } from "../../app/manifesto.ts";
-import { descricoesSaida } from "../../app/saida.ts";
-import { dadosAbout } from "../../cli/comandos/about.ts";
-import { raiz } from "../../cli/comandos.ts";
-import { TOPICOS_SKILL, textoDaSkill } from "../../skill/index.ts";
-import type { Registrador } from "../servidor.ts";
+import { manifest } from "../../app/manifest.ts";
+import { exitCodeDescriptions } from "../../app/exit-codes.ts";
+import { aboutData } from "../../cli/commands/about.ts";
+import { root } from "../../cli/commands.ts";
+import { SKILL_TOPICS, skillText } from "../../skill/index.ts";
+import type { Registrar } from "../server.ts";
 
-export function registrarResources({ servidor, catalogo }: Registrador): void {
-  const esquema = manifesto.bin;
+export function registerResources({ server, catalog }: Registrar): void {
+  const scheme = manifest.bin;
 
-  catalogo.resources.push({ uri: `${esquema}://about`, nome: "about", descricao: "Identidade e runtime do binário em JSON." });
-  servidor.registerResource(
+  catalog.resources.push({ uri: `${scheme}://about`, name: "about", description: "Binary identity and runtime as JSON." });
+  server.registerResource(
     "about",
-    `${esquema}://about`,
-    { title: "Sobre o binário", description: "Identidade e runtime em JSON.", mimeType: "application/json" },
-    async (uri) => ({ contents: [{ uri: uri.href, mimeType: "application/json", text: JSON.stringify(dadosAbout(), null, 2) }] }),
+    `${scheme}://about`,
+    { title: "About the binary", description: "Identity and runtime as JSON.", mimeType: "application/json" },
+    async (uri) => ({ contents: [{ uri: uri.href, mimeType: "application/json", text: JSON.stringify(aboutData(), null, 2) }] }),
   );
 
-  catalogo.resources.push({ uri: `${esquema}://exit-codes`, nome: "exit-codes", descricao: "Tabela de códigos de saída em JSON." });
-  servidor.registerResource(
+  catalog.resources.push({ uri: `${scheme}://exit-codes`, name: "exit-codes", description: "Exit-code table as JSON." });
+  server.registerResource(
     "exit-codes",
-    `${esquema}://exit-codes`,
-    { title: "Códigos de saída", description: "Tabela de códigos de saída em JSON.", mimeType: "application/json" },
+    `${scheme}://exit-codes`,
+    { title: "Exit codes", description: "Exit-code table as JSON.", mimeType: "application/json" },
     async (uri) => ({
-      contents: [{ uri: uri.href, mimeType: "application/json", text: JSON.stringify({ codigos: descricoesSaida }, null, 2) }],
+      contents: [{ uri: uri.href, mimeType: "application/json", text: JSON.stringify({ codes: exitCodeDescriptions }, null, 2) }],
     }),
   );
 
-  catalogo.resources.push({ uri: `${esquema}://skill`, nome: "skill", descricao: "Documentação completa em Markdown." });
-  servidor.registerResource(
+  catalog.resources.push({ uri: `${scheme}://skill`, name: "skill", description: "Full documentation in Markdown." });
+  server.registerResource(
     "skill",
-    `${esquema}://skill`,
-    { title: "Documentação completa", description: "Toda a documentação embutida em Markdown.", mimeType: "text/markdown" },
-    async (uri) => ({ contents: [{ uri: uri.href, mimeType: "text/markdown", text: textoDaSkill(raiz) }] }),
+    `${scheme}://skill`,
+    { title: "Full documentation", description: "All the embedded documentation in Markdown.", mimeType: "text/markdown" },
+    async (uri) => ({ contents: [{ uri: uri.href, mimeType: "text/markdown", text: skillText(root) }] }),
   );
 
-  catalogo.resources.push({
-    uri: `${esquema}://skill/{topico}`,
-    nome: "skill-topico",
-    descricao: `Seção da documentação. Tópicos: ${TOPICOS_SKILL.join(", ")}.`,
+  catalog.resources.push({
+    uri: `${scheme}://skill/{topic}`,
+    name: "skill-topic",
+    description: `One documentation section. Topics: ${SKILL_TOPICS.join(", ")}.`,
   });
-  servidor.registerResource(
-    "skill-topico",
-    new ResourceTemplate(`${esquema}://skill/{topico}`, {
+  server.registerResource(
+    "skill-topic",
+    new ResourceTemplate(`${scheme}://skill/{topic}`, {
       list: async () => ({
-        resources: TOPICOS_SKILL.map((t) => ({
-          uri: `${esquema}://skill/${t}`,
+        resources: SKILL_TOPICS.map((t) => ({
+          uri: `${scheme}://skill/${t}`,
           name: `skill-${t}`,
-          title: `Documentação: ${t}`,
+          title: `Documentation: ${t}`,
           mimeType: "text/markdown",
         })),
       }),
     }),
-    { title: "Seção da documentação", description: "Uma seção da documentação embutida.", mimeType: "text/markdown" },
-    async (uri, { topico }) => ({
-      contents: [{ uri: uri.href, mimeType: "text/markdown", text: textoDaSkill(raiz, String(topico)) }],
+    { title: "Documentation section", description: "One section of the embedded documentation.", mimeType: "text/markdown" },
+    async (uri, { topic }) => ({
+      contents: [{ uri: uri.href, mimeType: "text/markdown", text: skillText(root, String(topic)) }],
     }),
   );
 }

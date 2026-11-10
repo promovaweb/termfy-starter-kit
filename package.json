@@ -1,7 +1,7 @@
 {
   "name": "termfy-starter-kit",
-  "version": "0.2.0",
-  "description": "Esqueleto de CLI, TUI e servidor MCP stdio em Bun, com as skills do framework Termfy instaladas.",
+  "version": "0.3.0",
+  "description": "CLI, TUI and MCP stdio server skeleton in Bun, with the Termfy framework skills installed.",
   "type": "module",
   "private": true,
   "license": "UNLICENSED",
@@ -10,10 +10,10 @@
   },
   "termfy": {
     "bin": "termfy",
-    "titulo": "Termfy",
-    "autor": "Promovaweb",
+    "title": "Termfy",
+    "author": "Promovaweb",
     "site": "https://promovaweb.com",
-    "repositorio": "https://github.com/promovaweb/termfy-starter-kit",
+    "repository": "https://github.com/promovaweb/termfy-starter-kit",
     "framework": "https://github.com/promovaweb/termfy"
   },
   "scripts": {
@@ -22,18 +22,18 @@
     "tui": "bun run src/main.ts",
     "mcp": "bun run src/main.ts mcp",
     "build": "bun run scripts/build.ts",
-    "build:todos": "bun run scripts/build.ts --todos",
+    "build:all": "bun run scripts/build.ts --all",
     "test": "bun test",
     "typecheck": "bunx tsc --noEmit",
     "opencli": "bun run src/main.ts --opencli > docs/opencli.json",
-    "opencli:check": "bun run scripts/conferir-opencli.ts",
-    "skills:instalar": "npx -y skills add https://github.com/promovaweb/termfy -y -a universal -a claude-code -a codex -a opencode -a cursor -a gemini-cli",
+    "opencli:check": "bun run scripts/check-opencli.ts",
+    "skills:install": "npx -y skills add https://github.com/promovaweb/termfy -y -a universal -a claude-code -a codex -a opencode -a cursor -a gemini-cli",
     "skills:update": "npx -y skills update -y -p",
-    "skills:check": "bun run scripts/conferir-skills.ts",
-    "iniciar": "bun run scripts/iniciar.ts",
+    "skills:check": "bun run scripts/check-skills.ts",
+    "init": "bun run scripts/init.ts",
     "ebook": "bun run .ebook/build-ebook.mjs",
     "ebook:verify": "bun run .ebook/build-ebook.mjs --check",
-    "validar": "bun run typecheck && bun test && bun run skills:check && bun run opencli:check && bun run ebook:verify && bun run build"
+    "validate": "bun run typecheck && bun test && bun run skills:check && bun run opencli:check && bun run ebook:verify && bun run build"
   },
   "engines": {
     "bun": ">=1.3.14"

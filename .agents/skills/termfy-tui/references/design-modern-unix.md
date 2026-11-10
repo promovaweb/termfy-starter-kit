@@ -7,7 +7,7 @@ cor e peso em vez de espaço em branco.
 ## Estrutura fixa da tela
 
 ```text
-▌ Título v0.1.0   │  descrição em uma linha            linux-x64 • Bun 1.3.14
+▌ Título v<version>   │  descrição em uma linha            linux-x64 • Bun 1.3.14
 ──────────────────────────────────────────────────────────────────────────────
  Overview      About
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬
@@ -27,28 +27,28 @@ cor e peso em vez de espaço em branco.
 
 ## Paleta
 
-Dois temas em `src/tui/tema.ts`. Papéis:
+Dois temas em `src/tui/theme.ts`. Papéis:
 
 | Papel | Uso |
 | --- | --- |
-| `fundo` | fundo geral |
-| `superficie` | fundo dos painéis |
-| `superficieAlta` | aba ativa, caixa de ajuda |
-| `borda`, `bordaAtiva` | borda normal e do painel em foco |
-| `texto`, `textoSutil`, `textoForte` | valor, rótulo, título |
-| `acento` | o que está ativo ou é ação |
-| `acentoSecundario` | links, origens externas |
-| `ok`, `aviso`, `erro` | estado, nunca decoração |
-| `barraFundo`, `barraTexto`, `teclaFundo`, `teclaTexto` | barra inferior |
+| `background` | fundo geral |
+| `surface` | fundo dos painéis |
+| `surfaceHigh` | aba ativa, caixa de ajuda |
+| `border`, `borderActive` | borda normal e do painel em foco |
+| `text`, `textDim`, `textStrong` | valor, rótulo, título |
+| `accent` | o que está ativo ou é ação |
+| `accentSecondary` | links, origens externas |
+| `ok`, `warn`, `error` | estado, nunca decoração |
+| `barBackground`, `barText`, `keyBackground`, `keyText` | barra inferior |
 
-A paleta `noite` parte do Tokyo Night; a `dia` parte do Tokyo Night Day.
-Mantenha contraste mínimo 4.5:1 entre `texto` e `superficie`.
+A paleta `night` parte do Tokyo Night; a `day` parte do Tokyo Night Day.
+Mantenha contraste mínimo 4.5:1 entre `text` e `surface`.
 
 ## Tipografia de terminal
 
 - Rótulos à esquerda, apagados, alinhados pela maior chave; valores à
-  direita, em `texto`. Use `tabelaChaveValor`.
-- Títulos de seção dentro do painel em `textoForte` negrito.
+  direita, em `text`. Use `keyValueTable`.
+- Títulos de seção dentro do painel em `textStrong` negrito.
 - Listas com `•` em acento ou `→` para comandos.
 - Nada em caixa alta além de siglas.
 - Glifos de uma célula apenas. Evite emoji: largura varia por terminal.
@@ -56,9 +56,9 @@ Mantenha contraste mínimo 4.5:1 entre `texto` e `superficie`.
 ## Movimento e estado
 
 - Nenhuma animação contínua. Atualize só quando houver dado novo.
-- Estado por cor: `ok` verde, `aviso` âmbar, `erro` vermelho, sempre
+- Estado por cor: `ok` verde, `warn` âmbar, `error` vermelho, sempre
   acompanhado de texto, nunca só pela cor.
-- Painel em foco recebe `bordaAtiva` e título em `acento`.
+- Painel em foco recebe `borderActive` e título em `accent`.
 
 ## Densidade
 
@@ -71,12 +71,12 @@ Mantenha contraste mínimo 4.5:1 entre `texto` e `superficie`.
 
 - Valores em uma linha usam `wrapMode: "none"` e recortam na borda.
 - Descrições usam `wrapMode: "word"` em painéis com altura automática.
-- URLs longas vão em linha própria, em `textoSutil`, abaixo do rótulo.
+- URLs longas vão em linha própria, em `textDim`, abaixo do rótulo.
 
 ## Checklist de revisão
 
-- [ ] Nenhuma cor literal fora de `tema.ts`.
+- [ ] Nenhuma cor literal fora de `src/tui/theme.ts`.
 - [ ] Nenhum `console.log`.
 - [ ] Barra inferior lista as teclas da tela.
 - [ ] Frame de teste em 110×30 sem texto cortado em rótulos.
-- [ ] Funciona com `tui.tema = dia`.
+- [ ] Funciona com `tui.theme = day`.

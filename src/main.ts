@@ -1,29 +1,29 @@
 #!/usr/bin/env bun
 /**
- * Ponto de entrada do binário.
+ * Binary entry point.
  *
- * Regra de despacho:
+ * Dispatch rule:
  *
- * 1. sem argumentos e com terminal interativo → abre a TUI;
- * 2. sem argumentos e sem TTY → imprime a ajuda e encerra com código 2,
- *    para que pipes e agentes não fiquem presos esperando uma interface;
- * 3. com argumentos → CLI (inclui `mcp`, que vira servidor stdio).
+ * 1. no arguments and an interactive terminal → open the TUI;
+ * 2. no arguments and no TTY → print help and exit with code 2, so pipes
+ *    and agents do not hang waiting for an interface;
+ * 3. with arguments → CLI (including `mcp`, which becomes a stdio server).
  *
- * O processo sempre termina por `process.exit` com um código da tabela de
- * `app/saida.ts`.
+ * The process always ends through `process.exit` with a code from
+ * `app/exit-codes.ts`.
  */
-import { executarCli } from "./cli/index.ts";
-import { CodigoSaida } from "./app/saida.ts";
+import { runCli } from "./cli/index.ts";
+import { ExitCode } from "./app/exit-codes.ts";
 
 const argv = process.argv.slice(2);
 
 process.on("SIGINT", () => {
-  process.exit(CodigoSaida.INTERROMPIDO);
+  process.exit(ExitCode.INTERRUPTED);
 });
 
-const semArgumentos = argv.length === 0;
-const interativo = Boolean(process.stdin.isTTY && process.stdout.isTTY);
+const noArguments = argv.length === 0;
+const interactive = Boolean(process.stdin.isTTY && process.stdout.isTTY);
 
-const codigo = semArgumentos && interativo ? await executarCli(["tui"]) : await executarCli(semArgumentos ? ["--help"] : argv);
+const code = noArguments && interactive ? await runCli(["tui"]) : await runCli(noArguments ? ["--help"] : argv);
 
-process.exit(semArgumentos && !interativo ? CodigoSaida.USO_INVALIDO : codigo);
+process.exit(noArguments && !interactive ? ExitCode.USAGE : code);

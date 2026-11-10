@@ -1,205 +1,205 @@
 /**
- * Leitura e gravação de settings.json.
+ * Reading and writing settings.json.
  *
- * O arquivo guarda preferências em texto claro. Chaves aninhadas usam
- * notação de ponto (`saida.formato`). O esquema abaixo lista as chaves que o
- * esqueleto reconhece; projetos derivados ampliam `ESQUEMA_SETTINGS` e
- * ganham validação, valor padrão e documentação automática no `--help` do
- * comando `config`.
+ * The file keeps preferences in plain text. Nested keys use dot notation
+ * (`output.format`). The schema below lists the keys the skeleton knows;
+ * derived projects extend `SETTINGS_SCHEMA` and get validation, defaults and
+ * automatic documentation in the `config` command help.
  */
 import { readFileSync, writeFileSync } from "node:fs";
-import { caminhos, existe, garantirDiretorioBase } from "./caminhos.ts";
-import { classificarErroFs, erro } from "../app/erros.ts";
-import { CodigoSaida } from "../app/saida.ts";
+import { paths, exists, ensureBaseDir } from "./paths.ts";
+import { classifyFsError, error } from "../app/errors.ts";
+import { ExitCode } from "../app/exit-codes.ts";
 
-/** Tipo aceito por uma chave de configuração. */
-export type TipoSetting = "string" | "number" | "boolean" | "enum";
+/** Type accepted by a settings key. */
+export type SettingType = "string" | "number" | "boolean" | "enum";
 
-/** Descrição de uma chave conhecida. */
-export interface DefinicaoSetting {
-  chave: string;
-  tipo: TipoSetting;
-  padrao: string | number | boolean;
-  descricao: string;
-  /** Valores aceitos quando `tipo` é `enum`. */
-  valores?: readonly string[];
+/** Description of a known key. */
+export interface SettingDefinition {
+  key: string;
+  type: SettingType;
+  default: string | number | boolean;
+  description: string;
+  /** Accepted values when `type` is `enum`. */
+  values?: readonly string[];
 }
 
-/** Esquema das chaves reconhecidas pelo esqueleto. */
-export const ESQUEMA_SETTINGS: readonly DefinicaoSetting[] = Object.freeze([
+/** Schema of the keys the skeleton recognizes. */
+export const SETTINGS_SCHEMA: readonly SettingDefinition[] = Object.freeze([
   {
-    chave: "saida.formato",
-    tipo: "enum",
-    padrao: "texto",
-    valores: ["texto", "json"],
-    descricao: "Formato padrão da saída do CLI quando --json não é informado.",
+    key: "output.format",
+    type: "enum",
+    default: "text",
+    values: ["text", "json"],
+    description: "Default CLI output format when --json is not given.",
   },
   {
-    chave: "saida.cores",
-    tipo: "boolean",
-    padrao: true,
-    descricao: "Usa cores ANSI na saída de texto. NO_COLOR=1 sempre desliga.",
+    key: "output.colors",
+    type: "boolean",
+    default: true,
+    description: "Use ANSI colors in text output. NO_COLOR=1 always disables them.",
   },
   {
-    chave: "tui.abaInicial",
-    tipo: "enum",
-    padrao: "overview",
-    valores: ["overview", "about"],
-    descricao: "Aba aberta ao iniciar a TUI.",
+    key: "tui.initialTab",
+    type: "enum",
+    default: "overview",
+    values: ["overview", "about"],
+    description: "Tab opened when the TUI starts.",
   },
   {
-    chave: "tui.tema",
-    tipo: "enum",
-    padrao: "noite",
-    valores: ["noite", "dia"],
-    descricao: "Paleta da TUI. `noite` é a paleta padrão do modern unix.",
+    key: "tui.theme",
+    type: "enum",
+    default: "night",
+    values: ["night", "day"],
+    description: "TUI palette. `night` is the default modern unix palette.",
   },
   {
-    chave: "telemetria.ativa",
-    tipo: "boolean",
-    padrao: false,
-    descricao: "Reservado para projetos derivados. O esqueleto não envia nada.",
+    key: "telemetry.enabled",
+    type: "boolean",
+    default: false,
+    description: "Reserved for derived projects. The skeleton sends nothing.",
   },
 ]);
 
 export type Settings = Record<string, unknown>;
 
-/** Devolve um objeto com todos os valores padrão, já aninhado. */
-export function settingsPadrao(): Settings {
-  const resultado: Settings = {};
-  for (const def of ESQUEMA_SETTINGS) definirCaminho(resultado, def.chave, def.padrao);
-  return resultado;
+/** Returns an object with every default value, already nested. */
+export function defaultSettings(): Settings {
+  const result: Settings = {};
+  for (const def of SETTINGS_SCHEMA) setPath(result, def.key, def.default);
+  return result;
 }
 
-/** Lê settings.json. Arquivo ausente devolve os padrões. */
-export function lerSettings(): Settings {
-  const caminho = caminhos.settings();
-  if (!existe(caminho)) return settingsPadrao();
-  let bruto: string;
+/** Reads settings.json. A missing file yields the defaults. */
+export function readSettings(): Settings {
+  const path = paths.settings();
+  if (!exists(path)) return defaultSettings();
+  let raw: string;
   try {
-    bruto = readFileSync(caminho, "utf8");
+    raw = readFileSync(path, "utf8");
   } catch (e) {
-    throw classificarErroFs(e, CodigoSaida.CONFIGURACAO, `Falha ao ler ${caminho}`);
+    throw classifyFsError(e, ExitCode.CONFIG, `Failed to read ${path}`);
   }
-  let dados: unknown;
+  let data: unknown;
   try {
-    dados = JSON.parse(bruto);
+    data = JSON.parse(raw);
   } catch {
-    throw erro.configuracao(`${caminho} não contém JSON válido.`, { caminho });
+    throw error.config(`${path} does not contain valid JSON.`, { path });
   }
-  if (!dados || typeof dados !== "object" || Array.isArray(dados)) {
-    throw erro.configuracao(`${caminho} precisa conter um objeto JSON.`, { caminho });
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    throw error.config(`${path} must contain a JSON object.`, { path });
   }
-  return mesclar(settingsPadrao(), dados as Settings);
+  return merge(defaultSettings(), data as Settings);
 }
 
-/** Grava settings.json com indentação de dois espaços. */
-export function gravarSettings(settings: Settings): string {
-  garantirDiretorioBase();
-  const caminho = caminhos.settings();
+/** Writes settings.json with two-space indentation. */
+export function writeSettings(settings: Settings): string {
+  ensureBaseDir();
+  const path = paths.settings();
   try {
-    writeFileSync(caminho, `${JSON.stringify(settings, null, 2)}\n`, { mode: 0o600 });
+    writeFileSync(path, `${JSON.stringify(settings, null, 2)}\n`, { mode: 0o600 });
   } catch (e) {
-    throw classificarErroFs(e, CodigoSaida.CONFIGURACAO, `Falha ao gravar ${caminho}`);
+    throw classifyFsError(e, ExitCode.CONFIG, `Failed to write ${path}`);
   }
-  return caminho;
+  return path;
 }
 
-/** Lê um valor por notação de ponto. Devolve `undefined` quando não existe. */
-export function obterCaminho(objeto: Settings, chave: string): unknown {
-  return chave.split(".").reduce<unknown>((atual, parte) => {
-    if (atual && typeof atual === "object") return (atual as Record<string, unknown>)[parte];
+/** Reads a value by dot path. Returns `undefined` when absent. */
+export function getPath(object: Settings, key: string): unknown {
+  return key.split(".").reduce<unknown>((current, part) => {
+    if (current && typeof current === "object") return (current as Record<string, unknown>)[part];
     return undefined;
-  }, objeto);
+  }, object);
 }
 
-/** Define um valor por notação de ponto, criando os níveis intermediários. */
-export function definirCaminho(objeto: Settings, chave: string, valor: unknown): void {
-  const partes = chave.split(".");
-  let atual: Record<string, unknown> = objeto;
-  for (const parte of partes.slice(0, -1)) {
-    if (!atual[parte] || typeof atual[parte] !== "object") atual[parte] = {};
-    atual = atual[parte] as Record<string, unknown>;
+/** Sets a value by dot path, creating intermediate levels. */
+export function setPath(object: Settings, key: string, value: unknown): void {
+  const parts = key.split(".");
+  let current: Record<string, unknown> = object;
+  for (const part of parts.slice(0, -1)) {
+    if (!current[part] || typeof current[part] !== "object") current[part] = {};
+    current = current[part] as Record<string, unknown>;
   }
-  atual[partes[partes.length - 1] as string] = valor;
+  current[parts[parts.length - 1] as string] = value;
 }
 
-/** Remove um valor por notação de ponto. Devolve `true` quando algo saiu. */
-export function removerCaminho(objeto: Settings, chave: string): boolean {
-  const partes = chave.split(".");
-  let atual: Record<string, unknown> = objeto;
-  for (const parte of partes.slice(0, -1)) {
-    const proximo = atual[parte];
-    if (!proximo || typeof proximo !== "object") return false;
-    atual = proximo as Record<string, unknown>;
+/** Removes a value by dot path. Returns `true` when something was removed. */
+export function removePath(object: Settings, key: string): boolean {
+  const parts = key.split(".");
+  let current: Record<string, unknown> = object;
+  for (const part of parts.slice(0, -1)) {
+    const next = current[part];
+    if (!next || typeof next !== "object") return false;
+    current = next as Record<string, unknown>;
   }
-  const ultima = partes[partes.length - 1] as string;
-  if (!(ultima in atual)) return false;
-  delete atual[ultima];
+  const last = parts[parts.length - 1] as string;
+  if (!(last in current)) return false;
+  delete current[last];
   return true;
 }
 
-/** Localiza a definição de uma chave no esquema. */
-export function definicaoDe(chave: string): DefinicaoSetting | undefined {
-  return ESQUEMA_SETTINGS.find((def) => def.chave === chave);
+/** Finds the schema definition of a key. */
+export function definitionOf(key: string): SettingDefinition | undefined {
+  return SETTINGS_SCHEMA.find((def) => def.key === key);
 }
 
 /**
- * Converte o texto digitado no terminal para o tipo declarado no esquema.
- * Chaves fora do esquema são aceitas como string, para dar espaço a
- * extensões do projeto derivado, mas o `--help` as marca como livres.
+ * Converts the text typed in the terminal to the type declared in the
+ * schema. Keys outside the schema are accepted as strings, leaving room for
+ * derived-project extensions; `--help` marks them as free keys.
  */
-export function converterValor(chave: string, texto: string): unknown {
-  const def = definicaoDe(chave);
-  if (!def) return texto;
-  switch (def.tipo) {
+export function convertValue(key: string, text: string): unknown {
+  const def = definitionOf(key);
+  if (!def) return text;
+  switch (def.type) {
     case "boolean": {
-      const baixo = texto.toLowerCase();
-      if (["true", "1", "sim", "yes", "on"].includes(baixo)) return true;
-      if (["false", "0", "nao", "não", "no", "off"].includes(baixo)) return false;
-      throw erro.configuracao(`"${chave}" espera true ou false; recebeu "${texto}".`, { chave, valor: texto });
+      const lower = text.toLowerCase();
+      if (["true", "1", "yes", "on"].includes(lower)) return true;
+      if (["false", "0", "no", "off"].includes(lower)) return false;
+      throw error.config(`"${key}" expects true or false; got "${text}".`, { key, value: text });
     }
     case "number": {
-      const numero = Number(texto);
-      if (!Number.isFinite(numero)) {
-        throw erro.configuracao(`"${chave}" espera um número; recebeu "${texto}".`, { chave, valor: texto });
+      const number = Number(text);
+      if (!Number.isFinite(number)) {
+        throw error.config(`"${key}" expects a number; got "${text}".`, { key, value: text });
       }
-      return numero;
+      return number;
     }
     case "enum": {
-      if (!def.valores?.includes(texto)) {
-        throw erro.configuracao(
-          `"${chave}" aceita apenas: ${def.valores?.join(", ")}; recebeu "${texto}".`,
-          { chave, valor: texto, aceitos: def.valores },
-        );
+      if (!def.values?.includes(text)) {
+        throw error.config(`"${key}" accepts only: ${def.values?.join(", ")}; got "${text}".`, {
+          key,
+          value: text,
+          accepted: def.values,
+        });
       }
-      return texto;
+      return text;
     }
     default:
-      return texto;
+      return text;
   }
 }
 
-/** Achata um objeto aninhado em pares `chave.ponto = valor`. */
-export function achatar(objeto: Settings, prefixo = ""): Array<[string, unknown]> {
-  const pares: Array<[string, unknown]> = [];
-  for (const [k, v] of Object.entries(objeto)) {
-    const chave = prefixo ? `${prefixo}.${k}` : k;
-    if (v && typeof v === "object" && !Array.isArray(v)) pares.push(...achatar(v as Settings, chave));
-    else pares.push([chave, v]);
+/** Flattens a nested object into `dot.key = value` pairs. */
+export function flatten(object: Settings, prefix = ""): Array<[string, unknown]> {
+  const pairs: Array<[string, unknown]> = [];
+  for (const [k, v] of Object.entries(object)) {
+    const key = prefix ? `${prefix}.${k}` : k;
+    if (v && typeof v === "object" && !Array.isArray(v)) pairs.push(...flatten(v as Settings, key));
+    else pairs.push([key, v]);
   }
-  return pares.sort((a, b) => a[0].localeCompare(b[0]));
+  return pairs.sort((a, b) => a[0].localeCompare(b[0]));
 }
 
-function mesclar(base: Settings, extra: Settings): Settings {
-  const saida: Settings = { ...base };
+function merge(base: Settings, extra: Settings): Settings {
+  const out: Settings = { ...base };
   for (const [k, v] of Object.entries(extra)) {
-    const atual = saida[k];
-    if (v && typeof v === "object" && !Array.isArray(v) && atual && typeof atual === "object") {
-      saida[k] = mesclar(atual as Settings, v as Settings);
+    const current = out[k];
+    if (v && typeof v === "object" && !Array.isArray(v) && current && typeof current === "object") {
+      out[k] = merge(current as Settings, v as Settings);
     } else {
-      saida[k] = v;
+      out[k] = v;
     }
   }
-  return saida;
+  return out;
 }

@@ -12,7 +12,7 @@ do OpenMCP é a disciplina de economia:
    conversa; cada palavra a mais custa em todas as chamadas.
 2. Schemas enxutos. Campos opcionais com padrão na descrição, sem repetir o
    óbvio.
-3. Respostas recortadas. Devolva campos úteis; ofereça `limite` e `cursor`
+3. Respostas recortadas. Devolva campos úteis; ofereça `limit` e `cursor`
    quando a lista cresce.
 4. Uma tool de descoberta (`skill`) em vez de dezenas de tools de
    documentação.

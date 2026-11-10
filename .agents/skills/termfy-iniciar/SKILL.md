@@ -12,7 +12,7 @@ a partir do template `promovaweb/termfy-starter-kit`.
 ## Leia antes
 
 - `AGENTS.md` do repositório.
-- `docs/personalizar-template.md` e `docs/arquitetura.md`.
+- `docs/customize-template.md` e `docs/architecture.md`.
 - `references/checklist.md` desta skill.
 
 ## Entrada
@@ -29,7 +29,7 @@ variáveis `<BIN>_HOME` e `<BIN>_MASTER_KEY` e o esquema das URIs MCP.
 3. Rode o bootstrap com todos os campos conhecidos:
 
    ```bash
-   bun run iniciar -- --nome <bin> --titulo "<Título>" --descricao "<frase>" --autor "<Autor>" --repositorio <url> --site <url>
+   bun run init -- --name <bin> --title "<Título>" --description "<frase>" --author "<Autor>" --repository <url> --site <url>
    ```
 
 4. Atualize as skills para a versão mais recente do framework:
@@ -52,7 +52,7 @@ variáveis `<BIN>_HOME` e `<BIN>_MASTER_KEY` e o esquema das URIs MCP.
 
 6. Rode `bun run ebook`. A capa e o rodapé do guia do usuário em PDF e EPUB
    leem o título novo; os arquivos em `ebook/` entram no primeiro commit.
-7. Rode `bun run validar`. O comando encadeia typecheck, testes, conferência
+7. Rode `bun run validate`. O comando encadeia typecheck, testes, conferência
    das skills instaladas, conferência do `docs/opencli.json`, conferência do
    ebook e build.
 8. Reescreva a seção inicial de `README.md` com o propósito do produto e
@@ -64,7 +64,7 @@ variáveis `<BIN>_HOME` e `<BIN>_MASTER_KEY` e o esquema das URIs MCP.
 ## Marcos de progresso
 
 Informe ao usuário quando: o bootstrap terminar, as skills estiverem
-atualizadas, o ebook estiver regenerado, `bun run validar` passar e o README
+atualizadas, o ebook estiver regenerado, `bun run validate` passar e o README
 estiver reescrito. Em cada
 marco, liste os arquivos alterados.
 
@@ -72,10 +72,10 @@ marco, liste os arquivos alterados.
 
 Relate nome do binário, caminhos de dados, versão das skills instaladas
 (`skills-lock.json`), comandos conferidos, testes executados e o que ficou
-pendente. Não declare concluído com `bun run validar` falhando.
+pendente. Não declare concluído com `bun run validate` falhando.
 
 ## Compatibilidade
 
-Starter kit 0.2.x. Os caminhos citados (`scripts/iniciar.ts`,
-`docs/personalizar-template.md`, `tests/tui.test.ts`, `.ebook/build-ebook.mjs`)
+Starter kit 0.3.x. Os caminhos citados (`scripts/init.ts`,
+`docs/customize-template.md`, `tests/tui.test.ts`, `.ebook/build-ebook.mjs`)
 existem nessa faixa.

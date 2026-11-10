@@ -1,68 +1,68 @@
-/** Conversa real com o servidor MCP via stdio usando o Client do SDK. */
+/** Real conversation with the MCP server over stdio using the SDK Client. */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { VARIAVEL_HOME } from "../src/config/caminhos.ts";
-import { manifesto } from "../src/app/manifesto.ts";
+import { HOME_VARIABLE } from "../src/config/paths.ts";
+import { manifest } from "../src/app/manifest.ts";
 
-let pasta: string;
-let cliente: Client;
+let dir: string;
+let client: Client;
 
 beforeAll(async () => {
-  pasta = mkdtempSync(join(tmpdir(), "termfy-mcp-"));
-  cliente = new Client({ name: "teste", version: "0.0.0" });
-  const transporte = new StdioClientTransport({
+  dir = mkdtempSync(join(tmpdir(), "termfy-mcp-"));
+  client = new Client({ name: "test", version: "0.0.0" });
+  const transport = new StdioClientTransport({
     command: "bun",
     args: ["run", "src/main.ts", "mcp"],
     cwd: join(import.meta.dir, ".."),
-    env: { ...(process.env as Record<string, string>), [VARIAVEL_HOME]: pasta },
+    env: { ...(process.env as Record<string, string>), [HOME_VARIABLE]: dir },
     stderr: "ignore",
   });
-  await cliente.connect(transporte);
+  await client.connect(transport);
 });
 
 afterAll(async () => {
-  await cliente.close();
-  rmSync(pasta, { recursive: true, force: true });
+  await client.close();
+  rmSync(dir, { recursive: true, force: true });
 });
 
 describe("mcp stdio", () => {
-  test("lista tools", async () => {
-    const { tools } = await cliente.listTools();
+  test("lists tools", async () => {
+    const { tools } = await client.listTools();
     expect(tools.map((t) => t.name)).toEqual(expect.arrayContaining(["about", "skill", "credentials_status"]));
   });
 
-  test("chama about", async () => {
-    const r = await cliente.callTool({ name: "about", arguments: {} });
-    const sc = r.structuredContent as { versao: string; bin: string };
-    expect(sc.versao).toBe(manifesto.versao);
-    expect(sc.bin).toBe(manifesto.bin);
+  test("calls about", async () => {
+    const r = await client.callTool({ name: "about", arguments: {} });
+    const sc = r.structuredContent as { version: string; bin: string };
+    expect(sc.version).toBe(manifest.version);
+    expect(sc.bin).toBe(manifest.bin);
   });
 
-  test("skill por tópico", async () => {
-    const r = await cliente.callTool({ name: "skill", arguments: { topico: "mcp" } });
-    const texto = (r.content as Array<{ type: string; text: string }>)[0]?.text ?? "";
-    expect(texto).toContain("# MCP");
+  test("skill by topic", async () => {
+    const r = await client.callTool({ name: "skill", arguments: { topic: "mcp" } });
+    const text = (r.content as Array<{ type: string; text: string }>)[0]?.text ?? "";
+    expect(text).toContain("# MCP");
   });
 
-  test("lê resource de códigos de saída", async () => {
-    const r = await cliente.readResource({ uri: `${manifesto.bin}://exit-codes` });
+  test("reads the exit-codes resource", async () => {
+    const r = await client.readResource({ uri: `${manifest.bin}://exit-codes` });
     const json = JSON.parse((r.contents[0] as { text: string }).text);
-    expect(json.codigos[0].codigo).toBe(0);
+    expect(json.codes[0].code).toBe(0);
   });
 
-  test("credentials_status não expõe valores", async () => {
-    const r = await cliente.callTool({ name: "credentials_status", arguments: {} });
+  test("credentials_status does not expose values", async () => {
+    const r = await client.callTool({ name: "credentials_status", arguments: {} });
     const sc = r.structuredContent as Record<string, unknown>;
-    expect(Object.keys(sc)).not.toContain("valores");
-    expect(sc.quantidade).toBe(0);
+    expect(Object.keys(sc)).not.toContain("values");
+    expect(sc.count).toBe(0);
   });
 
-  test("prompt operar", async () => {
-    const r = await cliente.getPrompt({ name: "operar", arguments: { tarefa: "listar config" } });
-    expect((r.messages[0]?.content as { text: string }).text).toContain("listar config");
+  test("operate prompt", async () => {
+    const r = await client.getPrompt({ name: "operate", arguments: { task: "list config" } });
+    expect((r.messages[0]?.content as { text: string }).text).toContain("list config");
   });
 });

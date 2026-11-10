@@ -1,62 +1,62 @@
 /**
- * Tools de configuração: leitura de settings.json e estado do cofre.
- * Nenhuma delas grava nem revela segredos. Escrita de configuração continua
- * passando pelo CLI, onde há confirmação humana.
+ * Configuration tools: reading settings.json and the vault status.
+ * None of them writes or reveals secrets. Configuration writes stay in the
+ * CLI, where a human confirms them.
  */
 import { z } from "zod";
-import { statusCofre } from "../../config/credenciais.ts";
-import { ESQUEMA_SETTINGS, achatar, lerSettings, obterCaminho } from "../../config/settings.ts";
-import { caminhos } from "../../config/caminhos.ts";
-import type { Registrador } from "../servidor.ts";
+import { vaultStatus } from "../../config/credentials.ts";
+import { SETTINGS_SCHEMA, flatten, readSettings, getPath } from "../../config/settings.ts";
+import { paths } from "../../config/paths.ts";
+import type { Registrar } from "../server.ts";
 
-export function registrarToolsConfig({ servidor, catalogo }: Registrador): void {
-  catalogo.tools.push({ nome: "config_list", descricao: "Todas as chaves de settings.json com valores em vigor." });
-  servidor.registerTool(
+export function registerConfigTools({ server, catalog }: Registrar): void {
+  catalog.tools.push({ name: "config_list", description: "Every settings.json key with its effective value." });
+  server.registerTool(
     "config_list",
     {
-      title: "Listar configuração",
-      description: "Lista as chaves de settings.json (mescladas com os padrões) e o esquema conhecido.",
+      title: "List configuration",
+      description: "Lists the settings.json keys (merged with defaults) and the known schema.",
       inputSchema: {},
     },
     async () => {
       const d = {
-        arquivo: caminhos.settings(),
-        valores: Object.fromEntries(achatar(lerSettings())),
-        esquema: ESQUEMA_SETTINGS.map((x) => ({ ...x })),
+        file: paths.settings(),
+        values: Object.fromEntries(flatten(readSettings())),
+        schema: SETTINGS_SCHEMA.map((x) => ({ ...x })),
       };
       return { content: [{ type: "text", text: JSON.stringify(d, null, 2) }], structuredContent: d };
     },
   );
 
-  catalogo.tools.push({ nome: "config_get", descricao: "Valor de uma chave de settings.json." });
-  servidor.registerTool(
+  catalog.tools.push({ name: "config_get", description: "Value of a settings.json key." });
+  server.registerTool(
     "config_get",
     {
-      title: "Ler chave de configuração",
-      description: "Devolve o valor de uma chave em notação de ponto, por exemplo saida.formato.",
-      inputSchema: { chave: z.string().min(1).describe("Chave em notação de ponto.") },
+      title: "Read a configuration key",
+      description: "Returns the value of a key in dot notation, e.g. output.format.",
+      inputSchema: { key: z.string().min(1).describe("Key in dot notation.") },
     },
-    async ({ chave }) => {
-      const valor = obterCaminho(lerSettings(), chave);
-      const d = { chave, valor: valor ?? null, existe: valor !== undefined };
+    async ({ key }) => {
+      const value = getPath(readSettings(), key);
+      const d = { key, value: value ?? null, exists: value !== undefined };
       return {
         content: [{ type: "text", text: JSON.stringify(d, null, 2) }],
         structuredContent: d,
-        isError: valor === undefined,
+        isError: value === undefined,
       };
     },
   );
 
-  catalogo.tools.push({ nome: "credentials_status", descricao: "Nomes gravados e origem da chave mestra, sem valores." });
-  servidor.registerTool(
+  catalog.tools.push({ name: "credentials_status", description: "Saved names and master key source, without values." });
+  server.registerTool(
     "credentials_status",
     {
-      title: "Estado do cofre de credenciais",
-      description: "Informa arquivo, origem da chave mestra, quantidade e nomes das credenciais. Nunca devolve valores.",
+      title: "Credentials vault status",
+      description: "Reports file, master key source, count and names of credentials. Never returns values.",
       inputSchema: {},
     },
     async () => {
-      const d = statusCofre();
+      const d = vaultStatus();
       return { content: [{ type: "text", text: JSON.stringify(d, null, 2) }], structuredContent: d };
     },
   );

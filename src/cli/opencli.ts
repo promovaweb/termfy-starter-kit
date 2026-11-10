@@ -1,18 +1,17 @@
 /**
- * Geração da descrição OpenCLI.
+ * OpenCLI description generator.
  *
- * Converte o registro de comandos no documento JSON definido pela OpenCLI
- * Specification 0.1 (https://opencli.org). Agentes e geradores de
- * documentação leem esse documento para saber como invocar o binário sem
- * abrir o código. O comando `bun run opencli` grava o resultado em
- * `docs/opencli.json`, e `bun run opencli:check` falha quando o arquivo está
- * desatualizado em relação ao registro.
+ * Converts the command registry into the JSON document defined by the
+ * OpenCLI Specification 0.1 (https://opencli.org). Agents and documentation
+ * generators read it to learn how to invoke the binary without opening the
+ * code. `bun run opencli` writes the result to `docs/opencli.json`, and
+ * `bun run opencli:check` fails when the file is out of date.
  */
-import { manifesto } from "../app/manifesto.ts";
-import { descricoesSaida, CodigoSaida } from "../app/saida.ts";
-import { OPCOES_GLOBAIS, type Comando, type DefinicaoArgumento, type DefinicaoOpcao } from "./registro.ts";
+import { manifest } from "../app/manifest.ts";
+import { exitCodeDescriptions, ExitCode } from "../app/exit-codes.ts";
+import { GLOBAL_OPTIONS, type Command, type ArgumentDefinition, type OptionDefinition } from "./registry.ts";
 
-interface ArgumentoOpenCli {
+interface OpenCliArgument {
   name: string;
   description?: string;
   required?: boolean;
@@ -20,30 +19,30 @@ interface ArgumentoOpenCli {
   acceptedValues?: string[];
 }
 
-interface OpcaoOpenCli {
+interface OpenCliOption {
   name: string;
   aliases?: string[];
   description: string;
   required?: boolean;
   recursive?: boolean;
-  arguments?: ArgumentoOpenCli[];
+  arguments?: OpenCliArgument[];
   metadata?: Array<{ name: string; value: unknown }>;
 }
 
-interface ComandoOpenCli {
+interface OpenCliCommand {
   name: string;
   aliases?: string[];
   description?: string;
-  arguments?: ArgumentoOpenCli[];
-  options?: OpcaoOpenCli[];
-  commands?: ComandoOpenCli[];
+  arguments?: OpenCliArgument[];
+  options?: OpenCliOption[];
+  commands?: OpenCliCommand[];
   exitCodes?: Array<{ code: number; description: string }>;
   examples?: string[];
   interactive?: boolean;
   hidden?: boolean;
 }
 
-export interface DocumentoOpenCli {
+export interface OpenCliDocument {
   $schema: string;
   opencli: "0.1";
   info: {
@@ -55,67 +54,67 @@ export interface DocumentoOpenCli {
     license?: { name: string };
   };
   conventions: { groupOptions: boolean; optionSeparator: string };
-  command: ComandoOpenCli;
+  command: OpenCliCommand;
 }
 
-function argumento(a: DefinicaoArgumento): ArgumentoOpenCli {
-  const saida: ArgumentoOpenCli = { name: a.nome, description: a.descricao, required: a.obrigatorio === true };
-  if (a.variadico) saida.arity = { minimum: a.obrigatorio ? 1 : 0 };
-  if (a.valores) saida.acceptedValues = [...a.valores];
-  return saida;
+function argument(a: ArgumentDefinition): OpenCliArgument {
+  const out: OpenCliArgument = { name: a.name, description: a.description, required: a.required === true };
+  if (a.variadic) out.arity = { minimum: a.required ? 1 : 0 };
+  if (a.values) out.acceptedValues = [...a.values];
+  return out;
 }
 
-function opcao(o: DefinicaoOpcao): OpcaoOpenCli {
-  const saida: OpcaoOpenCli = { name: o.nome, description: o.descricao };
-  if (o.aliases?.length) saida.aliases = [...o.aliases];
-  if (o.recursiva) saida.recursive = true;
-  if (o.argumento) {
-    saida.arguments = [
+function option(o: OptionDefinition): OpenCliOption {
+  const out: OpenCliOption = { name: o.name, description: o.description };
+  if (o.aliases?.length) out.aliases = [...o.aliases];
+  if (o.recursive) out.recursive = true;
+  if (o.argument) {
+    out.arguments = [
       {
-        name: o.argumento.nome,
-        required: !o.argumento.opcional,
-        arity: { minimum: o.argumento.opcional ? 0 : 1, maximum: 1 },
-        ...(o.argumento.valores ? { acceptedValues: [...o.argumento.valores] } : {}),
+        name: o.argument.name,
+        required: !o.argument.optional,
+        arity: { minimum: o.argument.optional ? 0 : 1, maximum: 1 },
+        ...(o.argument.values ? { acceptedValues: [...o.argument.values] } : {}),
       },
     ];
   }
-  if (o.padrao !== undefined) saida.metadata = [{ name: "x-default", value: o.padrao }];
-  return saida;
+  if (o.default !== undefined) out.metadata = [{ name: "x-default", value: o.default }];
+  return out;
 }
 
-function comando(c: Comando, ehRaiz: boolean): ComandoOpenCli {
-  const saida: ComandoOpenCli = { name: ehRaiz ? manifesto.bin : c.nome, description: c.descricao };
-  if (c.aliases?.length) saida.aliases = [...c.aliases];
-  if (c.argumentos?.length) saida.arguments = c.argumentos.map(argumento);
-  const opcoes = [...(ehRaiz ? OPCOES_GLOBAIS : []), ...(c.opcoes ?? [])].filter((o) => !o.oculta);
-  if (opcoes.length) saida.options = opcoes.map(opcao);
-  const filhos = (c.subcomandos ?? []).filter((s) => !s.oculto);
-  if (filhos.length) saida.commands = filhos.map((s) => comando(s, false));
-  if (c.exemplos?.length) saida.examples = [...c.exemplos];
-  if (c.interativo) saida.interactive = true;
-  if (c.oculto) saida.hidden = true;
-  const base: readonly CodigoSaida[] = [CodigoSaida.SUCESSO, CodigoSaida.ERRO_GENERICO, CodigoSaida.USO_INVALIDO];
-  const codigos = ehRaiz ? descricoesSaida : descricoesSaida.filter((d) => base.includes(d.codigo) || c.codigosSaida?.includes(d.codigo));
-  saida.exitCodes = codigos.map((d) => ({ code: d.codigo, description: `${d.nome}: ${d.descricao}` }));
-  return saida;
+function command(c: Command, isRoot: boolean): OpenCliCommand {
+  const out: OpenCliCommand = { name: isRoot ? manifest.bin : c.name, description: c.description };
+  if (c.aliases?.length) out.aliases = [...c.aliases];
+  if (c.arguments?.length) out.arguments = c.arguments.map(argument);
+  const options = [...(isRoot ? GLOBAL_OPTIONS : []), ...(c.options ?? [])].filter((o) => !o.hidden);
+  if (options.length) out.options = options.map(option);
+  const children = (c.subcommands ?? []).filter((s) => !s.hidden);
+  if (children.length) out.commands = children.map((s) => command(s, false));
+  if (c.examples?.length) out.examples = [...c.examples];
+  if (c.interactive) out.interactive = true;
+  if (c.hidden) out.hidden = true;
+  const base: readonly ExitCode[] = [ExitCode.SUCCESS, ExitCode.GENERIC_ERROR, ExitCode.USAGE];
+  const codes = isRoot ? exitCodeDescriptions : exitCodeDescriptions.filter((d) => base.includes(d.code) || c.exitCodes?.includes(d.code));
+  out.exitCodes = codes.map((d) => ({ code: d.code, description: `${d.name}: ${d.description}` }));
+  return out;
 }
 
-/** Monta o documento OpenCLI completo a partir da raiz do registro. */
-export function gerarOpenCli(raiz: Comando): DocumentoOpenCli {
+/** Builds the full OpenCLI document from the registry root. */
+export function generateOpenCli(root: Command): OpenCliDocument {
   return {
     $schema: "https://opencli.org/draft.json",
     opencli: "0.1",
     info: {
-      title: manifesto.titulo,
-      version: manifesto.versao,
-      summary: manifesto.descricao,
+      title: manifest.title,
+      version: manifest.version,
+      summary: manifest.description,
       description:
-        `${manifesto.descricao} Sem argumentos abre a TUI; "${manifesto.bin} mcp" inicia o servidor MCP via stdio; ` +
-        `qualquer outro comando roda como CLI com saída em texto ou --json.`,
-      ...(manifesto.autor ? { contact: { name: manifesto.autor, url: manifesto.site || manifesto.repositorio } } : {}),
-      license: { name: manifesto.licenca },
+        `${manifest.description} Without arguments it opens the TUI; "${manifest.bin} mcp" starts the MCP server over stdio; ` +
+        `any other command runs as a CLI with text or --json output.`,
+      ...(manifest.author ? { contact: { name: manifest.author, url: manifest.site || manifest.repository } } : {}),
+      license: { name: manifest.license },
     },
     conventions: { groupOptions: false, optionSeparator: " " },
-    command: comando(raiz, true),
+    command: command(root, true),
   };
 }

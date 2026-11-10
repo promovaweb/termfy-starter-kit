@@ -33,10 +33,10 @@ jobs:
           sudo apt-get install -y libxml2-utils poppler-utils unzip
 
       - name: Validar projeto
-        run: bun run validar
+        run: bun run validate
 
       - name: Compilar para todas as plataformas
-        run: bun run build:todos
+        run: bun run build:all
 
       - name: Gerar checksums
         run: cd dist && sha256sum * > SHA256SUMS
