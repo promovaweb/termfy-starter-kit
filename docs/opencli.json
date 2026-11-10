@@ -1,0 +1,790 @@
+{
+  "$schema": "https://opencli.org/draft.json",
+  "opencli": "0.1",
+  "info": {
+    "title": "Termfy",
+    "version": "0.1.0",
+    "summary": "Esqueleto de CLI, TUI e servidor MCP stdio em Bun, com as skills do framework Termfy instaladas.",
+    "description": "Esqueleto de CLI, TUI e servidor MCP stdio em Bun, com as skills do framework Termfy instaladas. Sem argumentos abre a TUI; \"termfy mcp\" inicia o servidor MCP via stdio; qualquer outro comando roda como CLI com saída em texto ou --json.",
+    "contact": {
+      "name": "Promovaweb",
+      "url": "https://promovaweb.com"
+    },
+    "license": {
+      "name": "UNLICENSED"
+    }
+  },
+  "conventions": {
+    "groupOptions": false,
+    "optionSeparator": " "
+  },
+  "command": {
+    "name": "termfy",
+    "description": "Esqueleto de CLI, TUI e servidor MCP stdio em Bun, com as skills do framework Termfy instaladas.",
+    "options": [
+      {
+        "name": "--help",
+        "description": "Mostra a ajuda do comando atual e encerra com código 0.",
+        "aliases": [
+          "-h"
+        ],
+        "recursive": true
+      },
+      {
+        "name": "--version",
+        "description": "Imprime a versão e encerra com código 0.",
+        "aliases": [
+          "-V"
+        ],
+        "recursive": true
+      },
+      {
+        "name": "--json",
+        "description": "Devolve a saída em JSON com o envelope { ok, comando, dados } ou { ok, comando, erro }. Erros também saem em JSON.",
+        "recursive": true
+      },
+      {
+        "name": "--skill",
+        "description": "Imprime a documentação completa embutida no binário, pensada para agentes de IA. Com um tópico, imprime só aquela seção.",
+        "recursive": true,
+        "arguments": [
+          {
+            "name": "topico",
+            "required": false,
+            "arity": {
+              "minimum": 0,
+              "maximum": 1
+            },
+            "acceptedValues": [
+              "cli",
+              "tui",
+              "mcp",
+              "config",
+              "codigos"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "--opencli",
+        "description": "Imprime a descrição OpenCLI (JSON) de toda a árvore de comandos.",
+        "recursive": true
+      },
+      {
+        "name": "--no-color",
+        "description": "Desliga cores ANSI na saída de texto. Equivale a NO_COLOR=1.",
+        "recursive": true
+      }
+    ],
+    "commands": [
+      {
+        "name": "tui",
+        "description": "Abre a interface de terminal (Overview e About). Exige TTY.",
+        "options": [
+          {
+            "name": "--aba",
+            "description": "Aba inicial. Sobrepõe tui.abaInicial de settings.json.",
+            "arguments": [
+              {
+                "name": "aba",
+                "required": true,
+                "arity": {
+                  "minimum": 1,
+                  "maximum": 1
+                },
+                "acceptedValues": [
+                  "overview",
+                  "about"
+                ]
+              }
+            ]
+          }
+        ],
+        "examples": [
+          "termfy",
+          "termfy tui --aba about"
+        ],
+        "interactive": true,
+        "exitCodes": [
+          {
+            "code": 0,
+            "description": "SUCESSO: Operação concluída."
+          },
+          {
+            "code": 1,
+            "description": "ERRO_GENERICO: Falha inesperada sem classificação específica."
+          },
+          {
+            "code": 2,
+            "description": "USO_INVALIDO: Argumentos, opções ou subcomando inválidos."
+          },
+          {
+            "code": 8,
+            "description": "TERMINAL_INDISPONIVEL: A TUI exige um terminal interativo (TTY)."
+          }
+        ]
+      },
+      {
+        "name": "about",
+        "description": "Mostra versão, executável, runtime, plataforma e créditos.",
+        "aliases": [
+          "sobre"
+        ],
+        "examples": [
+          "termfy about",
+          "termfy about --json"
+        ],
+        "exitCodes": [
+          {
+            "code": 0,
+            "description": "SUCESSO: Operação concluída."
+          },
+          {
+            "code": 1,
+            "description": "ERRO_GENERICO: Falha inesperada sem classificação específica."
+          },
+          {
+            "code": 2,
+            "description": "USO_INVALIDO: Argumentos, opções ou subcomando inválidos."
+          }
+        ]
+      },
+      {
+        "name": "config",
+        "description": "Lê e grava preferências em ~/.<bin>/settings.json.",
+        "commands": [
+          {
+            "name": "list",
+            "description": "Lista todas as chaves com os valores em vigor (arquivo mesclado com os padrões).",
+            "aliases": [
+              "ls"
+            ],
+            "examples": [
+              "termfy config list",
+              "termfy config list --json"
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCESSO: Operação concluída."
+              },
+              {
+                "code": 1,
+                "description": "ERRO_GENERICO: Falha inesperada sem classificação específica."
+              },
+              {
+                "code": 2,
+                "description": "USO_INVALIDO: Argumentos, opções ou subcomando inválidos."
+              },
+              {
+                "code": 3,
+                "description": "CONFIGURACAO: settings.json ausente, inválido ou chave desconhecida."
+              },
+              {
+                "code": 6,
+                "description": "NAO_ENCONTRADO: Recurso solicitado não existe."
+              },
+              {
+                "code": 7,
+                "description": "PERMISSAO: Permissão negada no sistema de arquivos."
+              }
+            ]
+          },
+          {
+            "name": "get",
+            "description": "Mostra o valor de uma chave.",
+            "arguments": [
+              {
+                "name": "chave",
+                "description": "Chave em notação de ponto, por exemplo saida.formato.",
+                "required": true
+              }
+            ],
+            "examples": [
+              "termfy config get tui.abaInicial"
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCESSO: Operação concluída."
+              },
+              {
+                "code": 1,
+                "description": "ERRO_GENERICO: Falha inesperada sem classificação específica."
+              },
+              {
+                "code": 2,
+                "description": "USO_INVALIDO: Argumentos, opções ou subcomando inválidos."
+              },
+              {
+                "code": 3,
+                "description": "CONFIGURACAO: settings.json ausente, inválido ou chave desconhecida."
+              },
+              {
+                "code": 6,
+                "description": "NAO_ENCONTRADO: Recurso solicitado não existe."
+              },
+              {
+                "code": 7,
+                "description": "PERMISSAO: Permissão negada no sistema de arquivos."
+              }
+            ]
+          },
+          {
+            "name": "set",
+            "description": "Grava um valor em settings.json, convertendo o tipo conforme o esquema.",
+            "arguments": [
+              {
+                "name": "chave",
+                "description": "Chave em notação de ponto.",
+                "required": true
+              },
+              {
+                "name": "valor",
+                "description": "Valor em texto. Booleanos aceitam true/false, sim/nao, 1/0.",
+                "required": true
+              }
+            ],
+            "examples": [
+              "termfy config set saida.formato json",
+              "termfy config set saida.cores false"
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCESSO: Operação concluída."
+              },
+              {
+                "code": 1,
+                "description": "ERRO_GENERICO: Falha inesperada sem classificação específica."
+              },
+              {
+                "code": 2,
+                "description": "USO_INVALIDO: Argumentos, opções ou subcomando inválidos."
+              },
+              {
+                "code": 3,
+                "description": "CONFIGURACAO: settings.json ausente, inválido ou chave desconhecida."
+              },
+              {
+                "code": 6,
+                "description": "NAO_ENCONTRADO: Recurso solicitado não existe."
+              },
+              {
+                "code": 7,
+                "description": "PERMISSAO: Permissão negada no sistema de arquivos."
+              }
+            ]
+          },
+          {
+            "name": "unset",
+            "description": "Remove uma chave do arquivo. A chave volta ao valor padrão, se houver.",
+            "aliases": [
+              "rm"
+            ],
+            "arguments": [
+              {
+                "name": "chave",
+                "description": "Chave em notação de ponto.",
+                "required": true
+              }
+            ],
+            "examples": [
+              "termfy config unset telemetria.ativa"
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCESSO: Operação concluída."
+              },
+              {
+                "code": 1,
+                "description": "ERRO_GENERICO: Falha inesperada sem classificação específica."
+              },
+              {
+                "code": 2,
+                "description": "USO_INVALIDO: Argumentos, opções ou subcomando inválidos."
+              },
+              {
+                "code": 3,
+                "description": "CONFIGURACAO: settings.json ausente, inválido ou chave desconhecida."
+              },
+              {
+                "code": 6,
+                "description": "NAO_ENCONTRADO: Recurso solicitado não existe."
+              },
+              {
+                "code": 7,
+                "description": "PERMISSAO: Permissão negada no sistema de arquivos."
+              }
+            ]
+          },
+          {
+            "name": "path",
+            "description": "Imprime o caminho da pasta de dados e dos arquivos.",
+            "examples": [
+              "termfy config path"
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCESSO: Operação concluída."
+              },
+              {
+                "code": 1,
+                "description": "ERRO_GENERICO: Falha inesperada sem classificação específica."
+              },
+              {
+                "code": 2,
+                "description": "USO_INVALIDO: Argumentos, opções ou subcomando inválidos."
+              }
+            ]
+          },
+          {
+            "name": "schema",
+            "description": "Lista as chaves reconhecidas, com tipo, padrão e descrição.",
+            "examples": [
+              "termfy config schema --json"
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCESSO: Operação concluída."
+              },
+              {
+                "code": 1,
+                "description": "ERRO_GENERICO: Falha inesperada sem classificação específica."
+              },
+              {
+                "code": 2,
+                "description": "USO_INVALIDO: Argumentos, opções ou subcomando inválidos."
+              }
+            ]
+          }
+        ],
+        "exitCodes": [
+          {
+            "code": 0,
+            "description": "SUCESSO: Operação concluída."
+          },
+          {
+            "code": 1,
+            "description": "ERRO_GENERICO: Falha inesperada sem classificação específica."
+          },
+          {
+            "code": 2,
+            "description": "USO_INVALIDO: Argumentos, opções ou subcomando inválidos."
+          },
+          {
+            "code": 3,
+            "description": "CONFIGURACAO: settings.json ausente, inválido ou chave desconhecida."
+          },
+          {
+            "code": 6,
+            "description": "NAO_ENCONTRADO: Recurso solicitado não existe."
+          },
+          {
+            "code": 7,
+            "description": "PERMISSAO: Permissão negada no sistema de arquivos."
+          }
+        ]
+      },
+      {
+        "name": "credentials",
+        "description": "Guarda segredos cifrados (AES-256-GCM) em ~/.<bin>/credentials.json.",
+        "aliases": [
+          "cred"
+        ],
+        "commands": [
+          {
+            "name": "set",
+            "description": "Grava ou substitui uma credencial. O valor é lido sem eco ou pelo stdin.",
+            "arguments": [
+              {
+                "name": "nome",
+                "description": "Identificador da credencial: minúsculas, números, ponto, hífen e sublinhado (ex.: openai.api_key).",
+                "required": true
+              }
+            ],
+            "options": [
+              {
+                "name": "--stdin",
+                "description": "Força a leitura do valor pela primeira linha do stdin, mesmo em terminal interativo."
+              }
+            ],
+            "examples": [
+              "termfy credentials set openai.api_key",
+              "printf '%s' \"$TOKEN\" | termfy credentials set github.token --stdin"
+            ],
+            "interactive": true,
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCESSO: Operação concluída."
+              },
+              {
+                "code": 1,
+                "description": "ERRO_GENERICO: Falha inesperada sem classificação específica."
+              },
+              {
+                "code": 2,
+                "description": "USO_INVALIDO: Argumentos, opções ou subcomando inválidos."
+              },
+              {
+                "code": 4,
+                "description": "CREDENCIAIS: credentials.json ilegível, chave mestra ausente ou credencial não encontrada."
+              },
+              {
+                "code": 7,
+                "description": "PERMISSAO: Permissão negada no sistema de arquivos."
+              },
+              {
+                "code": 130,
+                "description": "INTERROMPIDO: Entrada cancelada ou processo interrompido."
+              }
+            ]
+          },
+          {
+            "name": "get",
+            "description": "Mostra uma credencial mascarada. Use --reveal para o valor completo.",
+            "arguments": [
+              {
+                "name": "nome",
+                "description": "Identificador da credencial.",
+                "required": true
+              }
+            ],
+            "options": [
+              {
+                "name": "--reveal",
+                "description": "Imprime o valor em claro. Em --json, o campo passa a ser `valor`."
+              }
+            ],
+            "examples": [
+              "termfy credentials get openai.api_key",
+              "termfy credentials get openai.api_key --reveal"
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCESSO: Operação concluída."
+              },
+              {
+                "code": 1,
+                "description": "ERRO_GENERICO: Falha inesperada sem classificação específica."
+              },
+              {
+                "code": 2,
+                "description": "USO_INVALIDO: Argumentos, opções ou subcomando inválidos."
+              },
+              {
+                "code": 4,
+                "description": "CREDENCIAIS: credentials.json ilegível, chave mestra ausente ou credencial não encontrada."
+              },
+              {
+                "code": 7,
+                "description": "PERMISSAO: Permissão negada no sistema de arquivos."
+              },
+              {
+                "code": 130,
+                "description": "INTERROMPIDO: Entrada cancelada ou processo interrompido."
+              }
+            ]
+          },
+          {
+            "name": "list",
+            "description": "Lista os nomes gravados. Nunca exibe valores.",
+            "aliases": [
+              "ls"
+            ],
+            "examples": [
+              "termfy credentials list --json"
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCESSO: Operação concluída."
+              },
+              {
+                "code": 1,
+                "description": "ERRO_GENERICO: Falha inesperada sem classificação específica."
+              },
+              {
+                "code": 2,
+                "description": "USO_INVALIDO: Argumentos, opções ou subcomando inválidos."
+              },
+              {
+                "code": 4,
+                "description": "CREDENCIAIS: credentials.json ilegível, chave mestra ausente ou credencial não encontrada."
+              },
+              {
+                "code": 7,
+                "description": "PERMISSAO: Permissão negada no sistema de arquivos."
+              },
+              {
+                "code": 130,
+                "description": "INTERROMPIDO: Entrada cancelada ou processo interrompido."
+              }
+            ]
+          },
+          {
+            "name": "remove",
+            "description": "Remove uma credencial do cofre.",
+            "aliases": [
+              "rm"
+            ],
+            "arguments": [
+              {
+                "name": "nome",
+                "description": "Identificador da credencial.",
+                "required": true
+              }
+            ],
+            "examples": [
+              "termfy credentials remove github.token"
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCESSO: Operação concluída."
+              },
+              {
+                "code": 1,
+                "description": "ERRO_GENERICO: Falha inesperada sem classificação específica."
+              },
+              {
+                "code": 2,
+                "description": "USO_INVALIDO: Argumentos, opções ou subcomando inválidos."
+              },
+              {
+                "code": 4,
+                "description": "CREDENCIAIS: credentials.json ilegível, chave mestra ausente ou credencial não encontrada."
+              },
+              {
+                "code": 7,
+                "description": "PERMISSAO: Permissão negada no sistema de arquivos."
+              },
+              {
+                "code": 130,
+                "description": "INTERROMPIDO: Entrada cancelada ou processo interrompido."
+              }
+            ]
+          },
+          {
+            "name": "status",
+            "description": "Mostra arquivo, origem da chave mestra e quantidade de credenciais.",
+            "examples": [
+              "termfy credentials status"
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCESSO: Operação concluída."
+              },
+              {
+                "code": 1,
+                "description": "ERRO_GENERICO: Falha inesperada sem classificação específica."
+              },
+              {
+                "code": 2,
+                "description": "USO_INVALIDO: Argumentos, opções ou subcomando inválidos."
+              }
+            ]
+          },
+          {
+            "name": "clear",
+            "description": "Apaga credentials.json inteiro. Mantém master.key. Pede confirmação em terminal.",
+            "options": [
+              {
+                "name": "--yes",
+                "description": "Não pede confirmação.",
+                "aliases": [
+                  "-y"
+                ]
+              }
+            ],
+            "examples": [
+              "termfy credentials clear --yes"
+            ],
+            "interactive": true,
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCESSO: Operação concluída."
+              },
+              {
+                "code": 1,
+                "description": "ERRO_GENERICO: Falha inesperada sem classificação específica."
+              },
+              {
+                "code": 2,
+                "description": "USO_INVALIDO: Argumentos, opções ou subcomando inválidos."
+              },
+              {
+                "code": 4,
+                "description": "CREDENCIAIS: credentials.json ilegível, chave mestra ausente ou credencial não encontrada."
+              },
+              {
+                "code": 7,
+                "description": "PERMISSAO: Permissão negada no sistema de arquivos."
+              },
+              {
+                "code": 130,
+                "description": "INTERROMPIDO: Entrada cancelada ou processo interrompido."
+              }
+            ]
+          }
+        ],
+        "exitCodes": [
+          {
+            "code": 0,
+            "description": "SUCESSO: Operação concluída."
+          },
+          {
+            "code": 1,
+            "description": "ERRO_GENERICO: Falha inesperada sem classificação específica."
+          },
+          {
+            "code": 2,
+            "description": "USO_INVALIDO: Argumentos, opções ou subcomando inválidos."
+          },
+          {
+            "code": 4,
+            "description": "CREDENCIAIS: credentials.json ilegível, chave mestra ausente ou credencial não encontrada."
+          },
+          {
+            "code": 7,
+            "description": "PERMISSAO: Permissão negada no sistema de arquivos."
+          },
+          {
+            "code": 130,
+            "description": "INTERROMPIDO: Entrada cancelada ou processo interrompido."
+          }
+        ]
+      },
+      {
+        "name": "mcp",
+        "description": "Inicia o servidor MCP (stdio) com tools, resources e prompts para agentes.",
+        "options": [
+          {
+            "name": "--list",
+            "description": "Em vez de iniciar o servidor, lista tools, resources e prompts registrados e encerra."
+          }
+        ],
+        "examples": [
+          "termfy mcp",
+          "termfy mcp --list --json"
+        ],
+        "exitCodes": [
+          {
+            "code": 0,
+            "description": "SUCESSO: Operação concluída."
+          },
+          {
+            "code": 1,
+            "description": "ERRO_GENERICO: Falha inesperada sem classificação específica."
+          },
+          {
+            "code": 2,
+            "description": "USO_INVALIDO: Argumentos, opções ou subcomando inválidos."
+          },
+          {
+            "code": 9,
+            "description": "MCP: O servidor MCP falhou ao iniciar ou perdeu o transporte stdio."
+          }
+        ]
+      },
+      {
+        "name": "skill",
+        "description": "Imprime a documentação embutida, inteira ou por tópico. Mesmo efeito de --skill.",
+        "arguments": [
+          {
+            "name": "topico",
+            "description": "Seção desejada. Sem argumento, imprime tudo.",
+            "required": false,
+            "acceptedValues": [
+              "cli",
+              "tui",
+              "mcp",
+              "config",
+              "codigos"
+            ]
+          }
+        ],
+        "examples": [
+          "termfy skill",
+          "termfy skill mcp",
+          "termfy --skill cli"
+        ],
+        "exitCodes": [
+          {
+            "code": 0,
+            "description": "SUCESSO: Operação concluída."
+          },
+          {
+            "code": 1,
+            "description": "ERRO_GENERICO: Falha inesperada sem classificação específica."
+          },
+          {
+            "code": 2,
+            "description": "USO_INVALIDO: Argumentos, opções ou subcomando inválidos."
+          }
+        ]
+      }
+    ],
+    "examples": [
+      "termfy",
+      "termfy about --json",
+      "termfy config set saida.formato json",
+      "termfy credentials set openai.api_key",
+      "termfy mcp",
+      "termfy --skill"
+    ],
+    "exitCodes": [
+      {
+        "code": 0,
+        "description": "SUCESSO: Operação concluída."
+      },
+      {
+        "code": 1,
+        "description": "ERRO_GENERICO: Falha inesperada sem classificação específica."
+      },
+      {
+        "code": 2,
+        "description": "USO_INVALIDO: Argumentos, opções ou subcomando inválidos."
+      },
+      {
+        "code": 3,
+        "description": "CONFIGURACAO: settings.json ausente, inválido ou chave desconhecida."
+      },
+      {
+        "code": 4,
+        "description": "CREDENCIAIS: credentials.json ilegível, chave mestra ausente ou credencial não encontrada."
+      },
+      {
+        "code": 5,
+        "description": "REDE_OU_API: Falha de rede ou resposta de API fora do esperado."
+      },
+      {
+        "code": 6,
+        "description": "NAO_ENCONTRADO: Recurso solicitado não existe."
+      },
+      {
+        "code": 7,
+        "description": "PERMISSAO: Permissão negada no sistema de arquivos."
+      },
+      {
+        "code": 8,
+        "description": "TERMINAL_INDISPONIVEL: A TUI exige um terminal interativo (TTY)."
+      },
+      {
+        "code": 9,
+        "description": "MCP: O servidor MCP falhou ao iniciar ou perdeu o transporte stdio."
+      },
+      {
+        "code": 130,
+        "description": "INTERROMPIDO: Entrada cancelada ou processo interrompido."
+      }
+    ]
+  }
+}

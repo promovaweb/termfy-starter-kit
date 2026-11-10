@@ -1,0 +1,30 @@
+ ▌ Termfy v0.1.0  │  Framework de skills e esqueleto de CLI, TUI e servidor MCP stdio  linux-x64 • Bun 1.3.14
+ ────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Overview      About
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+ ╭─ Ambiente ─────────────────────────────────────────────────╮╭─ Estado ───────────────────────────────────╮
+ │ Binário     termfy v0.1.0                                  ││ settings.json     • padrões                │
+ │ Runtime     Bun 1.3.14                                     ││ credentials.json  • vazio                  │
+ │ Plataforma  linux-x64                                      ││ chave mestra      não criada               │
+ │ Terminal    110×30  xterm-256color                         ││ MCP               termfy mcp               │
+ │ Dados       /tmp/termfy-frame-home                         ││                                            │
+ ╰────────────────────────────────────────────────────────────╯╰────────────────────────────────────────────╯
+ ╭─ Configuração em vigor ────────────────────────────────────╮╭─ Próximos passos ──────────────────────────╮
+ │ saida.cores       true                                     ││ No terminal                                │
+ │ saida.formato     "texto"                                  ││ → termfy --help                            │
+ │ telemetria.ativa  false                                    ││ → termfy credentials set <nome>            │
+ │ tui.abaInicial    "overview"                               ││ → termfy config set tui.tema dia           │
+ │ tui.tema          "noite"                                  ││ → termfy --skill                           │
+ │                                                            ││                                            │
+ │                                                            ││ Para agentes                               │
+ │                                                            ││ Cliente MCP: { "command": "termfy",        │
+ │                                                            ││ "args": ["mcp"] }                          │
+ │                                                            ││                                            │
+ │                                                            ││                                            │
+ │                                                            ││                                            │
+ │                                                            ││                                            │
+ │                                                            ││                                            │
+ │                                                            ││                                            │
+ │                                                            ││                                            │
+ ╰────────────────────────────────────────────────────────────╯╰────────────────────────────────────────────╯
+  ←/→  aba   1-9  ir   ?  ajuda   q  sair

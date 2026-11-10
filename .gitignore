@@ -1,0 +1,22 @@
+# Dependências
+node_modules/
+
+# Artefatos de build
+dist/
+*.tsbuildinfo
+
+# Logs e temporários
+*.log
+.DS_Store
+tmp/
+
+# Variáveis locais
+.env
+.env.*
+!.env.example
+
+# Dados locais de desenvolvimento (a pasta real fica em ~/.<bin>/)
+.termfy-home/
+
+# As skills ficam versionadas em .agents/skills/ e skills-lock.json.
+# Os links por agente (.claude/skills etc.) também entram no repositório.
