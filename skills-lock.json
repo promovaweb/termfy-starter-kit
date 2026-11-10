@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "termfy-brand": {
+      "source": "promovaweb/termfy",
+      "sourceType": "github",
+      "skillPath": "skills/termfy-brand/SKILL.md",
+      "computedHash": "558f30fb5b5a0b4c30d1404492b0e8d2539f404da1349ed866f3df07853351d1"
+    },
     "termfy-cli": {
       "source": "promovaweb/termfy",
       "sourceType": "github",

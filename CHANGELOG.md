@@ -2,6 +2,15 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.6.1] - 2026-11-10
+
+### Corrigido
+
+- A 0.6.0 saiu sem a skill `termfy-brand` instalada (o instalador pulava a
+  skill por um frontmatter inválido no framework 0.6.1) e com `skills:check`
+  falhando. Skills do framework 0.6.2 instaladas, oito no total, e
+  `validate` verde.
+
 ## [0.6.0] - 2026-11-10
 
 ### Adicionado
