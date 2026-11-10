@@ -1,5 +1,6 @@
 /** Tests key rotation, environment replacement and unchanged files on rejection. */
-import { afterEach, beforeEach, expect, test } from "bun:test";
+import { afterEach, beforeEach, expect, test, spyOn } from "bun:test";
+import * as fs from "node:fs";
 import { mkdtempSync, readFileSync, rmSync, statSync, unlinkSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
@@ -43,7 +44,7 @@ test("invalid or absent new key leaves both files untouched", () => {
   setCredential("test.token", "secret-value");
   const key = readFileSync(paths.masterKey(), "utf8");
   const vault = readFileSync(paths.credentials(), "utf8");
-  for (const value of [undefined, "invalid"]) {
+  for (const value of [undefined, "invalid", "a".repeat(63), "a".repeat(65), "g".repeat(64)]) {
     if (value) process.env[MASTER_KEY_VARIABLE] = value; else delete process.env[MASTER_KEY_VARIABLE];
     expect(() => rotateMasterKey(true)).toThrow();
     expect(readFileSync(paths.masterKey(), "utf8")).toBe(key);
@@ -60,4 +61,44 @@ test("a current environment key can rotate to a random disk key", () => {
   setCredential("test.token", "secret-value");
   rotateMasterKey();
   expect(getCredential("test.token")).toBe("secret-value");
+});
+
+test("failed vault replacement rolls back the key atomically", () => {
+  setCredential("test.token", "secret-value");
+  const originalKey = readFileSync(paths.masterKey(), "utf8");
+  const originalVault = readFileSync(paths.credentials(), "utf8");
+  const rename = fs.renameSync;
+  const fault = spyOn(fs, "renameSync").mockImplementation((from, to) => {
+    if (to === paths.credentials()) throw new Error("Injected replacement failure");
+    return rename(from, to);
+  });
+  try {
+    expect(() => rotateMasterKey()).toThrow(expect.objectContaining({ code: ExitCode.CREDENTIALS }));
+    expect(readFileSync(paths.masterKey(), "utf8")).toBe(originalKey);
+    expect(readFileSync(paths.credentials(), "utf8")).toBe(originalVault);
+    expect(getCredential("test.token")).toBe("secret-value");
+    expect(fs.readdirSync(dir).some((name) => name.startsWith(".rotate-"))).toBe(false);
+  } finally { fault.mockRestore(); }
+});
+
+test("a failed rollback retains the original key for recovery", () => {
+  setCredential("test.token", "secret-value");
+  const originalKey = readFileSync(paths.masterKey(), "utf8");
+  const originalVault = readFileSync(paths.credentials(), "utf8");
+  const rename = fs.renameSync;
+  const fault = spyOn(fs, "renameSync").mockImplementation((from, to) => {
+    if (to === paths.credentials() || String(from).endsWith("previous.key")) throw new Error("Injected filesystem failure");
+    return rename(from, to);
+  });
+  try {
+    expect(() => rotateMasterKey()).toThrow("Key rollback failed");
+    expect(readFileSync(paths.credentials(), "utf8")).toBe(originalVault);
+    const backup = fs.readdirSync(dir).find((name) => name.startsWith(".rotate-"));
+    expect(backup).toBeDefined();
+    const recoveryKey = join(dir, backup!, "previous.key");
+    expect(readFileSync(recoveryKey, "utf8")).toBe(originalKey);
+    expect(statSync(recoveryKey).mode & 0o777).toBe(0o600);
+    rename(recoveryKey, paths.masterKey());
+    expect(getCredential("test.token")).toBe("secret-value");
+  } finally { fault.mockRestore(); }
 });

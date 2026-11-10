@@ -95,6 +95,7 @@ O diagnóstico não cria arquivos nem mostra segredos.
 `{{bin}} completion <shell>` imprime o script em stdout. O argument `shell`
 aceita `bash`, `zsh` ou `fish`; subcommands, options locais e globais e valores
 de enum vêm do registry. Com `--json`, `data` contém `{ shell, script }`.
+O script Zsh usa `compdef` e `compadd`, sem `bashcompinit`.
 Instale na sessão atual ou acrescente a linha ao arquivo de inicialização:
 
 ```bash

@@ -5,10 +5,10 @@ title: Termfy
 description: "CLI, TUI and MCP stdio server skeleton in Bun, with the Termfy framework skills installed."
 status: done
 createdAt: 2026-11-10T12:00:00.000Z
-updatedAt: 2026-11-10T18:00:00.000Z
+updatedAt: 2026-11-10T19:00:00.000Z
 commands:
   - path: tui
-    description: Open the terminal interface (Overview and About). Requires a TTY.
+    description: "Abre a interface de terminal com Overview e About. Exige TTY."
     arguments: []
     options:
       - name: "--tab"
@@ -16,7 +16,7 @@ commands:
         values:
           - overview
           - about
-        description: Initial tab. Overrides tui.initialTab from settings.json.
+        description: "Define a aba inicial e substitui tui.initialTab de settings.json."
     data: "{ closed }"
     exitCodes:
       - 8
@@ -24,7 +24,7 @@ commands:
     interactive: true
     example: termfy
   - path: about
-    description: "Show version, executable, runtime, platform and credits."
+    description: "Mostra versão, executável, runtime, plataforma e créditos."
     arguments: []
     options: []
     data: "{ bin, title, version, description, author, site, repository, license, executable, runtime, platform, pid, dataDir, credits[] }"
@@ -33,10 +33,10 @@ commands:
     interactive: false
     example: termfy about
   - path: config
-    description: Read and write preferences in ~/.<bin>/settings.json.
+    description: "Lê e grava preferências em ~/.<bin>/settings.json."
     arguments: []
     options: []
-    data: "{ help } with --help"
+    data: "{ help } com --help"
     exitCodes:
       - 3
       - 7
@@ -45,7 +45,7 @@ commands:
     interactive: false
     example: termfy config --help
   - path: config list
-    description: List every key with its effective value (file merged with defaults).
+    description: "Lista cada key com o valor do arquivo combinado ao padrão."
     arguments: []
     options: []
     data: "{ file, exists, values }"
@@ -57,7 +57,7 @@ commands:
     interactive: false
     example: termfy config list
   - path: config get
-    description: Show the value of a key.
+    description: "Mostra o valor de uma key."
     arguments:
       - name: key
         required: true
@@ -71,7 +71,7 @@ commands:
     interactive: false
     example: termfy config get tui.initialTab
   - path: config set
-    description: "Write a value to settings.json, converting the type according to the schema."
+    description: "Grava um valor em settings.json com o tipo definido pelo schema."
     arguments:
       - name: key
         required: true
@@ -87,7 +87,7 @@ commands:
     interactive: false
     example: termfy config set output.format json
   - path: config unset
-    description: "Remove a key from the file. The key falls back to its default, if any."
+    description: "Remove uma key do arquivo e restaura seu padrão, se houver."
     arguments:
       - name: key
         required: true
@@ -101,7 +101,7 @@ commands:
     interactive: false
     example: termfy config unset telemetry.enabled
   - path: config path
-    description: Print the data directory and file paths.
+    description: "Mostra a pasta de dados e os caminhos dos arquivos."
     arguments: []
     options: []
     data: "{ base, settings, credentials, masterKey }"
@@ -110,7 +110,7 @@ commands:
     interactive: false
     example: termfy config path
   - path: config schema
-    description: "List the known keys with type, default and description."
+    description: "Lista as keys conhecidas com tipo, padrão e descrição."
     arguments: []
     options: []
     data: "{ keys[] }"
@@ -119,10 +119,10 @@ commands:
     interactive: false
     example: termfy config schema --json
   - path: credentials
-    description: Store encrypted secrets (AES-256-GCM) in ~/.<bin>/credentials.json.
+    description: "Armazena segredos cifrados com AES-256-GCM em ~/.<bin>/credentials.json."
     arguments: []
     options: []
-    data: "{ help } with --help"
+    data: "{ help } com --help"
     exitCodes:
       - 4
       - 7
@@ -131,13 +131,13 @@ commands:
     interactive: false
     example: termfy credentials --help
   - path: credentials set
-    description: Save or replace a credential. The value is read without echo or from stdin.
+    description: "Salva ou substitui uma credencial, lida sem eco ou pelo stdin."
     arguments:
       - name: name
         required: true
     options:
       - name: "--stdin"
-        description: "Force reading the value from the first stdin line, even on an interactive terminal."
+        description: "Lê o valor da primeira linha do stdin, inclusive no terminal interativo."
     data: "{ name, file, saved }"
     exitCodes:
       - 4
@@ -147,14 +147,14 @@ commands:
     interactive: true
     example: termfy credentials set openai.api_key
   - path: credentials get
-    description: Show a masked credential. Use --reveal for the full value.
+    description: "Mostra uma credencial mascarada; --reveal exibe o valor completo."
     arguments:
       - name: name
         required: true
     options:
       - name: "--reveal"
-        description: "Print the value in clear. In --json the field becomes `value`."
-    data: "{ name, masked, length } or { name, value } with --reveal"
+        description: "Exibe o valor em texto claro; no --json, o campo passa a ser value."
+    data: "{ name, masked, length } ou { name, value } com --reveal"
     exitCodes:
       - 4
       - 7
@@ -163,7 +163,7 @@ commands:
     interactive: false
     example: termfy credentials get openai.api_key
   - path: credentials list
-    description: List saved names. Never shows values.
+    description: "Lista os nomes salvos, sem mostrar valores."
     arguments: []
     options: []
     data: "{ count, names[] }"
@@ -175,7 +175,7 @@ commands:
     interactive: false
     example: termfy credentials list --json
   - path: credentials remove
-    description: Remove a credential from the vault.
+    description: "Remove uma credencial do cofre."
     arguments:
       - name: name
         required: true
@@ -189,7 +189,7 @@ commands:
     interactive: false
     example: termfy credentials remove github.token
   - path: credentials status
-    description: "Show file, master key source and number of credentials."
+    description: "Mostra arquivo, origem da master key e quantidade de credenciais."
     arguments: []
     options: []
     data: "{ file, exists, masterKeySource, count, names[], masterKeyVariable, algorithm }"
@@ -198,11 +198,11 @@ commands:
     interactive: false
     example: termfy credentials status
   - path: credentials clear
-    description: Delete credentials.json entirely. Keeps master.key. Asks for confirmation on a terminal.
+    description: "Apaga credentials.json, preserva master.key e pede confirmação no terminal."
     arguments: []
     options:
       - name: "--yes"
-        description: Skip the confirmation.
+        description: "Dispensa a confirmação."
     data: "{ file, deleted }"
     exitCodes:
       - 4
@@ -212,11 +212,11 @@ commands:
     interactive: true
     example: termfy credentials clear --yes
   - path: credentials rotate-key
-    description: Re-encrypt the existing vault with a new master key and write master.key with mode 0600.
+    description: "Cifra novamente o cofre com uma nova master key e grava master.key com permissão 0600."
     arguments: []
     options:
       - name: "--from-env"
-        description: Use TERMFY_MASTER_KEY (64 hex characters) as the new key; read the current key from master.key.
+        description: "Usa TERMFY_MASTER_KEY, com 64 caracteres hexadecimais, como nova chave; lê a chave atual de master.key."
     data: "{ rotated, source }"
     exitCodes:
       - 4
@@ -226,19 +226,19 @@ commands:
     interactive: false
     example: termfy credentials rotate-key --help
   - path: mcp
-    description: "Start the MCP server (stdio) with tools, resources and prompts for agents."
+    description: "Inicia o servidor MCP via stdio com tools, resources e prompts para agentes."
     arguments: []
     options:
       - name: "--list"
-        description: "Instead of starting the server, list registered tools, resources and prompts and exit."
-    data: "{ name, version, tools[], resources[], prompts[] } with --list; { closed } after shutdown"
+        description: "Lista tools, resources e prompts registrados e encerra sem iniciar o servidor."
+    data: "{ name, version, tools[], resources[], prompts[] } com --list; { closed } após encerrar"
     exitCodes:
       - 9
     credentials: []
     interactive: false
     example: termfy mcp
   - path: skill
-    description: "Print the embedded documentation, whole or by topic. Same effect as --skill."
+    description: "Imprime a documentação embutida, completa ou por topic, como --skill."
     arguments:
       - name: topic
         values:
@@ -255,7 +255,7 @@ commands:
     interactive: false
     example: termfy skill
   - path: doctor
-    description: "Check runtime, terminal, settings, key source and vault readability without changing files."
+    description: "Confere runtime, terminal, settings, origem da chave e leitura do cofre sem alterar arquivos."
     arguments: []
     options: []
     data: "{ checks[], ok }"
@@ -265,7 +265,7 @@ commands:
     interactive: false
     example: termfy doctor --help
   - path: completion
-    description: "Print a registry-generated completion script for bash, zsh or fish."
+    description: "Imprime um script de completion para bash, zsh ou fish gerado pelo registry."
     arguments:
       - name: shell
         required: true
@@ -280,17 +280,17 @@ commands:
     interactive: false
     example: termfy completion --help
   - path: spec
-    description: Read and check the embedded CLISPEC.md contract.
+    description: "Lê e confere o contrato CLISPEC.md embutido."
     arguments: []
     options: []
-    data: "{ help } with --help"
+    data: "{ help } com --help"
     exitCodes:
       - 3
     credentials: []
     interactive: false
     example: termfy spec --help
   - path: spec show
-    description: "Show the embedded spec front matter, sections and progress."
+    description: "Resume a spec em texto; com --json, mostra front matter, seções e progresso completos."
     arguments: []
     options: []
     data: "{ frontmatter, sections, progress }"
@@ -300,11 +300,11 @@ commands:
     interactive: false
     example: termfy spec show
   - path: spec check
-    description: Validate the embedded spec against the executable registries.
+    description: "Confere a spec embutida contra os registries do executável."
     arguments: []
     options:
       - name: "--strict"
-        description: Fail on warnings as well as errors. Disabled by default.
+        description: "Faz avisos causarem falha, assim como erros. Desativada por padrão."
     data: "{ ok, errors[], warnings[] }"
     exitCodes:
       - 3
@@ -312,7 +312,7 @@ commands:
     interactive: false
     example: termfy spec check
   - path: spec progress
-    description: "Show completed checklist items, total items and percentage."
+    description: "Mostra itens concluídos, total e porcentagem da checklist."
     arguments: []
     options: []
     data: "{ done, total, percent }"
@@ -324,63 +324,63 @@ commands:
 screens:
   - id: overview
     title: Overview
-    description: "Environment, configuration and vault at a glance"
+    description: "Apresenta ambiente, configuração e cofre."
     keys: []
   - id: about
     title: About
-    description: "Binary, version, license and credits"
+    description: "Apresenta binário, versão, licença e créditos."
     keys: []
 mcp:
   tools:
     - name: about
-      description: "Version, executable, runtime, platform and credits of the binary."
+      description: "Mostra versão, executável, runtime, plataforma e créditos do binário."
       input: "{}"
       output: "{ bin, title, version, description, author, site, repository, license, executable, runtime, platform, pid, dataDir, credits[] }"
       effect: read
     - name: exit_codes
-      description: Process exit-code table.
+      description: "Retorna a tabela de exit codes do processo."
       input: "{}"
       output: "{ codes[] }"
       effect: read
     - name: skill
-      description: "Embedded documentation, whole or by topic."
+      description: "Retorna a documentação embutida, completa ou por topic."
       input: "{ topic? }"
-      output: Markdown text
+      output: Texto em Markdown
       effect: read
     - name: config_list
-      description: Every settings.json key with its effective value.
+      description: "Retorna cada key de settings.json com seu valor atual."
       input: "{}"
       output: "{ file, values, schema[] }"
       effect: read
     - name: config_get
-      description: Value of a settings.json key.
+      description: "Retorna o valor de uma key de settings.json."
       input: "{ key }"
       output: "{ key, value, exists }"
       effect: read
     - name: credentials_status
-      description: "Saved names and master key source, without values."
+      description: "Mostra nomes salvos e origem da master key, sem valores."
       input: "{}"
       output: "{ file, exists, masterKeySource, count, names[] }"
       effect: read
     - name: doctor
-      description: "Diagnose runtime, terminal and configuration health. Returns checks and ok without credential values or file changes."
+      description: "Confere runtime, terminal e configuração; retorna checks e ok sem valores de credenciais ou alterações em arquivos."
       input: "{}"
       output: "{ checks[], ok }"
       effect: read
     - name: spec
-      description: "Read the binary contract before operating it or proposing changes. Returns front matter, sections and progress without writing."
+      description: "Lê o contrato antes de operar o binário ou propor mudanças; retorna front matter, seções e progresso sem gravar."
       input: "{}"
       output: "{ frontmatter, sections, progress }"
       effect: read
   resources:
     - uri: termfy://about
-      description: Binary identity and runtime as JSON.
+      description: "Retorna identidade do binário e runtime em JSON."
     - uri: termfy://exit-codes
-      description: Exit-code table as JSON.
+      description: "Retorna a tabela de exit codes em JSON."
     - uri: termfy://skill
-      description: Full documentation in Markdown.
+      description: "Retorna a documentação completa em Markdown."
     - uri: "termfy://skill/{topic}"
-      description: "One documentation section. Topics: cli, tui, mcp, config, exit-codes, reference."
+      description: "Retorna uma seção da documentação. Topics: cli, tui, mcp, config, exit-codes, reference."
   prompts:
     - name: operate
       args:
@@ -392,29 +392,29 @@ settings:
     values:
       - text
       - json
-    description: Default CLI output format when --json is not given.
+    description: "Define o formato de saída do CLI quando --json não é informado."
   - key: output.colors
     type: boolean
     default: true
-    description: Use ANSI colors in text output. NO_COLOR=1 always disables them.
+    description: "Usa cores ANSI na saída de texto; NO_COLOR=1 sempre desliga as cores."
   - key: tui.initialTab
     type: enum
     default: overview
     values:
       - overview
       - about
-    description: Tab opened when the TUI starts.
+    description: "Define a aba aberta ao iniciar a TUI."
   - key: tui.theme
     type: enum
     default: night
     values:
       - night
       - day
-    description: "TUI palette. `night` is the default modern unix palette."
+    description: "Define a paleta da TUI; night é o padrão modern unix."
   - key: telemetry.enabled
     type: boolean
     default: false
-    description: Reserved for derived projects. The skeleton sends nothing.
+    description: "Reservada para projetos derivados; o esqueleto não envia dados."
 credentials: []
 ---
 
@@ -451,3 +451,4 @@ e permite consultar sua documentação e seu contrato sem acessar o repositório
 
 - 2026-11-10: contrato convertido para front matter YAML e cinco seções fixas.
 - 2026-11-10: nenhuma credencial de serviço é consumida pelo esqueleto.
+- 2026-11-10: resumo textual da spec e conferência de checklist revisados.

@@ -2,6 +2,26 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.5.1] - 2026-11-10
+
+### Corrigido
+
+- Spec: checklist malformada deixa de ser ignorada, options recursivas dos
+  commands pais são aceitas no cruzamento, campos obrigatórios só com
+  espaços são rejeitados, `spec show` em texto vira um resumo legível (o
+  `--json` continua completo) e `docs/spec.md` documenta erros, avisos,
+  formatos e exit codes.
+- Completion: zsh passa a usar `compdef` e `compadd` nativos; bash e zsh
+  conferidos em execução.
+- `credentials rotate-key`: rollback atômico da chave quando a recifragem
+  falha, com cópia preservada se o rollback também falhar; `--from-env`
+  exige 64 hex.
+- `doctor`: avisos de TTY fora de terminal não contam como falha; exit
+  codes 0 e 3 conferidos.
+- `listPanel`: rolagem acompanha a seleção; `j` e `k` sem conflito com as
+  teclas globais.
+- Testes: 112 (1 pulado quando `fish` não está instalado).
+
 ## [0.5.0] - 2026-11-10
 
 ### Adicionado

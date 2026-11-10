@@ -59,7 +59,23 @@ test("MCP returns the shared checks and marks failures", async () => {
     expect((await client.listTools()).tools.map((t) => t.name)).toContain("doctor");
     const result = await client.callTool({ name: "doctor", arguments: {} });
     expect(result.structuredContent).toEqual(collectDoctorChecks());
+    expect(result.isError).toBe(false);
     writeFileSync(paths.settings(), "[]");
     expect((await client.callTool({ name: "doctor", arguments: {} })).isError).toBe(true);
   } finally { await client.close(); await server.close(); }
+});
+
+test("CLI without a TTY exits successfully with warnings and fails only for failed checks", () => {
+  const run = () => Bun.spawnSync([process.execPath, "run", "src/main.ts", "doctor", "--json"], {
+    env: { ...process.env }, stdin: "ignore",
+  });
+  const success = run();
+  expect(success.exitCode).toBe(ExitCode.SUCCESS);
+  const data = JSON.parse(success.stdout.toString()).data;
+  expect(data.ok).toBe(true);
+  for (const name of ["stdin", "stdout"]) expect(data.checks.find((c: { name: string }) => c.name === name).status).toBe("warn");
+  writeFileSync(paths.settings(), "invalid");
+  const failure = run();
+  expect(failure.exitCode).toBe(ExitCode.CONFIG);
+  expect(JSON.parse(failure.stdout.toString()).data.ok).toBe(false);
 });

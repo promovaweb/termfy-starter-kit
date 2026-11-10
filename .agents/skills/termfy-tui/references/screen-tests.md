@@ -11,15 +11,17 @@ const setup = await createTestRenderer({ width: 110, height: 30 });
 const closed = mountTui(setup.renderer, { initialTab: "about" });
 await setup.renderOnce();
 
-const frame = setup.captureCharFrame();   // string com o conteúdo visível
-setup.mockInput.pressKey("2");            // dígito, "left", "right", "tab", "escape"
+const frame = setup.captureCharFrame();   // Visible frame text
+setup.mockInput.pressKey("2");            // Digit, "left", "right", "tab", "escape"
 await setup.renderOnce();
 setup.mockInput.pressKey("q");
-await closed;                          // mountTui devolve quando o renderer é destruído
+await closed;                          // mountTui resolves when the renderer is destroyed
 ```
 
-Isole a pasta de dados com `process.env.<BIN>_HOME = mkdtempSync(...)` antes
+Isole a pasta de dados com `process.env[HOME_VARIABLE] = temporaryDir` antes
 de montar, para que o frame não dependa das configurações da máquina.
+Importe `HOME_VARIABLE` de `src/config/paths.ts` e crie `temporaryDir`
+com `mkdtempSync`.
 
 ## O que conferir
 

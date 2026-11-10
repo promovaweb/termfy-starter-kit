@@ -14,6 +14,7 @@ import { parseSpec, type ParsedSpec } from "../src/spec/parse.ts";
 import { checkSpec } from "../src/spec/check.ts";
 import { checkCredentialUsage } from "../scripts/check-spec.ts";
 import type { Spec } from "../src/spec/schema.ts";
+import { root } from "../src/cli/commands.ts";
 
 const base: Spec = {
   schemaVersion: "1.0.0", bin: manifest.bin, title: manifest.title, description: manifest.description,
@@ -53,6 +54,18 @@ describe("parseSpec", () => {
     expectConfig(document(base, "- [ ] First {#a1b2}\n- [x] Second {#a1b2}"));
   });
 
+  test.each([
+    "* [ ] Pending {#a1b2}", "+ [ ] Pending", "1. [ ] Pending {#a1b2}",
+    "- [?] Unknown state {#a1b2}", "- [] Empty checkbox {#a1b2}",
+    "- [ ]   {#a1b2}", "- [ ] `#termfy-cli` {#a1b2}",
+  ])("rejects malformed tasks instead of hiding pending work: %s", (item) => {
+    expectConfig(document({ ...base, status: "done" }, item));
+  });
+
+  test("accepts checkbox whitespace and uppercase X", () => {
+    expect(parseSpec(document(base, "-\t[X]\tComplete\t{#a1b2}")).progress).toEqual({ done: 1, total: 1, percent: 100 });
+  });
+
   test("rejects status done with a pending item", () => {
     expectConfig(document({ ...base, status: "done" }));
     expect(parseSpec(document({ ...base, status: "done" }, "- [x] Complete {#a1b2}")).progress.percent).toBe(100);
@@ -81,6 +94,8 @@ describe("parseSpec", () => {
 
   test("rejects missing front matter, malformed YAML and unknown fields", () => {
     expectConfig("## Purpose\nNo YAML.");
+    expectConfig("---\nbin: example\n");
+    expectConfig("---\n---\n");
     expectConfig("---\nunterminated: [\n---\n");
     expectConfig(document({ ...base, extra: true }));
     expectConfig(document({ ...base, commands: [{ path: "about", description: "About.", extra: true }] }));
@@ -89,6 +104,7 @@ describe("parseSpec", () => {
 
   test.each([
     { schemaVersion: "2.0.0" }, { status: "unknown" }, { createdAt: "yesterday" },
+    { title: "   " }, { bin: "\t" },
     { commands: "about" }, { settings: [{ key: "x", type: "object", default: {} }] },
     { credentials: [{ name: "Invalid Name", usedBy: [] }] },
     { commands: [{ path: "about", description: "About.", exitCodes: [1.5] }] },
@@ -165,6 +181,18 @@ describe("checkSpec", () => {
     spec.frontmatter.credentials.push({ name: "shop.token", usedBy: ["config get", "config_get"] });
     expect(checkSpec(spec).ok).toBe(true);
   });
+
+  test("accepts recursive ancestor options and rejects non-recursive ones", () => {
+    const original = root.options;
+    try {
+      root.options = [{ name: "--ancestor", description: "Test ancestor option.", recursive: true, argument: { name: "level" } }];
+      const spec = loadSpec();
+      spec.frontmatter.commands.find((command) => command.path === "config get")!.options = [{ name: "--ancestor", argument: "level" }];
+      expect(checkSpec(spec).ok).toBe(true);
+      root.options = [{ ...root.options[0]!, recursive: false }];
+      expect(checkSpec(spec).errors).toContain("Unknown option --ancestor on command config get.");
+    } finally { root.options = original; }
+  });
 });
 
 test("credential scanner ignores comments and strings but checks literal calls", async () => {
@@ -183,6 +211,60 @@ test("credential scanner ignores comments and strings but checks literal calls",
 });
 
 describe("spec interfaces", () => {
+  test("show uses a concise text summary and preserves complete JSON", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "termfy-spec-show-"));
+    try {
+      const run = async (args: string[]) => {
+        const proc = Bun.spawn([process.execPath, "run", "src/main.ts", "spec", "show", ...args], {
+          cwd: join(import.meta.dir, ".."), env: { ...process.env, [HOME_VARIABLE]: dir, NO_COLOR: "1" },
+          stdin: "ignore", stdout: "pipe", stderr: "pipe",
+        });
+        const [stdout, stderr, code] = await Promise.all([new Response(proc.stdout).text(), new Response(proc.stderr).text(), proc.exited]);
+        expect(code).toBe(ExitCode.SUCCESS);
+        expect(stderr).toBe("");
+        return stdout;
+      };
+      const text = await run([]);
+      for (const label of ["Status", "Commands", "Screens", "Tools", "Settings", "Credentials", "Checklist", "Purpose", "Out of scope"]) expect(text).toContain(label);
+      expect(text).not.toContain("schemaVersion:");
+      expect(text).not.toContain("## Notes");
+      expect(text.length).toBeLessThan(1600);
+      const { frontmatter, sections, progress } = loadSpec();
+      expect(JSON.parse(await run(["--json"])).data).toEqual({ frontmatter, sections, progress });
+    } finally { rmSync(dir, { recursive: true, force: true }); }
+  });
+
+  test.each([
+    { strict: false, remove: false, code: ExitCode.SUCCESS },
+    { strict: true, remove: false, code: ExitCode.CONFIG },
+    { strict: false, remove: true, code: ExitCode.CONFIG },
+  ])("check reports warnings and errors with the correct exit code: %j", async ({ strict, remove, code }) => {
+    const dir = mkdtempSync(join(tmpdir(), "termfy-spec-check-"));
+    try {
+      // Alter only the in-memory registry of an isolated subprocess, never repository files.
+      const script = `
+        import { root } from "./src/cli/commands.ts";
+        import { runCli } from "./src/cli/index.ts";
+        root.subcommands = ${remove ? 'root.subcommands.filter((command) => command.name !== "about")' : '[...root.subcommands, { name: "test-only", description: "Test only." }]'};
+        process.exit(await runCli(${JSON.stringify(["spec", "check", "--json", ...(strict ? ["--strict"] : [])])}));
+      `;
+      const proc = Bun.spawn([process.execPath, "-e", script], {
+        cwd: join(import.meta.dir, ".."), env: { ...process.env, [HOME_VARIABLE]: dir, NO_COLOR: "1" },
+        stdin: "ignore", stdout: "pipe", stderr: "pipe",
+      });
+      const [stdout, stderr, actual] = await Promise.all([new Response(proc.stdout).text(), new Response(proc.stderr).text(), proc.exited]);
+      expect(stderr).toBe("");
+      expect(actual).toBe(code);
+      const result = JSON.parse(stdout).data;
+      expect(result.ok).toBe(code === ExitCode.SUCCESS);
+      if (remove) expect(result.errors).toContain("Unknown command: about.");
+      else {
+        expect(result.errors).toEqual([]);
+        expect(result.warnings).toContain("Command missing from spec: test-only.");
+      }
+    } finally { rmSync(dir, { recursive: true, force: true }); }
+  });
+
   test("CLI spec check --json succeeds in a subprocess", async () => {
     const dir = mkdtempSync(join(tmpdir(), "termfy-spec-cli-"));
     try {

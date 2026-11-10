@@ -1,4 +1,7 @@
-# Contrato do CLISPEC.md (cópia de docs/spec.md do starter kit)
+# Contrato do CLISPEC.md
+
+Resumo conferido com `src/spec/schema.ts`, `src/spec/parse.ts` e
+`src/spec/check.ts` do starter kit 0.5.0.
 
 `CLISPEC.md`, na raiz do projeto, descreve o que o binário faz. Ele é
 editável por uma pessoa no editor e, ao mesmo tempo, lido de forma
@@ -16,7 +19,7 @@ tool MCP `spec`.
 `CLISPEC.md` abre com front matter YAML delimitado por `---` e segue com
 cinco seções fixas, nesta ordem: `## Purpose`, `## Audiences`,
 `## Out of scope`, `## Checklist` e `## Notes`. Os títulos são exatos; texto
-fora deles é preservado mas não participa da leitura. A prosa pode estar em
+fora das seções fixas permanece no arquivo, mas não entra em `sections`. A prosa pode estar em
 qualquer idioma; os nomes (commands, options, keys, tools, screens) são os
 nomes do código, em inglês.
 
@@ -104,7 +107,7 @@ Itens GFM, um por linha, com `{#id}` obrigatório de quatro caracteres
 ```
 
 Item sem `{#id}` ou com `{#id}` repetido recusa a leitura. Progresso é
-`concluídos / total`.
+`progress: { done, total, percent }`; `percent` vale 0 quando não há itens.
 
 ### `## Notes`
 
@@ -145,7 +148,10 @@ A leitura relata o estado declarado; não o infere.
 - `status: done` com item pendente.
 
 Avisos (não falham, salvo `--strict`): command, screen, tool ou setting do
-código ausente da spec.
+código ausente da spec. Resources e prompts omitidos não geram avisos.
+O cruzamento confere nomes, arguments das options, exit codes e tipos das
+settings; não compara toda descrição, forma de `data`, defaults ou listas
+de valores. Confira esses contratos também nos testes.
 
 `bun run spec:check` roda o mesmo cruzamento a partir do código-fonte e, além
 disso, confere que todo `getCredential("<name>")` em `src/` aparece em
@@ -153,10 +159,17 @@ disso, confere que todo `getCredential("<name>")` em `src/` aparece em
 
 ## Tool MCP
 
-`spec` devolve o front matter parseado, as seções e o progresso. Um agente
+`spec` devolve `{ frontmatter, sections, progress }`. A tool não expõe
+a lista parseada `checklist` como campo separado e não executa o
+cruzamento de `spec check`. Um agente
 lê a spec antes de operar o binário ou de propor mudanças.
 
-## Exemplo mínimo
+## Exemplo de planejamento
+
+O exemplo abaixo passa pela estrutura do contrato, mas só passa em
+`spec check` depois que a identidade coincidir com `package.json` e os
+commands, screens, tools e settings declarados forem implementados.
+Referências futuras geram erros, inclusive com `status: draft`.
 
 ```markdown
 ---

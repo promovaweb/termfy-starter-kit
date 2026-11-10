@@ -37,8 +37,9 @@ Model Context Protocol, ou para revisar o que já está exposto.
    `structuredContent` com o mesmo objeto. Falha prevista devolve
    `isError: true` com mensagem clara, sem lançar exceção.
 4. Nenhuma tool devolve o valor de uma credencial. `credentials_status`
-   mostra só nomes. Tools que consomem APIs leem o valor com
-   `getCredential()` internamente e devolvem o resultado da chamada.
+   mostra `file`, `exists`, `masterKeySource`, `count` e `names`, sem
+   valores. Tools que consomem APIs leem o valor com
+   `getCredential(name)` internamente e devolvem o resultado da chamada.
 5. Tools que gravam ou têm efeito externo dizem isso na descrição e, quando
    couber, aceitam `dryRun`.
 6. Toda tool entra em `catalog.tools` para que `mcp --list` a enxergue.
@@ -65,11 +66,16 @@ Model Context Protocol, ou para revisar o que já está exposto.
 
 ## Checklist da spec
 
-Ao concluir cada entrega, marque o item correspondente em `## Checklist` do
-`CLISPEC.md` de `- [ ]` para `- [x]` pelo `{#id}`, sem mudar texto nem id,
-e avance `updatedAt`. Registre em `## Notes` uma linha datada quando a
-implementação se afastar do combinado. Rode `bun run dev -- spec check` antes
-de entregar: avisos sobre o item recém-implementado devem ter sumido.
+Ao concluir e testar cada entrega, a skill de implementação marca o item
+correspondente em `## Checklist` do `CLISPEC.md` de `- [ ]` para `- [x]`
+pelo `{#id}`, preservando o id. Avance `updatedAt` e use `in_progress`
+enquanto houver trabalho. Só use `done` após concluir todos os itens.
+Se o escopo mudar, revise a entrada da spec e o texto do item com
+`termfy-spec`; registre a alteração em `## Notes`.
+Rode `bun run dev -- spec check --json`: referências declaradas ainda não
+implementadas são erros, mesmo em `draft`. Relate separadamente as
+pendências de outras entregas. Ao concluir o escopo inteiro, rode
+`bun run validate` e exija saída 0.
 
 ## Marcos
 

@@ -33,11 +33,13 @@ argumentos e opções, ou para mudar o formato de saída e os códigos de saída
    `error.usage`, `error.config`, `error.credentials`, `error.network`,
    `error.notFound`, `error.permission`. Nunca `process.exit` dentro de um
    comando.
-4. Segredos nunca entram por argumento. Use `readSecret()` ou `--stdin` e
+4. Segredos nunca entram por argumento. Use `readSecret(label)` ou `--stdin` e
    grave com `setCredential()`. Para consumir uma API, chame
    `getCredential(name)`.
-5. Comandos que exigem terminal recebem `interactive: true` e oferecem uma
-   saída não interativa (`--stdin`, `--yes`).
+5. Comandos com interação recebem `interactive: true`. Esse campo descreve
+   a interface e não verifica TTY. Implemente a verificação em `run` e,
+   quando aplicável, declare e trate `--stdin` ou `--yes`. A TUI exige TTY
+   e não oferece uma alternativa não interativa.
 6. Stdout só recebe dados. Progresso e avisos vão para `ctx.stderr`.
 7. `completion <shell>` e `--opencli` são gerados do registry: um command novo
    aparece neles sem trabalho extra. `doctor` confere o ambiente; se o
@@ -64,11 +66,16 @@ argumentos e opções, ou para mudar o formato de saída e os códigos de saída
 
 ## Checklist da spec
 
-Ao concluir cada entrega, marque o item correspondente em `## Checklist` do
-`CLISPEC.md` de `- [ ]` para `- [x]` pelo `{#id}`, sem mudar texto nem id,
-e avance `updatedAt`. Registre em `## Notes` uma linha datada quando a
-implementação se afastar do combinado. Rode `bun run dev -- spec check` antes
-de entregar: avisos sobre o item recém-implementado devem ter sumido.
+Ao concluir e testar cada entrega, a skill de implementação marca o item
+correspondente em `## Checklist` do `CLISPEC.md` de `- [ ]` para `- [x]`
+pelo `{#id}`, preservando o id. Avance `updatedAt` e use `in_progress`
+enquanto houver trabalho. Só use `done` após concluir todos os itens.
+Se o escopo mudar, revise a entrada da spec e o texto do item com
+`termfy-spec`; registre a alteração em `## Notes`.
+Rode `bun run dev -- spec check --json`: referências declaradas ainda não
+implementadas são erros, mesmo em `draft`. Relate separadamente as
+pendências de outras entregas. Ao concluir o escopo inteiro, rode
+`bun run validate` e exija saída 0.
 
 ## Marcos
 

@@ -9,13 +9,21 @@
 | progresso, avisos | stderr | stderr (texto livre) |
 | servidor MCP | stdout reservado ao JSON-RPC | idem |
 
-`command` é a cadeia completa, por exemplo `termfy config get`.
+`command` é a cadeia resolvida, por exemplo `termfy config get`. Se o
+parser falhar antes de devolver a cadeia, o campo contém só o nome do binário.
+
+O envelope com `error` é usado para exceções. `doctor` e `spec check`
+podem devolver `{ ok: true, command, data }` com saída 3: nesses casos,
+`data.ok` é `false`. Confira o exit code e os campos de `data`.
+`--opencli` imprime o documento OpenCLI sem envelope; o servidor MCP
+reserva stdout ao protocolo.
 
 ## Quando o JSON é padrão
 
 `output.format = json` em settings.json faz todo comando responder em JSON
 sem a flag. `--json` sempre vence; não existe `--text`, porque a preferência
-de arquivo cobre esse caso.
+de arquivo cobre esse caso. Essa preferência não transforma stdout do
+servidor MCP nem envolve o documento de `--opencli` em outro JSON.
 
 ## Formatação de texto
 
@@ -31,7 +39,8 @@ passado e `output.colors` é `true`.
 
 ## Mascaramento
 
-`mask(value)` mantém quatro caracteres iniciais e dois finais. Comandos
+`mask(value)` mascara tudo quando o valor tem até oito caracteres. Para
+valores maiores, mantém quatro caracteres iniciais e dois finais. Comandos
 que exibem segredo mascaram por padrão e revelam só com `--reveal`. Em
 `--json`, o campo muda de `masked` para `value` quando revelado, para que
 scripts não confundam os dois.

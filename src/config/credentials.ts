@@ -175,9 +175,11 @@ export function rotateMasterKey(fromEnv = false): { rotated: true; source: "env"
   const previous = exists(keyPath) ? readFileSync(keyPath) : undefined;
   let staging: string | undefined;
   let replaced = false;
+  let retainBackup = false;
   try {
     staging = mkdtempSync(join(paths.base(), ".rotate-"));
     chmodSync(staging, 0o700);
+    if (previous) writeFileSync(join(staging, "previous.key"), previous, { mode: 0o600 });
     const stagedKey = join(staging, "master.key");
     const stagedVault = join(staging, "credentials.json");
     writeFileSync(stagedKey, `${fresh.toString("hex")}\n`, { mode: 0o600 });
@@ -187,12 +189,17 @@ export function rotateMasterKey(fromEnv = false): { rotated: true; source: "env"
     renameSync(stagedVault, paths.credentials());
   } catch {
     if (replaced) {
-      if (previous) { writeFileSync(keyPath, previous, { mode: 0o600 }); chmodSync(keyPath, 0o600); }
-      else unlinkSync(keyPath);
+      try {
+        if (previous) renameSync(join(staging!, "previous.key"), keyPath);
+        else unlinkSync(keyPath);
+      } catch {
+        retainBackup = true;
+        throw error.credentials(`Key rollback failed. Recovery files remain in ${staging}. ${previous ? "Restore previous.key as master.key" : "Remove the replacement master.key and keep the original environment key"} before using the vault.`);
+      }
     }
     throw error.credentials("Could not rotate the master key; the vault was not changed.");
   } finally {
-    if (staging) rmSync(staging, { recursive: true, force: true });
+    if (staging && !retainBackup) rmSync(staging, { recursive: true, force: true });
   }
   if (!fromEnv) delete process.env[MASTER_KEY_VARIABLE];
   return { rotated: true, source: fromEnv ? "env" : "file" };

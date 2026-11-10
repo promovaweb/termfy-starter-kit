@@ -47,8 +47,10 @@ import { readSettings, getPath } from "../config/settings.ts";
 const timeout = Number(getPath(readSettings(), "api.timeoutMs") ?? 10000);
 ```
 
-`readSettings()` já mescla o arquivo com os padrões, então o valor nunca é
-`undefined` para chaves do esquema.
+`readSettings()` mescla o arquivo com os padrões. Se a chave não estiver
+no arquivo, usa o padrão do esquema. A leitura não valida todos os valores
+já gravados: um objeto pai substituído por um escalar pode ocultar a chave;
+trate valores ausentes ou inválidos no consumidor.
 
 ## Documentação
 

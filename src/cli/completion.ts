@@ -63,8 +63,8 @@ export function generateCompletion(root: Command, shell: CompletionShell): strin
   }
   return [
     `# Completion for ${root.name}`,
-    ...(shell === "zsh" ? ["autoload -Uz compinit bashcompinit", "compinit", "bashcompinit"] : []),
-    `${name}() {`, ...(shell === "zsh" ? ["  setopt localoptions ksharrays"] : []), "  local state=0 position=0 pending='' ended=0 token current prefix='' candidates='' i",
+    ...(shell === "zsh" ? ["if (( ! $+functions[compdef] )); then", "  autoload -Uz compinit", "  compinit -D", "fi"] : []),
+    `${name}() {`, ...(shell === "zsh" ? ["  setopt localoptions ksharrays", '  local -a COMP_WORDS=("${words[@]}") COMPREPLY', "  local COMP_CWORD=$((CURRENT - 1))"] : []), "  local state=0 position=0 pending='' ended=0 token current prefix='' candidates='' i",
     '  current="${COMP_WORDS[COMP_CWORD]}"', "  COMPREPLY=()",
     "  for ((i=1; i<COMP_CWORD; i++)); do", '    token="${COMP_WORDS[i]}"',
     '    if [[ -n "$pending" ]]; then pending=\'\'; continue; fi',
@@ -83,7 +83,12 @@ export function generateCompletion(root: Command, shell: CompletionShell): strin
     "      esac", "    fi", '    case "$state:$position" in',
     ...arguments_.filter((a) => a.values.length).map((a) => `      ${quote(a.key)}) candidates="$candidates "${quote(a.values.join(" "))} ;;`),
     "    esac", "  fi",
-    '  while IFS= read -r token; do [[ "$token" = "$current"* ]] && COMPREPLY+=("$prefix$token"); done < <(compgen -W "$candidates" -- "$current")',
-    "}", `complete -F ${name} ${quote(root.name)}`, "",
+    ...(shell === "zsh" ? [
+      '  for token in ${(s: :)candidates}; do [[ "$token" = "$current"* ]] && COMPREPLY+=("$prefix$token"); done',
+      '  compadd -Q -a COMPREPLY',
+    ] : [
+      '  while IFS= read -r token; do [[ "$token" = "$current"* ]] && COMPREPLY+=("$prefix$token"); done < <(compgen -W "$candidates" -- "$current")',
+    ]),
+    "}", shell === "zsh" ? `compdef ${name} ${quote(root.name)}` : `complete -F ${name} ${quote(root.name)}`, "",
   ].join("\n");
 }

@@ -2,7 +2,7 @@
 import { ExitCode } from "../app/exit-codes.ts";
 import { manifest } from "../app/manifest.ts";
 import { root } from "../cli/commands.ts";
-import { GLOBAL_OPTIONS, type Command } from "../cli/registry.ts";
+import { GLOBAL_OPTIONS, type Command, type OptionDefinition } from "../cli/registry.ts";
 import { SETTINGS_SCHEMA } from "../config/settings.ts";
 import { describeServer } from "../mcp/server.ts";
 import { screens } from "../tui/screens/index.ts";
@@ -25,20 +25,23 @@ export function checkSpec(spec: ParsedSpec, { strict = false }: { strict?: boole
   if (declared.bin !== manifest.bin) errors.push("Spec bin differs from package.json.");
   if (declared.description !== manifest.description) errors.push("Spec description differs from package.json.");
   const commands = new Map<string, Command>();
-  const visit = (command: Command, parent: string) => {
+  const options = new Map<string, readonly OptionDefinition[]>();
+  const visit = (command: Command, parent: string, inherited: readonly OptionDefinition[]) => {
+    const recursive = [...inherited, ...(command.options ?? []).filter((option) => option.recursive)];
     for (const child of command.subcommands ?? []) {
       const path = parent ? `${parent} ${child.name}` : child.name;
       commands.set(path, child);
-      visit(child, path);
+      options.set(path, [...recursive, ...(child.options ?? [])]);
+      visit(child, path, recursive);
     }
   };
-  visit(root, "");
+  visit(root, "", GLOBAL_OPTIONS);
   const codes = new Set<number>(Object.values(ExitCode));
   for (const command of declared.commands) {
     const actual = commands.get(command.path);
     if (!actual) { errors.push(`Unknown command: ${command.path}.`); continue; }
     for (const option of command.options ?? []) {
-      const match = [...GLOBAL_OPTIONS, ...(actual.options ?? [])].find((entry) => entry.name === option.name);
+      const match = options.get(command.path)?.find((entry) => entry.name === option.name || entry.aliases?.includes(option.name));
       if (!match) errors.push(`Unknown option ${option.name} on command ${command.path}.`);
       else if (option.argument !== undefined && option.argument !== match.argument?.name) errors.push(`Unknown option argument ${option.argument} for ${command.path} ${option.name}.`);
     }

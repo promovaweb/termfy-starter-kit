@@ -11,9 +11,11 @@
 - [ ] `package.json`: `name`, `bin`, `description`, bloco `termfy` e `repository` atualizados.
 - [ ] `.env.example`: variáveis com o novo prefixo.
 - [ ] `README.md`, `AGENTS.md`, `CHANGELOG.md` e `.github/workflows/*.yml` sem a palavra `termfy` fora de citações ao framework e ao starter kit.
-- [ ] `bun run skills:check` confirma as cinco skills em `.agents/skills/` e no `skills-lock.json`.
+- [ ] `bun run skills:check` confirma as seis skills em `.agents/skills/` e no `skills-lock.json`.
 - [ ] `bun run dev -- --version` imprime o nome do binário e a versão de `package.json`.
 - [ ] `bun run dev -- about --json` traz `data.author`, `data.site` e `data.repository` preenchidos.
+- [ ] `CLISPEC.md` tem `bin` e `description` iguais aos de `package.json`; `init` não reescreve a spec.
+- [ ] `bun run opencli` regenerou `docs/opencli.json` com a nova identidade.
 - [ ] `bun run dev -- config path` aponta para `~/.<bin>/`.
 
 ## O que o bootstrap não faz

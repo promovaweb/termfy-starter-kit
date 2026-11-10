@@ -63,16 +63,18 @@ export function parseSpec(raw: string): ParsedSpec {
       continue;
     }
     if (current) sections[current] += `${line}\n`;
-    if (current !== "Checklist" || !/^\s*-\s+\[[ xX]\]/.test(line)) continue;
-    const item = /^\s*- \[([ xX])\] (.+?)\s+\{#([a-z0-9]{4})\}\s*$/.exec(line);
-    if (!item || /\{#[^}]*\}/.test(item[2]!)) throw error.config("Each checklist item must end with exactly one four-character {#id} using [a-z0-9].");
+    if (current !== "Checklist" || !/^\s*(?:[-+*]|\d+[.)])\s+\[/.test(line)) continue;
+    const item = /^\s*-\s+\[([ xX])\]\s+(\S.*?)\s+\{#([a-z0-9]{4})\}\s*$/.exec(line);
+    if (!item || /\{#[^}]*\}/.test(item[2]!)) throw error.config("Use - [ ] text {#id} or - [x] text {#id}; each item must end with exactly one four-character ID using [a-z0-9].");
     const mark = item[1]!;
     const content = item[2]!;
     const id = item[3]!;
     if (ids.has(id)) throw error.config(`Repeated checklist ID: ${id}.`);
     ids.add(id);
-    const tag = /\s+`#([a-z0-9-]+)`$/.exec(content);
-    checklist.push({ id, text: tag ? content.slice(0, tag.index).trimEnd() : content, done: mark.toLowerCase() === "x", ...(tag ? { skill: tag[1]! } : {}) });
+    const tag = /(?:^|\s+)`#([a-z0-9-]+)`$/.exec(content);
+    const text = tag ? content.slice(0, tag.index).trimEnd() : content;
+    if (!text) throw error.config("Each checklist item must have text before its skill tag and ID.");
+    checklist.push({ id, text, done: mark.toLowerCase() === "x", ...(tag ? { skill: tag[1]! } : {}) });
   }
   if (found !== headings.length) throw error.config(`Missing section: ${headings[found]}.`);
   for (const heading of headings) sections[heading] = sections[heading].trim();

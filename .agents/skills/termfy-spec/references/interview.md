@@ -98,4 +98,6 @@ tag da skill responsável. Frases verificáveis: command, saída e exit code.
 ## Fechamento
 
 Releia a spec com a pessoa, rode `bun run dev -- spec check --json`, registre
-as pendências em `## Notes` e indique a próxima skill.
+as pendências em `## Notes` e indique a próxima skill. Diferencie erros
+de estrutura de referências futuras ainda não implementadas. As skills
+de implementação marcam a checklist somente após implementar e testar.

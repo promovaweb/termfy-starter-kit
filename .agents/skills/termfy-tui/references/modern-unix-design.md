@@ -6,6 +6,8 @@ cor e peso em vez de espaço em branco.
 
 ## Estrutura fixa da tela
 
+Esquema ilustrativo com rótulos traduzidos; a interface do binário usa inglês.
+
 ```text
 ▌ Título v<version>   │  descrição em uma linha            linux-x64 • Bun 1.3.14
 ──────────────────────────────────────────────────────────────────────────────

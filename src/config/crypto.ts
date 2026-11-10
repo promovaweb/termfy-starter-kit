@@ -57,6 +57,7 @@ export function keyFromEnv(): Buffer | null {
 /**
  * Reads the master key. With `createIfMissing`, generates `master.key` when
  * neither the variable nor the file exists. Otherwise throws CREDENTIALS.
+ * ignoreEnvironment reads the disk key when the environment holds a replacement.
  */
 export function getMasterKey(createIfMissing: boolean, ignoreEnvironment = false): Buffer {
   const fromEnv = ignoreEnvironment ? null : keyFromEnv();

@@ -1,7 +1,7 @@
 /** Closed Zod schemas for the CLISPEC front matter contract. */
 import { z } from "zod";
 
-const text = z.string().min(1);
+const text = z.string().refine((value) => value.trim().length > 0, "Must not be blank.");
 const scalar = z.union([z.string(), z.number(), z.boolean()]);
 const credentialName = z.string().regex(/^[a-z0-9][a-z0-9_.-]{0,63}$/);
 

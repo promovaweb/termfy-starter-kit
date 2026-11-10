@@ -16,7 +16,7 @@ de tocar no código, marcando a checklist conforme avançam.
 
 - `AGENTS.md` do repositório.
 - `CLISPEC.md` atual e a saída de `bun run dev -- spec show --json`.
-- `docs/spec.md` do starter kit (cópia em `references/clispec-contract.md`):
+- `docs/spec.md` do starter kit (resumo em `references/clispec-contract.md`):
   front matter, seções, checklist e regras de `spec check`.
 - `references/interview.md`: as perguntas, em ordem, e o que cada resposta
   preenche.
@@ -33,20 +33,26 @@ de tocar no código, marcando a checklist conforme avançam.
    `data`, `exitCodes`, `credentials` e `example`. Cada tool com `effect`
    (`read`, `write` ou `network`). Cada credencial com `name` no formato
    `service.purpose` e `usedBy`.
-4. Exit codes citados existem em `src/app/exit-codes.ts`. Uma família nova
-   entra na spec e, na implementação, no código.
+4. Use os exit codes de `src/app/exit-codes.ts`. Se o pedido exigir uma
+   família nova, registre-a como entrega pendente e implemente-a no código
+   antes de exigir que `spec check` passe.
 5. A checklist tem um item por entrega, com `{#id}` de quatro caracteres
    gerado uma vez e a tag da skill responsável (`#termfy-cli`, `#termfy-tui`,
    `#termfy-mcp`, `#termfy-config`).
 6. Não invente requisitos. Dúvida sem resposta vai para `## Notes` como
    pergunta aberta, datada.
-7. Entrevista em blocos curtos: poucas perguntas por vez, confirmação em uma
+7. O binário compilado lê a spec embutida no build. Para conferir edições
+   locais, rode `bun run dev -- spec show --json` ou `bun run spec:check`.
+8. A entrevista cria itens pendentes e preserva os itens já concluídos.
+   Quem implementa e testa cada entrega marca seu item. Não marque uma
+   implementação como concluída apenas por descrevê-la na spec.
+9. Entrevista em blocos curtos: poucas perguntas por vez, confirmação em uma
    frase, até três caminhos por escolha aberta com o recomendado primeiro.
    Quando o pedido já responde o bloco, pule a pergunta.
 
 ## Passos
 
-1. Rode `git status --short`, leia o `CLISPEC.md` atual e rode
+1. Rode `git status --short`, leia o `CLISPEC.md` atual, se existir, e rode
    `bun run dev -- spec check --json` para ver o estado de partida.
 2. Conduza a entrevista de `references/interview.md` na ordem: identidade,
    propósito e públicos, modos, commands, TUI, MCP, configuração e
@@ -55,10 +61,12 @@ de tocar no código, marcando a checklist conforme avançam.
    (front matter ou seção) e mostre o trecho à pessoa.
 4. Preencha `status: draft`, `createdAt` e `updatedAt` com o momento atual
    em uma spec nova; em revisão, preserve `createdAt` e avance `updatedAt`.
-5. Rode `bun run dev -- spec check --json`. Erros de schema, `{#id}` ou de
-   nomes que já existem no código precisam ser corrigidos agora. Avisos de
-   command ou screen que ainda não existem no código são esperados: eles
-   são o trabalho a fazer.
+5. Rode `bun run dev -- spec check --json`. Corrija erros de schema,
+   seções, `{#id}` e identidade. Commands, screens, tools e settings
+   declarados sem implementação geram erros e saída 3, inclusive em
+   `draft`; relacione-os aos itens pendentes da checklist. Avisos indicam
+   entradas do código ausentes da spec. Não exija saída 0 para encerrar a
+   entrevista de uma funcionalidade ainda não implementada.
 6. Releia o arquivo inteiro: nomes em inglês, options sem colisão com as
    globais (`--help`, `--version`, `--json`, `--skill`, `--opencli`,
    `--no-color`), credenciais nomeadas, checklist cobrindo cada command,
@@ -72,7 +80,8 @@ de tocar no código, marcando a checklist conforme avançam.
 ## Marcos
 
 Identidade e propósito confirmados; commands fechados; TUI e MCP decididos;
-settings e credenciais nomeadas; `spec check` sem erros; checklist gravada.
+settings e credenciais nomeadas; contrato parseado; erros de referências
+futuras relacionados às entregas pendentes; checklist gravada.
 
 ## Saída
 

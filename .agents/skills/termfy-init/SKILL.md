@@ -39,7 +39,8 @@ variáveis `<BIN>_HOME` e `<BIN>_MASTER_KEY` e o esquema das URIs MCP.
    bun run skills:check
    ```
 
-5. Rode a skill `termfy-spec` para escrever o `CLISPEC.md` do produto no
+5. O bootstrap não atualiza `CLISPEC.md` nem regenera `docs/opencli.json`.
+   Rode `bun run opencli` e a skill `termfy-spec` para escrever o `CLISPEC.md` do produto no
    lugar do exemplo do esqueleto. Sem spec, as demais skills não têm o que
    implementar.
 6. Confira a identidade nos três modos:
@@ -54,7 +55,10 @@ variáveis `<BIN>_HOME` e `<BIN>_MASTER_KEY` e o esquema das URIs MCP.
    teste `tests/tui.test.ts`, que monta a interface no renderer de teste.
 
 7. Rode `bun run validate`. O comando encadeia typecheck, testes, conferência
-   das skills instaladas, conferência do `docs/opencli.json` e build.
+   das skills instaladas, conferência de `docs/opencli.json`,
+   `spec:check` e build. Se a spec incluir funcionalidades futuras,
+   registre os erros de referências ainda ausentes e encaminhe as entregas
+   às skills responsáveis antes de preparar a release.
 8. Reescreva a seção inicial de `README.md` com o propósito do produto e
    apague o trecho sobre o template. Mantenha as seções de instalação, modos,
    configuração e release.
@@ -70,9 +74,11 @@ marco, liste os arquivos alterados.
 
 ## Saída
 
-Relate nome do binário, caminhos de dados, versão das skills instaladas
-(`skills-lock.json`), comandos conferidos, testes executados e o que ficou
-pendente. Não declare concluído com `bun run validate` falhando.
+Relate nome do binário, caminhos de dados, origem das skills instaladas
+(`skills-lock.json` registra origem e hash, não uma versão SemVer), comandos
+conferidos, testes executados e o que ficou pendente. Se apenas a preparação
+terminou, informe isso; não declare o produto validado com
+`bun run validate` falhando.
 
 ## Compatibilidade
 

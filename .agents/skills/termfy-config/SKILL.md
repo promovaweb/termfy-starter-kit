@@ -31,16 +31,18 @@ credenciais, mudar a política da chave mestra ou depurar a pasta
 3. Segredos nunca passam por argumento de linha de comando, log, mensagem de
    erro, `data` do `--json` sem `--reveal`, resposta de tool MCP ou frame da
    TUI.
-4. Leitura de credencial em código usa `getCredential(name)`, que encerra
-   com código 4 quando o valor não existe. Não capture esse erro para
+4. Leitura de credencial em código usa `getCredential(name)`, que lança
+   `AppError` com código 4 quando o valor não existe. Não capture esse erro para
    seguir sem o valor.
 5. Nomes de credencial seguem `service.purpose` em minúsculas:
    `github.token`, `openai.api_key`, `smtp.password`.
 6. Arquivos continuam com permissão 0600 e a pasta com 0700. Não relaxe.
 7. A variável `<BIN>_MASTER_KEY` tem prioridade sobre `master.key`. Em CI e
    em servidores, use a variável e não grave a chave em disco. Para trocar a
-   chave, `credentials rotate-key` decifra com a atual e recifra com a nova;
-   não oriente apagar o cofre.
+   chave, `credentials rotate-key` decifra com a atual e grava uma nova
+   chave em disco, inclusive com `--from-env`. Nesse modo, a chave antiga
+   vem de `master.key` e a nova vem da variável. Sem a flag, remova a
+   variável antiga do shell após a rotação. Não oriente apagar o cofre.
 
 ## Passos para uma chave de configuração
 
@@ -56,18 +58,24 @@ credenciais, mudar a política da chave mestra ou depurar a pasta
 
 1. Defina o nome e documente-o em `docs/configuration.md` e na
    `longDescription` do comando que a usa.
-2. No comando ou na tool, chame `getCredential(name)` no início de
-   `run`, antes de qualquer efeito.
-3. Em `--help`, acrescente `ExitCode.CREDENTIALS` em `exitCodes`.
+2. Chame `getCredential(name)` no início de `run` do comando ou do
+   callback registrado por `server.registerTool`, antes de qualquer efeito.
+3. No registro do comando, acrescente `ExitCode.CREDENTIALS` em
+   `exitCodes`. Na tool, converta falhas previstas em `isError: true`.
 4. Oriente a gravação com `<bin> credentials set <name>` na mensagem de erro.
 
 ## Checklist da spec
 
-Ao concluir cada entrega, marque o item correspondente em `## Checklist` do
-`CLISPEC.md` de `- [ ]` para `- [x]` pelo `{#id}`, sem mudar texto nem id,
-e avance `updatedAt`. Registre em `## Notes` uma linha datada quando a
-implementação se afastar do combinado. Rode `bun run dev -- spec check` antes
-de entregar: avisos sobre o item recém-implementado devem ter sumido.
+Ao concluir e testar cada entrega, a skill de implementação marca o item
+correspondente em `## Checklist` do `CLISPEC.md` de `- [ ]` para `- [x]`
+pelo `{#id}`, preservando o id. Avance `updatedAt` e use `in_progress`
+enquanto houver trabalho. Só use `done` após concluir todos os itens.
+Se o escopo mudar, revise a entrada da spec e o texto do item com
+`termfy-spec`; registre a alteração em `## Notes`.
+Rode `bun run dev -- spec check --json`: referências declaradas ainda não
+implementadas são erros, mesmo em `draft`. Relate separadamente as
+pendências de outras entregas. Ao concluir o escopo inteiro, rode
+`bun run validate` e exija saída 0.
 
 ## Marcos
 

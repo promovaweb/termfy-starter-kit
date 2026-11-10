@@ -33,3 +33,25 @@ test("completion follows command depth and option or argument enums", () => {
   expect(complete(["demo", "config", "get", "--mode=sl"])).toEqual(["--mode=slow"]);
   expect(complete(["demo", "config", "get", "--", "t"])).toEqual(["theme"]);
 });
+
+for (const shell of COMPLETION_SHELLS) {
+  test.skipIf(!Bun.which(shell))(`${shell} accepts the generated script syntax`, () => {
+    const result = Bun.spawnSync([shell, "-n"], { stdin: Buffer.from(generateCompletion(root, shell)) });
+    expect(result.stderr.toString()).toBe("");
+    expect(result.exitCode).toBe(0);
+  });
+}
+
+test.skipIf(!Bun.which("zsh"))("native Zsh installs and produces option enums without bashcompinit", () => {
+  const script = generateCompletion(root, "zsh");
+  expect(script).not.toContain("bashcompinit");
+  const result = Bun.spawnSync(["zsh", "-c", `${script}
+    [[ $_comps[demo] = _complete_demo ]] || exit 1
+    compadd() { print -rl -- "\${COMPREPLY[@]}"; }
+    words=(demo config get --mode f); CURRENT=5
+    _complete_demo
+  `]);
+  expect(result.stderr.toString()).toBe("");
+  expect(result.exitCode).toBe(0);
+  expect(result.stdout.toString().trim()).toBe("fast");
+});

@@ -16,7 +16,7 @@ tool MCP `spec`.
 `CLISPEC.md` abre com front matter YAML delimitado por `---` e segue com
 cinco seções fixas, nesta ordem: `## Purpose`, `## Audiences`,
 `## Out of scope`, `## Checklist` e `## Notes`. Os títulos são exatos; texto
-fora deles é preservado mas não participa da leitura. A prosa pode estar em
+fora deles permanece no arquivo, mas não entra em `sections`. A prosa pode estar em
 qualquer idioma; os nomes (commands, options, keys, tools, screens) são os
 nomes do código, em inglês.
 
@@ -24,6 +24,12 @@ nomes do código, em inglês.
 
 O schema fechado fica em `src/spec/schema.ts` (Zod). Campo desconhecido,
 enum inválido ou tipo errado recusam a leitura.
+
+A regra de campos desconhecidos vale também para os objetos internos.
+Identificadores, títulos e descrições obrigatórias não podem ser vazios ou
+conter apenas espaços. Datas usam ISO 8601 com horário e fuso (`Z` ou offset).
+`blockedReason` e `archivedReason` são obrigatórios no estado correspondente
+e recusados nos demais estados.
 
 | Campo | Tipo | Obrigatório | Descrição |
 | --- | --- | --- | --- |
@@ -56,6 +62,10 @@ enum inválido ou tipo errado recusam a leitura.
 | `interactive` | boolean | não | exige TTY |
 | `example` | string | não | linha de uso |
 
+`argument` de uma option é o nome textual do valor; `values` é um array de
+strings. `default` aceita string, number ou boolean. Os campos `data`,
+`input` e `output` descrevem formatos como strings, sem conter os dados reais.
+
 ### Screen
 
 `{ id, title, description?, keys?: [{ key, action }] }`.
@@ -71,6 +81,10 @@ enum inválido ou tipo errado recusam a leitura.
 
 `{ key, type, default, values?, description? }`, com `type` em `string`,
 `number`, `boolean` ou `enum`.
+
+`default` aceita string, number ou boolean; `values`, quando presente, é
+um array de strings. O cruzamento confere a existência da key e seu `type`,
+sem comparar defaults, descrições ou listas de valores com o código.
 
 ### Credential
 
@@ -106,6 +120,18 @@ Itens GFM, um por linha, com `{#id}` obrigatório de quatro caracteres
 Item sem `{#id}` ou com `{#id}` repetido recusa a leitura. Progresso é
 `concluídos / total`.
 
+Use o marcador `-`, seguido de `[ ]`, `[x]` ou `[X]`, texto não vazio,
+tag opcional e ID no fim da linha. Outros marcadores de lista com checkbox
+ou estados diferentes são recusados, para que uma pendência não seja
+ignorada. Espaços e tabs entre os componentes são aceitos. Exemplos dentro
+de blocos cercados por crases ou tils não entram na contagem.
+
+O parser retorna `{ frontmatter, sections, checklist, progress }`.
+`sections` usa os cinco títulos exatos como keys; cada item da checklist
+tem `{ id, text, done, skill? }`, com a skill sem `#`. O progresso contém
+`{ done, total, percent }`; `percent` é `done / total * 100` e vale zero
+quando a checklist está vazia. O JSON mantém a precisão do cálculo.
+
 ### `## Notes`
 
 Registro cronológico, uma linha datada por escolha relevante, dúvida aberta
@@ -131,10 +157,18 @@ A leitura relata o estado declarado; não o infere.
 | `{{bin}} spec check [--json] [--strict]` | valida o contrato e cruza com o código |
 | `{{bin}} spec progress [--json]` | só a contagem da checklist |
 
+Em texto, `spec show` apresenta identidade, status, contagens de commands,
+screens, tools, settings e credentials, progresso e trechos de Purpose e
+Out of scope, limitados a 320 caracteres por seção. Com `--json`, mantém
+`{ frontmatter, sections, progress }` completo. O progresso em texto é
+arredondado para até duas casas decimais nesse resumo.
+
 `spec check` falha (exit code 3) quando:
 
 - o front matter não passa no schema ou a checklist tem `{#id}` ausente ou
   repetido;
+- o front matter está ausente, o YAML é inválido ou uma seção fixa está
+  ausente, repetida ou fora da ordem;
 - `bin` ou `description` divergem do `package.json`;
 - um command da spec não existe no registry, ou cita option, argument ou
   exit code que o registry não tem;
@@ -147,14 +181,35 @@ A leitura relata o estado declarado; não o infere.
 Avisos (não falham, salvo `--strict`): command, screen, tool ou setting do
 código ausente da spec.
 
+Paths de commands usam os nomes principais do registry, incluindo os
+agrupadores, como `config`, e os subcommands, como `config get`. Options
+globais e options recursivas dos pais também são aceitas. Os exit codes
+0, 1 e 2 são implícitos; os demais precisam existir na tabela central e no
+command. Resources e prompts ausentes da spec não geram avisos.
+
+O checker devolve `{ ok, errors, warnings }`. `--strict` mantém os avisos
+em `warnings`, mas faz `ok` ser `false` e o processo sair com 3. Sem erros
+ou avisos impeditivos, o exit code é 0. Erros de leitura lançam `AppError`
+com CONFIG, também nos commands `show` e `progress`.
+
+Em `spec check --json`, um cruzamento concluído usa o envelope normal do
+CLI e coloca o resultado em `data`; consulte `data.ok` e o exit code.
+Uma falha de leitura usa o envelope de erro com `error.code: 3`.
+
 `bun run spec:check` roda o mesmo cruzamento a partir do código-fonte e, além
 disso, confere que todo `getCredential("<name>")` em `src/` aparece em
 `credentials` da spec. Ele entra em `bun run validate`.
+
+O script sai com 1 quando há erro e com 0 quando passa; avisos não falham.
+A busca considera chamadas diretas com nome literal entre aspas ou crases,
+ignora comentários e exemplos em strings, e não resolve nomes calculados.
 
 ## Tool MCP
 
 `spec` devolve o front matter parseado, as seções e o progresso. Um agente
 lê a spec antes de operar o binário ou de propor mudanças.
+
+Se a leitura falhar, a tool devolve `isError: true` e a mensagem de CONFIG.
 
 ## Exemplo mínimo
 

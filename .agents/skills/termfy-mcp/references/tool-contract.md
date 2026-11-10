@@ -11,12 +11,12 @@ export function registerExampleTools({ server, catalog }: Registrar): void {
   const description = "Preview a target and its item limit. Returns the requested values.";
   catalog.tools.push({ name, description });
   server.registerTool(
-    name,                                   // snake_case, verbo no fim
+    name,                                   // snake_case, action last
     {
-      title: "Preview items",                        // nome legível para o cliente
-      description,     // quando usar + o que devolve
+      title: "Preview items",                        // Human-readable client label
+      description,     // When to use it and what it returns
       inputSchema: {
-        target: z.string().min(1).describe("Target to preview."),     // cada campo com describe()
+        target: z.string().min(1).describe("Target to preview."),     // Describe each field
         limit: z.number().int().positive().max(100).optional().describe("Maximum item count. Defaults to 10."),
       },
     },
@@ -25,7 +25,7 @@ export function registerExampleTools({ server, catalog }: Registrar): void {
       return {
         content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
         structuredContent: data,
-        // isError: true  em falha prevista
+        // Use isError: true for expected failures
       };
     },
   );

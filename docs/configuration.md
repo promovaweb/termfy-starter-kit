@@ -115,5 +115,7 @@ Sem `--from-env`, se a chave anterior veio da variável, remova essa variável
 do shell após a rotação: `unset {{BIN}}_MASTER_KEY`. Ela tem prioridade sobre
 o arquivo nas próximas execuções. Não execute gravações no cofre durante a
 rotação. Os dois arquivos são preparados antes da substituição; falhas de
-gravação comuns restauram a chave anterior. Como são dois arquivos, uma
+gravação comuns restauram a chave anterior por substituição atômica. Se essa
+restauração também falhar, os arquivos de recuperação ficam na pasta
+`.rotate-*` indicada pelo erro; a cópia `previous.key` mantém permissão 0600. Como são dois arquivos, uma
 interrupção do processo entre as substituições exige recuperação de backup.

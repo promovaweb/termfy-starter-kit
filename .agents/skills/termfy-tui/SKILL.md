@@ -30,13 +30,18 @@ interação por teclado da interface de terminal.
    `src/tui/theme.ts`, nas duas paletas, com nome de papel.
 3. Use os componentes de `src/tui/components.ts`: `panel`, `keyValueTable`,
    `list`, `heading`, `dim` e `listPanel` (lista com rolagem e seleção por
-   teclado, com `select`, `selected` e `move` para a screen tratar em
-   `onKey`). Se precisar de um novo,
+   teclado). `listPanel` devolve `{ box, select, selected, move }`: monte
+   `box`, chame `move(delta)` para navegar e `select(index)` para ativar
+   `onSelect`. `selected()` devolve o índice, ou -1 na lista vazia.
+   Encaminhe as teclas em `onKey`; o componente não registra esse handler
+   na screen. `spacer(renderer, height)` não recebe tema. Se precisar de um novo,
    crie lá, com tema como parâmetro, e documente no cabeçalho do arquivo.
 4. Painéis vizinhos não têm gap. Padding interno de uma célula. Bordas
    `rounded` com título na borda. Acento só no painel em foco.
 5. Teclas da tela vão em `keys` (para a barra inferior) e em `onKey`.
-   Não capture `q`, `Esc`, `Tab`, `?` nem dígitos, que são globais.
+   Preserve `q`, `Esc`, `Ctrl+C`, `Tab`, `?`, `left`, `right`, `[` e `]`,
+   além dos dígitos de 1 a 9. `onKey` é chamado antes do handler global;
+   devolva `false` para as teclas que a screen não tratar.
 6. Timers e assinaturas começam em `onEnter` e terminam em `onLeave`.
 7. A TUI nunca escreve em stdout com `console.log`. Use `renderer.console`
    do OpenTUI quando precisar depurar.
@@ -61,11 +66,16 @@ interação por teclado da interface de terminal.
 
 ## Checklist da spec
 
-Ao concluir cada entrega, marque o item correspondente em `## Checklist` do
-`CLISPEC.md` de `- [ ]` para `- [x]` pelo `{#id}`, sem mudar texto nem id,
-e avance `updatedAt`. Registre em `## Notes` uma linha datada quando a
-implementação se afastar do combinado. Rode `bun run dev -- spec check` antes
-de entregar: avisos sobre o item recém-implementado devem ter sumido.
+Ao concluir e testar cada entrega, a skill de implementação marca o item
+correspondente em `## Checklist` do `CLISPEC.md` de `- [ ]` para `- [x]`
+pelo `{#id}`, preservando o id. Avance `updatedAt` e use `in_progress`
+enquanto houver trabalho. Só use `done` após concluir todos os itens.
+Se o escopo mudar, revise a entrada da spec e o texto do item com
+`termfy-spec`; registre a alteração em `## Notes`.
+Rode `bun run dev -- spec check --json`: referências declaradas ainda não
+implementadas são erros, mesmo em `draft`. Relate separadamente as
+pendências de outras entregas. Ao concluir o escopo inteiro, rode
+`bun run validate` e exija saída 0.
 
 ## Marcos
 

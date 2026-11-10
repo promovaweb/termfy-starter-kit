@@ -11,18 +11,20 @@ Um comando é um objeto `Command` (ver `src/cli/registry.ts`).
 | `arguments` | não | posicionais; só o último pode ser `variadic` |
 | `options` | não | `--name` longo; `aliases` para curtos; `argument` quando recebe valor |
 | `subcommands` | não | comandos agrupadores não têm `run` |
-| `examples` | sim quando há `run` | linhas completas começando pelo binário |
-| `exitCodes` | sim quando há `run` | famílias além de 0, 1 e 2 |
-| `interactive` | quando exige TTY | marca OpenCLI `interactive` |
+| `examples` | recomendado quando há `run` | linhas completas começando pelo binário |
+| `exitCodes` | quando há famílias adicionais | famílias além de 0, 1 e 2 |
+| `interactive` | quando há interação | metadado OpenCLI; `run` verifica TTY |
 | `hidden` | não | some do `--help` e do OpenCLI |
-| `run` | sim em comandos finais | `(ctx) => Result` ou `Promise<Result>` |
+| `run` | sim em comandos finais | `(ctx) => Result \| Promise<Result>` |
 
 ## Contexto
 
 `ctx.args` traz os posicionais validados; `ctx.options` traz as opções pelo
-nome longo sem hifens (`--no-color` vira `ctx.options["no-color"]`);
+nome longo sem o prefixo `--` (`--no-color` vira `ctx.options["no-color"]`);
 `ctx.json` indica o formato; `ctx.stderr` recebe progresso; `ctx.interactive`
-diz se há TTY.
+diz se stdin e stdout são TTY. `OptionDefinition.default` é metadado; o
+parser não o aplica a `ctx.options`. Resolva o padrão em `run`, por exemplo
+`Number(ctx.options.limit ?? 10)`.
 
 ## Resultado
 
