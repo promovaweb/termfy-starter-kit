@@ -2,6 +2,14 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.3.2] - 2026-11-10
+
+### Corrigido
+
+- Ebook do guia do usuário avança para a edição 0.2.1, com o nome
+  `termfy-init` em `docs/customize-template.md`; a 0.3.1 tinha regenerado a
+  edição 0.2.0 com conteúdo novo sem avançar `ebook/VERSION`.
+
 ## [0.3.1] - 2026-11-10
 
 ### Alterado

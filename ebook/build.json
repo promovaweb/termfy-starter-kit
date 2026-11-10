@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "version": "0.2.0",
-  "edition": "v0.2.0",
+  "version": "0.2.1",
+  "edition": "v0.2.1",
   "bin": "termfy",
   "title": "Termfy",
-  "generated_at": "2026-11-10T12:22:44Z",
-  "source_sha256": "1b126c647e525828fba127e99931b893b5b89296cf01d9a773fe1c7d1bf817ad",
+  "generated_at": "2026-11-10T12:42:04Z",
+  "source_sha256": "eded7de19474c09e0f23610125a9da9a31e83c2048e2ff0f80e2164232551bad",
   "sources": [
     ".ebook/assets/logo.png",
     ".ebook/build-ebook.mjs",
@@ -29,12 +29,12 @@
   ],
   "artifacts": {
     "pdf": {
-      "file": "Termfy-User-Guide-v0.2.0.pdf",
-      "sha256": "85a25380eb5fe36c25966a69f58a7de553a899a8bded8a29ffdd3e5988ac4115"
+      "file": "Termfy-User-Guide-v0.2.1.pdf",
+      "sha256": "8aef8ed18a1913514114fda3a28f95b783bcbac3544f23c0b08634b8885426f8"
     },
     "epub": {
-      "file": "Termfy-User-Guide-v0.2.0.epub",
-      "sha256": "a504e13f38da702e08e95ff5fc17d41bad4fc671e61a5a4e8d1320845efca7ab"
+      "file": "Termfy-User-Guide-v0.2.1.epub",
+      "sha256": "f7904d5010a264969ed70d5dd2578954c647b4d570c5458197678c25927a2ef5"
     }
   }
 }
