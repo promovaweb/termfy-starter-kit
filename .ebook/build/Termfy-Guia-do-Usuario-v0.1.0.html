@@ -1,0 +1,1077 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Termfy: guia do usuário</title>
+</head>
+<body>
+  <div class="cover">
+    <img class="cover-mark" src="assets/logo.png" alt="Logo">
+    <div class="cover-title">
+      <div class="cover-kicker">Termfy</div>
+      <h1>Guia do usuário</h1>
+      <div class="cover-tagline">Esqueleto de CLI, TUI e servidor MCP
+stdio em Bun, com as skills do framework Termfy instaladas.</div>
+      <div class="cover-desc">Guia do usuário do Termfy: CLI, TUI,
+servidor MCP, configuração, credenciais e códigos de saída.</div>
+    </div>
+    <div class="cover-meta">
+      <div>Edição v0.1.0</div>
+      <div>Gerado em 10 de novembro de 2026</div>
+      <div>Fonte editorial: docs/</div>
+    </div>
+  </div>
+    <nav id="TOC" role="doc-toc"><ul>
+<li><a href="#readme.md__documentação-do-termfy"
+id="toc-readme.md__documentação-do-termfy">Documentação do Termfy</a>
+<ul>
+<li><a href="#readme.md__mapa" id="toc-readme.md__mapa">Mapa</a></li>
+<li><a href="#readme.md__documentação-embutida"
+id="toc-readme.md__documentação-embutida">Documentação embutida</a></li>
+</ul></li>
+<li><a href="#cli.md__cli" id="toc-cli.md__cli">CLI</a>
+<ul>
+<li><a href="#cli.md__convenções"
+id="toc-cli.md__convenções">Convenções</a></li>
+<li><a href="#cli.md__opções-globais"
+id="toc-cli.md__opções-globais">Opções globais</a></li>
+<li><a href="#cli.md__saída-em-texto-e-em-json"
+id="toc-cli.md__saída-em-texto-e-em-json">Saída em texto e em
+JSON</a></li>
+<li><a href="#cli.md__comandos-do-esqueleto"
+id="toc-cli.md__comandos-do-esqueleto">Comandos do esqueleto</a></li>
+<li><a href="#cli.md__como-adicionar-um-comando"
+id="toc-cli.md__como-adicionar-um-comando">Como adicionar um
+comando</a></li>
+</ul></li>
+<li><a href="#tui.md__tui" id="toc-tui.md__tui">TUI</a>
+<ul>
+<li><a href="#tui.md__abas" id="toc-tui.md__abas">Abas</a></li>
+<li><a href="#tui.md__teclas" id="toc-tui.md__teclas">Teclas</a></li>
+<li><a href="#tui.md__tema" id="toc-tui.md__tema">Tema</a></li>
+<li><a href="#tui.md__como-criar-uma-tela"
+id="toc-tui.md__como-criar-uma-tela">Como criar uma tela</a></li>
+</ul></li>
+<li><a href="#mcp.md__mcp" id="toc-mcp.md__mcp">MCP</a>
+<ul>
+<li><a href="#mcp.md__configuração-no-cliente"
+id="toc-mcp.md__configuração-no-cliente">Configuração no
+cliente</a></li>
+<li><a href="#mcp.md__tools" id="toc-mcp.md__tools">Tools</a></li>
+<li><a href="#mcp.md__resources"
+id="toc-mcp.md__resources">Resources</a></li>
+<li><a href="#mcp.md__prompts" id="toc-mcp.md__prompts">Prompts</a></li>
+<li><a href="#mcp.md__listar-sem-iniciar"
+id="toc-mcp.md__listar-sem-iniciar">Listar sem iniciar</a></li>
+<li><a href="#mcp.md__testar" id="toc-mcp.md__testar">Testar</a></li>
+<li><a href="#mcp.md__como-adicionar-uma-tool"
+id="toc-mcp.md__como-adicionar-uma-tool">Como adicionar uma
+tool</a></li>
+</ul></li>
+<li><a href="#configuracao.md__configuração-e-credenciais"
+id="toc-configuracao.md__configuração-e-credenciais">Configuração e
+credenciais</a>
+<ul>
+<li><a href="#configuracao.md__settings.json"
+id="toc-configuracao.md__settings.json">settings.json</a></li>
+<li><a href="#configuracao.md__credentials.json"
+id="toc-configuracao.md__credentials.json">credentials.json</a></li>
+<li><a href="#configuracao.md__o-que-a-cifra-protege"
+id="toc-configuracao.md__o-que-a-cifra-protege">O que a cifra
+protege</a></li>
+<li><a href="#configuracao.md__usar-uma-credencial-no-código"
+id="toc-configuracao.md__usar-uma-credencial-no-código">Usar uma
+credencial no código</a></li>
+<li><a href="#configuracao.md__variáveis-de-ambiente"
+id="toc-configuracao.md__variáveis-de-ambiente">Variáveis de
+ambiente</a></li>
+</ul></li>
+<li><a href="#codigos-de-saida.md__códigos-de-saída"
+id="toc-codigos-de-saida.md__códigos-de-saída">Códigos de saída</a>
+<ul>
+<li><a href="#codigos-de-saida.md__em-shell"
+id="toc-codigos-de-saida.md__em-shell">Em shell</a></li>
+<li><a href="#codigos-de-saida.md__no-código"
+id="toc-codigos-de-saida.md__no-código">No código</a></li>
+</ul></li>
+<li><a href="#arquitetura.md__arquitetura"
+id="toc-arquitetura.md__arquitetura">Arquitetura</a>
+<ul>
+<li><a href="#arquitetura.md__fluxo-de-execução"
+id="toc-arquitetura.md__fluxo-de-execução">Fluxo de execução</a></li>
+<li><a href="#arquitetura.md__regras-de-dependência"
+id="toc-arquitetura.md__regras-de-dependência">Regras de
+dependência</a></li>
+<li><a href="#arquitetura.md__build"
+id="toc-arquitetura.md__build">Build</a></li>
+</ul></li>
+<li><a href="#personalizar-template.md__personalizar-o-template"
+id="toc-personalizar-template.md__personalizar-o-template">Personalizar
+o template</a>
+<ul>
+<li><a href="#personalizar-template.md__o-que-mudar-depois"
+id="toc-personalizar-template.md__o-que-mudar-depois">O que mudar
+depois</a></li>
+<li><a href="#personalizar-template.md__skills"
+id="toc-personalizar-template.md__skills">Skills</a></li>
+</ul></li>
+<li><a href="#release.md__release"
+id="toc-release.md__release">Release</a>
+<ul>
+<li><a href="#release.md__build-local"
+id="toc-release.md__build-local">Build local</a></li>
+<li><a href="#release.md__ebook-do-guia"
+id="toc-release.md__ebook-do-guia">Ebook do guia</a></li>
+</ul></li>
+</ul></nav>
+    <main><h1 id="readme.md__documentação-do-termfy">Documentação do
+Termfy</h1>
+<p><code>termfy</code> é um executável único com três modos de uso:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Modo</th>
+<th>Como entrar</th>
+<th>Para quem</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TUI</td>
+<td><code>termfy</code> sem argumentos em um terminal interativo</td>
+<td>pessoas</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td><code>termfy &lt;comando&gt; [opções]</code>, com saída em texto ou
+<code>--json</code></td>
+<td>pessoas, scripts e agentes</td>
+</tr>
+<tr>
+<td>MCP</td>
+<td><code>termfy mcp</code>, servidor Model Context Protocol via
+stdio</td>
+<td>agentes de IA</td>
+</tr>
+</tbody>
+</table>
+<p>Os três modos compartilham a mesma identidade
+(<code>src/app/manifesto.ts</code>), a mesma configuração
+(<code>~/.termfy/settings.json</code>), o mesmo cofre de credenciais
+(<code>~/.termfy/credentials.json</code>, cifrado) e a mesma tabela de
+códigos de saída.</p>
+<h2 id="readme.md__mapa">Mapa</h2>
+<ul>
+<li>cli.md: comandos, opções globais, convenções de saída e a referência
+gerada do registro.</li>
+<li>tui.md: abas, teclas, tema e como criar uma tela.</li>
+<li>mcp.md: tools, resources, prompts e configuração nos clientes.</li>
+<li>configuracao.md: settings.json, credentials.json, chave mestra e
+variáveis de ambiente.</li>
+<li>codigos-de-saida.md: tabela de códigos e como tratá-los.</li>
+<li>arquitetura.md: pastas, camadas e fluxo de execução.</li>
+<li>personalizar-template.md: usar este repositório como ponto de
+partida de um novo binário.</li>
+<li>release.md: versão, changelog, tag, GitHub Release e binários.</li>
+<li>opencli.json: descrição OpenCLI gerada por
+<code>bun run opencli</code>.</li>
+</ul>
+<h2 id="readme.md__documentação-embutida">Documentação embutida</h2>
+<p>Toda esta pasta entra no binário. Um agente pode ler tudo sem acesso
+ao repositório:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">termfy</span> <span class="at">--skill</span>          <span class="co"># tudo</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">termfy</span> <span class="at">--skill</span> cli      <span class="co"># só a seção do CLI, com a referência gerada</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">termfy</span> <span class="at">--skill</span> mcp <span class="at">--json</span></span></code></pre></div>
+<p>Os tópicos aceitos são <code>cli</code>, <code>tui</code>,
+<code>mcp</code>, <code>config</code> e <code>codigos</code>.</p>
+<h1 id="cli.md__cli">CLI</h1>
+<h2 id="cli.md__convenções">Convenções</h2>
+<ul>
+<li><code>termfy &lt;comando&gt; [subcomando] [argumentos] [opções]</code>.</li>
+<li>Opções aceitam <code>--chave valor</code> e
+<code>--chave=valor</code>. Não há agrupamento de flags curtas
+(<code>-abc</code>).</li>
+<li><code>--</code> encerra a leitura de opções; o que vem depois é
+argumento.</li>
+<li>Opções globais valem em qualquer posição, antes ou depois do
+comando.</li>
+<li>Sem argumentos, em terminal interativo, o binário abre a TUI. Sem
+TTY, imprime a ajuda e sai com código 2.</li>
+<li>Toda saída de dados vai para stdout. Avisos, progresso e erros em
+modo texto vão para stderr.</li>
+</ul>
+<h2 id="cli.md__opções-globais">Opções globais</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Opção</th>
+<th>Efeito</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-h</code>, <code>--help</code></td>
+<td>Ajuda do comando atual. Código 0.</td>
+</tr>
+<tr>
+<td><code>-V</code>, <code>--version</code></td>
+<td>Imprime <code>termfy &lt;versão&gt;</code>. Código 0.</td>
+</tr>
+<tr>
+<td><code>--json</code></td>
+<td>Saída em JSON com envelope estável. Erros também saem em JSON, em
+stdout.</td>
+</tr>
+<tr>
+<td><code>--skill [topico]</code></td>
+<td>Documentação embutida. Tópicos: <code>cli</code>, <code>tui</code>,
+<code>mcp</code>, <code>config</code>, <code>codigos</code>.</td>
+</tr>
+<tr>
+<td><code>--opencli</code></td>
+<td>Descrição OpenCLI 0.1 da árvore de comandos em JSON.</td>
+</tr>
+<tr>
+<td><code>--no-color</code></td>
+<td>Desliga cores ANSI. <code>NO_COLOR=1</code> tem o mesmo efeito.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cli.md__saída-em-texto-e-em-json">Saída em texto e em JSON</h2>
+<p>Texto é o padrão quando <code>saida.formato</code> em settings.json é
+<code>texto</code>. Com <code>--json</code>, ou com
+<code>saida.formato = json</code>, a saída segue este envelope:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span> <span class="dt">&quot;ok&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span> <span class="dt">&quot;comando&quot;</span><span class="fu">:</span> <span class="st">&quot;termfy config get&quot;</span><span class="fu">,</span> <span class="dt">&quot;dados&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;chave&quot;</span><span class="fu">:</span> <span class="st">&quot;tui.tema&quot;</span><span class="fu">,</span> <span class="dt">&quot;valor&quot;</span><span class="fu">:</span> <span class="st">&quot;noite&quot;</span> <span class="fu">}</span> <span class="fu">}</span></span></code></pre></div>
+<p>Em erro:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;ok&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;comando&quot;</span><span class="fu">:</span> <span class="st">&quot;termfy credentials get&quot;</span><span class="fu">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;erro&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;codigo&quot;</span><span class="fu">:</span> <span class="dv">4</span><span class="fu">,</span> <span class="dt">&quot;nome&quot;</span><span class="fu">:</span> <span class="st">&quot;CREDENCIAIS&quot;</span><span class="fu">,</span> <span class="dt">&quot;mensagem&quot;</span><span class="fu">:</span> <span class="st">&quot;Credencial </span><span class="ch">\&quot;</span><span class="st">x</span><span class="ch">\&quot;</span><span class="st"> não encontrada.&quot;</span><span class="fu">,</span> <span class="dt">&quot;detalhes&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;nome&quot;</span><span class="fu">:</span> <span class="st">&quot;x&quot;</span> <span class="fu">}</span> <span class="fu">}</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>O código de saída do processo é sempre o mesmo de
+<code>erro.codigo</code>. Um agente deve ler os dois: o envelope para a
+mensagem, o código para a classe da falha.</p>
+<h2 id="cli.md__comandos-do-esqueleto">Comandos do esqueleto</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Comando</th>
+<th>Função</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tui [--aba &lt;aba&gt;]</code></td>
+<td>Abre a TUI. Exige TTY.</td>
+</tr>
+<tr>
+<td><code>about</code></td>
+<td>Versão, executável, runtime, plataforma e créditos.</td>
+</tr>
+<tr>
+<td><code>config list\|get\|set\|unset\|path\|schema</code></td>
+<td>Preferências em settings.json.</td>
+</tr>
+<tr>
+<td><code>credentials set\|get\|list\|remove\|status\|clear</code></td>
+<td>Cofre cifrado em credentials.json.</td>
+</tr>
+<tr>
+<td><code>mcp [--list]</code></td>
+<td>Servidor MCP via stdio, ou listagem do que ele registra.</td>
+</tr>
+<tr>
+<td><code>skill [topico]</code></td>
+<td>Mesmo efeito de <code>--skill</code>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="cli.md__como-adicionar-um-comando">Como adicionar um
+comando</h2>
+<ol type="1">
+<li>Copie <code>template/comando/exemplo.ts</code> para
+<code>src/cli/comandos/&lt;nome&gt;.ts</code>.</li>
+<li>Preencha <code>nome</code>, <code>descricao</code>,
+<code>argumentos</code>, <code>opcoes</code>, <code>exemplos</code> e
+<code>codigosSaida</code>. Toda opção precisa de <code>descricao</code>;
+é ela que aparece no <code>--help</code>, no <code>--skill</code> e no
+OpenCLI.</li>
+<li>Implemente <code>executar(ctx)</code> devolvendo
+<code>{ dados, texto }</code>. <code>dados</code> é o que sai em
+<code>--json</code>; <code>texto</code> é o que sai para humanos. Lance
+<code>ErroApp</code> (ou use <code>erro.*</code>) para falhas previstas,
+com o código certo.</li>
+<li>Registre o comando em <code>src/cli/comandos.ts</code>.</li>
+<li>Rode <code>bun test</code>, <code>bun run opencli</code> e confira
+<code>docs/opencli.json</code>.</li>
+</ol>
+<p>Segredos nunca entram por argumento de linha de comando. Leia pelo
+stdin ou por <code>lerSegredo()</code>; grave com
+<code>definirCredencial()</code>; recupere com
+<code>obterCredencial()</code>, que encerra com código 4 quando o valor
+não existe.</p>
+<h1 id="tui.md__tui">TUI</h1>
+<p>A interface de terminal abre com <code>termfy</code> sem argumentos
+ou com <code>termfy tui</code>. Ela exige stdin e stdout em um TTY; fora
+disso o processo encerra com código 8.</p>
+<h2 id="tui.md__abas">Abas</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Aba</th>
+<th>Conteúdo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Overview</td>
+<td>Ambiente (binário, runtime, plataforma, terminal, pasta de dados),
+estado de settings.json e do cofre, configuração em vigor e próximos
+passos.</td>
+</tr>
+<tr>
+<td>About</td>
+<td>Binário, projeto, licença, créditos e padrões seguidos.</td>
+</tr>
+</tbody>
+</table>
+<p>A aba inicial vem de <code>tui.abaInicial</code> em settings.json ou
+de <code>--aba</code>.</p>
+<h2 id="tui.md__teclas">Teclas</h2>
+<table>
+<thead>
+<tr>
+<th>Tecla</th>
+<th>Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>←</code> <code>→</code> <code>[</code> <code>]</code></td>
+<td>aba anterior ou seguinte</td>
+</tr>
+<tr>
+<td><code>Tab</code></td>
+<td>próxima aba</td>
+</tr>
+<tr>
+<td><code>1</code> … <code>9</code></td>
+<td>ir para a aba de mesmo número</td>
+</tr>
+<tr>
+<td><code>?</code></td>
+<td>mostrar ou esconder a ajuda de teclas</td>
+</tr>
+<tr>
+<td><code>q</code> <code>Esc</code> <code>Ctrl+C</code></td>
+<td>sair</td>
+</tr>
+</tbody>
+</table>
+<p>Cada tela pode declarar teclas próprias em <code>teclas</code> e
+tratá-las em <code>aoTecla</code>. Elas aparecem na barra inferior antes
+das teclas globais.</p>
+<h2 id="tui.md__tema">Tema</h2>
+<p>Duas paletas em <code>src/tui/tema.ts</code>: <code>noite</code>
+(padrão) e <code>dia</code>. A escolha vem de <code>tui.tema</code>. As
+cores têm nomes de papel (<code>acento</code>, <code>textoSutil</code>,
+<code>borda</code>), não de matiz, para que uma troca de paleta não
+exija tocar nas telas.</p>
+<p>Princípios do visual, no estilo modern unix:</p>
+<ul>
+<li>bordas arredondadas com título na própria borda;</li>
+<li>rótulos apagados à esquerda e valores em cor plena à direita;</li>
+<li>uma cor de acento para o que está ativo, uma secundária para links e
+origens externas; verde, âmbar e vermelho só para estado;</li>
+<li>barra de status com teclas em blocos invertidos;</li>
+<li>sem espaços vazios entre painéis vizinhos; padding interno de uma
+célula;</li>
+<li>nada pisca, nada rola sozinho.</li>
+</ul>
+<h2 id="tui.md__como-criar-uma-tela">Como criar uma tela</h2>
+<ol type="1">
+<li>Copie <code>template/tela/exemplo.ts</code> para
+<code>src/tui/telas/&lt;id&gt;.ts</code>.</li>
+<li>Preencha <code>id</code>, <code>titulo</code>,
+<code>descricao</code> e <code>montar(ctx)</code>. Use os componentes de
+<code>src/tui/componentes.ts</code> (<code>painel</code>,
+<code>tabelaChaveValor</code>, <code>lista</code>, <code>titulo</code>,
+<code>sutil</code>) e as cores de <code>ctx.tema</code>.</li>
+<li>Se a tela precisar de atualização periódica, inicie o timer em
+<code>aoEntrar</code> e limpe em <code>aoSair</code>.</li>
+<li>Registre em <code>src/tui/telas/index.ts</code>. A ordem da lista é
+a ordem das abas.</li>
+<li>Se o <code>id</code> for uma opção válida de aba inicial,
+acrescente-o em <code>tui.abaInicial</code>
+(<code>src/config/settings.ts</code>) e em <code>--aba</code>
+(<code>src/cli/comandos/tui.ts</code>).</li>
+</ol>
+<p>A TUI roda sobre o OpenTUI (<code>@opentui/core</code>). Use
+<code>BoxRenderable</code>, <code>TextRenderable</code>,
+<code>TabSelectRenderable</code>, <code>ScrollBoxRenderable</code> e os
+demais renderables do pacote. Sempre devolva o terminal com
+<code>renderer.destroy()</code>; <code>iniciarTui()</code> já cuida
+disso para <code>q</code>, <code>Esc</code> e <code>Ctrl+C</code>.</p>
+<h1 id="mcp.md__mcp">MCP</h1>
+<p><code>termfy mcp</code> transforma o processo em um servidor Model
+Context Protocol sobre stdio. Nada mais é escrito em stdout;
+diagnósticos vão para stderr.</p>
+<h2 id="mcp.md__configuração-no-cliente">Configuração no cliente</h2>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;mcpServers&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;termfy&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;termfy&quot;</span><span class="fu">,</span> <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;mcp&quot;</span><span class="ot">]</span> <span class="fu">}</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Para o Claude Code: <code>claude mcp add termfy -- termfy mcp</code>.
+Para desenvolvimento, sem compilar:
+<code>"command": "bun", "args": ["run", "src/main.ts", "mcp"]</code>.</p>
+<h2 id="mcp.md__tools">Tools</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Entrada</th>
+<th>Saída</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>about</code></td>
+<td>nenhuma</td>
+<td>identidade, runtime, plataforma, pasta de dados e créditos</td>
+</tr>
+<tr>
+<td><code>exit_codes</code></td>
+<td>nenhuma</td>
+<td>tabela de códigos de saída</td>
+</tr>
+<tr>
+<td><code>skill</code></td>
+<td><code>topico?</code> (<code>cli</code>, <code>tui</code>,
+<code>mcp</code>, <code>config</code>, <code>codigos</code>)</td>
+<td>documentação em Markdown</td>
+</tr>
+<tr>
+<td><code>config_list</code></td>
+<td>nenhuma</td>
+<td>chaves de settings.json em vigor e o esquema</td>
+</tr>
+<tr>
+<td><code>config_get</code></td>
+<td><code>chave</code></td>
+<td>valor da chave; <code>isError</code> quando não existe</td>
+</tr>
+<tr>
+<td><code>credentials_status</code></td>
+<td>nenhuma</td>
+<td>arquivo, origem da chave mestra, quantidade e nomes</td>
+</tr>
+</tbody>
+</table>
+<p>Nenhuma tool devolve o valor de uma credencial, e nenhuma tool grava.
+Escrita continua no CLI, onde há confirmação humana.</p>
+<h2 id="mcp.md__resources">Resources</h2>
+<table>
+<thead>
+<tr>
+<th>URI</th>
+<th>Conteúdo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>termfy://about</code></td>
+<td>identidade em JSON</td>
+</tr>
+<tr>
+<td><code>termfy://exit-codes</code></td>
+<td>códigos de saída em JSON</td>
+</tr>
+<tr>
+<td><code>termfy://skill</code></td>
+<td>documentação completa em Markdown</td>
+</tr>
+<tr>
+<td><code>termfy://skill/{topico}</code></td>
+<td>uma seção; o template lista os tópicos</td>
+</tr>
+</tbody>
+</table>
+<h2 id="mcp.md__prompts">Prompts</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Prompt</th>
+<th>Argumentos</th>
+<th>Função</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>operar</code></td>
+<td><code>tarefa</code></td>
+<td>instrui o agente a ler <code>skill cli</code> e executar a tarefa
+pelo CLI com <code>--json</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="mcp.md__listar-sem-iniciar">Listar sem iniciar</h2>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">termfy</span> mcp <span class="at">--list</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">termfy</span> mcp <span class="at">--list</span> <span class="at">--json</span></span></code></pre></div>
+<h2 id="mcp.md__testar">Testar</h2>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npx</span> @modelcontextprotocol/inspector termfy mcp</span></code></pre></div>
+<p>O Inspector abre uma página local para chamar tools, ler resources e
+inspecionar as mensagens JSON-RPC.</p>
+<h2 id="mcp.md__como-adicionar-uma-tool">Como adicionar uma tool</h2>
+<ol type="1">
+<li>Copie <code>template/tool/exemplo.ts</code> para
+<code>src/mcp/tools/&lt;nome&gt;.ts</code>.</li>
+<li>Declare <code>inputSchema</code> com Zod e descreva cada campo com
+<code>.describe()</code>. A descrição da tool diz quando usar e o que
+ela devolve.</li>
+<li>Devolva <code>content</code> em texto e, quando a saída for
+estruturada, <code>structuredContent</code> com o mesmo objeto.</li>
+<li>Acrescente a tool ao <code>catalogo.tools</code> para que
+<code>mcp --list</code> a enxergue.</li>
+<li>Registre a função em <code>registrarTudo</code> em
+<code>src/mcp/servidor.ts</code>.</li>
+<li>Teste com o Inspector e com <code>bun test</code>.</li>
+</ol>
+<p>Nomes de tools usam <code>snake_case</code>. Tools que gravam ou
+chamam APIs externas precisam dizer isso na descrição e nunca devem
+ecoar segredos na resposta.</p>
+<h1 id="configuracao.md__configuração-e-credenciais">Configuração e
+credenciais</h1>
+<p>Tudo que o binário persiste fica em <code>~/.termfy/</code>:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Arquivo</th>
+<th>Conteúdo</th>
+<th>Permissão</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>settings.json</code></td>
+<td>preferências em texto claro</td>
+<td>0600</td>
+</tr>
+<tr>
+<td><code>credentials.json</code></td>
+<td>envelope AES-256-GCM com os segredos</td>
+<td>0600</td>
+</tr>
+<tr>
+<td><code>master.key</code></td>
+<td>chave mestra em hexadecimal, criada na primeira gravação</td>
+<td>0600</td>
+</tr>
+</tbody>
+</table>
+<p>A pasta é criada com 0700. A variável <code>TERMFY_HOME</code> troca
+a raiz, útil em testes e CI.</p>
+<h2 id="configuracao.md__settings.json">settings.json</h2>
+<p>Chaves em notação de ponto. O esquema do esqueleto:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Chave</th>
+<th>Tipo</th>
+<th>Padrão</th>
+<th>Função</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>saida.formato</code></td>
+<td><code>texto</code> ou <code>json</code></td>
+<td><code>texto</code></td>
+<td>formato padrão da saída do CLI</td>
+</tr>
+<tr>
+<td><code>saida.cores</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>cores ANSI na saída de texto</td>
+</tr>
+<tr>
+<td><code>tui.abaInicial</code></td>
+<td><code>overview</code> ou <code>about</code></td>
+<td><code>overview</code></td>
+<td>aba aberta ao iniciar a TUI</td>
+</tr>
+<tr>
+<td><code>tui.tema</code></td>
+<td><code>noite</code> ou <code>dia</code></td>
+<td><code>noite</code></td>
+<td>paleta da TUI</td>
+</tr>
+<tr>
+<td><code>telemetria.ativa</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td>reservado para projetos derivados</td>
+</tr>
+</tbody>
+</table>
+<p>Comandos:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">termfy</span> config list</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">termfy</span> config get tui.tema</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ex">termfy</span> config set saida.formato json</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="ex">termfy</span> config unset telemetria.ativa</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="ex">termfy</span> config path</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="ex">termfy</span> config schema</span></code></pre></div>
+<p>Chaves fora do esquema são aceitas como texto. Para que uma chave
+nova ganhe tipo, padrão e documentação, acrescente-a a
+<code>ESQUEMA_SETTINGS</code> em
+<code>src/config/settings.ts</code>.</p>
+<h2 id="configuracao.md__credentials.json">credentials.json</h2>
+<p>O arquivo guarda um envelope:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span> <span class="dt">&quot;versao&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span> <span class="dt">&quot;algoritmo&quot;</span><span class="fu">:</span> <span class="st">&quot;aes-256-gcm&quot;</span><span class="fu">,</span> <span class="dt">&quot;iv&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;base64&gt;&quot;</span><span class="fu">,</span> <span class="dt">&quot;tag&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;base64&gt;&quot;</span><span class="fu">,</span> <span class="dt">&quot;dados&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;base64&gt;&quot;</span> <span class="fu">}</span></span></code></pre></div>
+<p><code>dados</code> é o JSON <code>{ "nome": "valor" }</code> cifrado.
+Nomes seguem <code>[a-z0-9][a-z0-9_.-]{0,63}</code>, por exemplo
+<code>openai.api_key</code> ou <code>github.token</code>.</p>
+<p>A chave mestra tem 32 bytes e vem, nesta ordem:</p>
+<ol type="1">
+<li>da variável <code>TERMFY_MASTER_KEY</code> (64 caracteres
+hexadecimais);</li>
+<li>do arquivo <code>master.key</code>, gerado automaticamente.</li>
+</ol>
+<p>Gere uma chave para a variável com <code>openssl rand -hex 32</code>.
+Quando a variável está definida, <code>master.key</code> é ignorado.</p>
+<p>Comandos:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">termfy</span> credentials set openai.api_key            <span class="co"># digita sem eco</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">printf</span> <span class="st">&#39;%s&#39;</span> <span class="st">&quot;</span><span class="va">$TOKEN</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="ex">termfy</span> credentials set github.token <span class="at">--stdin</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="ex">termfy</span> credentials get openai.api_key            <span class="co"># mascarado</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="ex">termfy</span> credentials get openai.api_key <span class="at">--reveal</span>   <span class="co"># em claro</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="ex">termfy</span> credentials list</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="ex">termfy</span> credentials remove github.token</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="ex">termfy</span> credentials status</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="ex">termfy</span> credentials clear <span class="at">--yes</span></span></code></pre></div>
+<h2 id="configuracao.md__o-que-a-cifra-protege">O que a cifra
+protege</h2>
+<p>A cifra protege o arquivo contra leitura casual, cópia em backup e
+varredura do disco por outras ferramentas. Quem tem acesso à mesma conta
+do sistema consegue ler <code>master.key</code> e decifrar o conteúdo.
+Para um nível acima, injete a chave por <code>TERMFY_MASTER_KEY</code> a
+partir de um gerenciador de segredos e não grave <code>master.key</code>
+em disco.</p>
+<h2 id="configuracao.md__usar-uma-credencial-no-código">Usar uma
+credencial no código</h2>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode ts"><code class="sourceCode typescript"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { obterCredencial } <span class="im">from</span> <span class="st">&quot;../config/credenciais.ts&quot;</span><span class="op">;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> token <span class="op">=</span> <span class="fu">obterCredencial</span>(<span class="st">&quot;github.token&quot;</span>)<span class="op">;</span> <span class="co">// lança ErroApp(4) quando não existe</span></span></code></pre></div>
+<p>Nunca escreva o valor em log, em erro, em <code>dados</code> do
+<code>--json</code> nem em resposta de tool MCP.</p>
+<h2 id="configuracao.md__variáveis-de-ambiente">Variáveis de
+ambiente</h2>
+<table>
+<thead>
+<tr>
+<th>Variável</th>
+<th>Efeito</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TERMFY_HOME</code></td>
+<td>troca <code>~/.termfy/</code> por outra pasta</td>
+</tr>
+<tr>
+<td><code>TERMFY_MASTER_KEY</code></td>
+<td>chave mestra em hex; dispensa <code>master.key</code></td>
+</tr>
+<tr>
+<td><code>NO_COLOR</code></td>
+<td>desliga cores na saída de texto</td>
+</tr>
+</tbody>
+</table>
+<h1 id="codigos-de-saida.md__códigos-de-saída">Códigos de saída</h1>
+<p>Zero é sucesso. Cada família de falha tem um número fixo. Scripts e
+agentes devem tratar o código antes de interpretar a mensagem.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Código</th>
+<th>Nome</th>
+<th>Quando</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td><code>SUCESSO</code></td>
+<td>operação concluída</td>
+</tr>
+<tr>
+<td>1</td>
+<td><code>ERRO_GENERICO</code></td>
+<td>falha inesperada sem classificação</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>USO_INVALIDO</code></td>
+<td>argumentos, opções ou subcomando inválidos; também quando o binário
+roda sem argumentos fora de um TTY</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>CONFIGURACAO</code></td>
+<td>settings.json ausente, inválido ou chave desconhecida</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>CREDENCIAIS</code></td>
+<td>credentials.json ilegível, chave mestra ausente ou credencial não
+encontrada</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>REDE_OU_API</code></td>
+<td>falha de rede ou resposta de API fora do esperado</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>NAO_ENCONTRADO</code></td>
+<td>recurso solicitado não existe</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>PERMISSAO</code></td>
+<td>permissão negada no sistema de arquivos</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>TERMINAL_INDISPONIVEL</code></td>
+<td>a TUI exige um terminal interativo</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>MCP</code></td>
+<td>o servidor MCP falhou ao iniciar ou perdeu o transporte</td>
+</tr>
+<tr>
+<td>130</td>
+<td><code>INTERROMPIDO</code></td>
+<td>entrada cancelada ou processo interrompido com Ctrl+C</td>
+</tr>
+</tbody>
+</table>
+<p>A fonte única é <code>src/app/saida.ts</code>. A mesma tabela aparece
+em <code>--help</code>, em <code>--opencli</code>, na tool MCP
+<code>exit_codes</code> e na resource
+<code>termfy://exit-codes</code>.</p>
+<h2 id="codigos-de-saida.md__em-shell">Em shell</h2>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="ot">! </span><span class="ex">termfy</span> credentials get github.token <span class="at">--json</span> <span class="op">&gt;</span> /tmp/saida.json<span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="va">$?</span> <span class="kw">in</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="ss">4</span><span class="kw">)</span> <span class="bu">echo</span> <span class="st">&quot;grave a credencial com: termfy credentials set github.token&quot;</span> <span class="cf">;;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="pp">*</span><span class="kw">)</span> <span class="bu">echo</span> <span class="st">&quot;falha: veja /tmp/saida.json&quot;</span> <span class="cf">;;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">esac</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span></code></pre></div>
+<h2 id="codigos-de-saida.md__no-código">No código</h2>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode ts"><code class="sourceCode typescript"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { erro } <span class="im">from</span> <span class="st">&quot;../app/erros.ts&quot;</span><span class="op">;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="cf">throw</span> erro<span class="op">.</span><span class="fu">rede</span>(<span class="st">&quot;A API respondeu 503.&quot;</span><span class="op">,</span> { status<span class="op">:</span> <span class="dv">503</span> })<span class="op">;</span> <span class="co">// sai com 5</span></span></code></pre></div>
+<p>Para uma família nova, acrescente a constante e a descrição em
+<code>src/app/saida.ts</code> e um atalho em
+<code>src/app/erros.ts</code>. Não reutilize números.</p>
+<h1 id="arquitetura.md__arquitetura">Arquitetura</h1>
+<pre class="text"><code>src/
+  main.ts                 ponto de entrada: decide TUI, CLI ou ajuda
+  app/
+    manifesto.ts          identidade do binário (nome, versão, autor, links)
+    saida.ts              tabela de códigos de saída
+    erros.ts              ErroApp e atalhos erro.*
+  cli/
+    index.ts              executarCli(argv): parse, opções globais, envelope JSON
+    registro.ts           tipos Comando, DefinicaoOpcao, Contexto, Resultado
+    parser.ts             argv → comando, argumentos e opções
+    ajuda.ts              renderização do --help a partir do registro
+    opencli.ts            descrição OpenCLI a partir do registro
+    formato.ts            cores, tabelas e seções da saída de texto
+    entrada.ts            leitura de segredos e confirmações
+    comandos.ts           raiz da árvore de comandos
+    comandos/             um arquivo por comando
+  config/
+    caminhos.ts           ~/.&lt;bin&gt;/ e variáveis de ambiente
+    settings.ts           settings.json e ESQUEMA_SETTINGS
+    cripto.ts             AES-256-GCM e chave mestra
+    credenciais.ts        cofre cifrado
+  mcp/
+    servidor.ts           McpServer, stdio e catálogo para `mcp --list`
+    tools/                uma função de registro por grupo de tools
+    resources/            resources e templates
+    prompts.ts            prompts
+  tui/
+    index.ts              montagem: cabeçalho, abas, conteúdo, barra de status
+    tema.ts               paletas noite e dia
+    tela.ts               contrato Tela e ContextoTela
+    componentes.ts        painel, tabelaChaveValor, lista, titulo, sutil
+    telas/                uma aba por arquivo
+  skill/
+    index.ts              docs/ embutida + referência gerada do registro
+docs/                     documentação do binário; entra no --skill e vira o ebook
+.ebook/ e ebook/          pipeline e saída do guia do usuário em PDF e EPUB
+template/                 stubs de comando, tela e tool
+.agents/skills/           skills do framework Termfy, instaladas via npx skills
+scripts/                  build, bootstrap do template e validações
+tests/                    bun test</code></pre>
+<h2 id="arquitetura.md__fluxo-de-execução">Fluxo de execução</h2>
+<ol type="1">
+<li><code>main.ts</code> lê <code>argv</code>. Sem argumentos e com TTY,
+chama <code>executarCli(["tui"])</code>. Sem TTY, imprime a ajuda e sai
+com 2. Com argumentos, passa adiante.</li>
+<li><code>parser.ts</code> caminha pela árvore do registro, separa
+opções e argumentos e valida contra as definições. Falhas viram
+<code>ErroApp(2)</code>.</li>
+<li><code>index.ts</code> trata <code>--version</code>,
+<code>--opencli</code>, <code>--skill</code> e <code>--help</code>.
+Depois chama <code>executar(ctx)</code> do comando.</li>
+<li>O comando devolve <code>{ dados, texto }</code>.
+<code>index.ts</code> imprime texto ou o envelope JSON e devolve o
+código.</li>
+<li><code>main.ts</code> encerra o processo com esse código.</li>
+</ol>
+<p><code>mcp</code> e <code>tui</code> são comandos como os demais; eles
+só não devolvem antes de o transporte ou o renderer fechar.</p>
+<h2 id="arquitetura.md__regras-de-dependência">Regras de
+dependência</h2>
+<ul>
+<li><code>app/</code> não importa de nenhuma outra camada.</li>
+<li><code>config/</code> importa só de <code>app/</code>.</li>
+<li><code>cli/</code>, <code>mcp/</code> e <code>tui/</code> importam de
+<code>app/</code> e <code>config/</code>. <code>mcp/</code> e
+<code>tui/</code> podem reutilizar funções de
+<code>cli/comandos/*</code> que coletam dados (como
+<code>dadosAbout</code>), nunca o contrário.</li>
+<li><code>skill/</code> importa de <code>cli/registro.ts</code> para
+gerar a referência.</li>
+</ul>
+<h2 id="arquitetura.md__build">Build</h2>
+<p><code>bun run build</code> compila <code>src/main.ts</code> em
+<code>dist/&lt;bin&gt;</code> para a plataforma atual com
+<code>bun build --compile</code>. <code>bun run build:todos</code> gera
+linux-x64, linux-arm64, darwin-x64, darwin-arm64 e windows-x64. O
+OpenTUI embute a biblioteca nativa no executável; o <code>docs/</code>
+entra como texto; o <code>package.json</code> entra como JSON.</p>
+<h1 id="personalizar-template.md__personalizar-o-template">Personalizar
+o template</h1>
+<p>Este repositório é um template do GitHub. Para iniciar um binário
+novo:</p>
+<ol type="1">
+<li><p>No GitHub, clique em <strong>Use this template</strong> e crie o
+repositório.</p></li>
+<li><p>Clone, instale e renomeie:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> install</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run iniciar <span class="at">--</span> <span class="at">--nome</span> meucli <span class="at">--titulo</span> <span class="st">&quot;Meu CLI&quot;</span> <span class="at">--descricao</span> <span class="st">&quot;O que ele faz.&quot;</span> <span class="at">--autor</span> <span class="st">&quot;Sua empresa&quot;</span> <span class="at">--repositorio</span> https://github.com/org/meucli <span class="at">--site</span> https://exemplo.com</span></code></pre></div>
+<p>O script reescreve <code>package.json</code> (<code>name</code>,
+<code>bin</code>, <code>description</code>, bloco <code>termfy</code>),
+<code>.env.example</code> e as menções a <code>termfy</code> em
+<code>README.md</code>, <code>AGENTS.md</code>,
+<code>CHANGELOG.md</code> e <code>.github/workflows/</code>. Os
+placeholders <code>termfy</code> em <code>docs/</code> são resolvidos em
+tempo de execução pelo manifesto, então <code>docs/</code> não precisa
+de edição.</p></li>
+<li><p>Confira: <code>bun run dev -- --version</code>,
+<code>bun run dev -- --help</code>, <code>bun run dev</code>.</p></li>
+<li><p>Rode <code>bun run ebook</code> para regenerar o guia em PDF e
+EPUB com o título novo.</p></li>
+<li><p>Rode <code>bun run validar</code>.</p></li>
+<li><p>Apague a seção “Sobre o template” deste README e escreva a do
+produto.</p></li>
+<li><p>Faça o primeiro commit e a primeira release conforme
+release.md.</p></li>
+</ol>
+<h2 id="personalizar-template.md__o-que-mudar-depois">O que mudar
+depois</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Quer</th>
+<th>Onde</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>novo comando</td>
+<td><code>template/comando/exemplo.ts</code> →
+<code>src/cli/comandos/</code>, registrar em
+<code>src/cli/comandos.ts</code></td>
+</tr>
+<tr>
+<td>nova aba</td>
+<td><code>template/tela/exemplo.ts</code> → <code>src/tui/telas/</code>,
+registrar em <code>src/tui/telas/index.ts</code></td>
+</tr>
+<tr>
+<td>nova tool MCP</td>
+<td><code>template/tool/exemplo.ts</code> → <code>src/mcp/tools/</code>,
+registrar em <code>src/mcp/servidor.ts</code></td>
+</tr>
+<tr>
+<td>nova chave de configuração</td>
+<td><code>ESQUEMA_SETTINGS</code> em
+<code>src/config/settings.ts</code></td>
+</tr>
+<tr>
+<td>novo código de saída</td>
+<td><code>src/app/saida.ts</code> e <code>src/app/erros.ts</code></td>
+</tr>
+<tr>
+<td>créditos e links</td>
+<td><code>src/app/manifesto.ts</code> e bloco <code>termfy</code> do
+<code>package.json</code></td>
+</tr>
+<tr>
+<td>cores da TUI</td>
+<td><code>src/tui/tema.ts</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="personalizar-template.md__skills">Skills</h2>
+<p>As skills do framework <a
+href="https://github.com/promovaweb/termfy"><code>promovaweb/termfy</code></a>
+estão instaladas em <code>.agents/skills/</code> e registradas em
+<code>skills-lock.json</code>. Elas ensinam um agente a evoluir o
+projeto:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Skill</th>
+<th>Uso</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>termfy-iniciar</code></td>
+<td>criar o binário a partir do template e fazer o primeiro commit</td>
+</tr>
+<tr>
+<td><code>termfy-cli</code></td>
+<td>comandos, opções, saída texto/JSON, códigos de saída e OpenCLI</td>
+</tr>
+<tr>
+<td><code>termfy-tui</code></td>
+<td>telas, componentes, tema e o visual modern unix</td>
+</tr>
+<tr>
+<td><code>termfy-mcp</code></td>
+<td>tools, resources, prompts e testes com o Inspector</td>
+</tr>
+<tr>
+<td><code>termfy-config</code></td>
+<td>settings, credenciais, chave mestra e variáveis</td>
+</tr>
+</tbody>
+</table>
+<p>Atualize para a versão mais recente do framework com
+<code>bun run skills:update</code>. Se a pasta sumir, reinstale com
+<code>bun run skills:instalar</code>. Não edite as skills aqui: mudanças
+acontecem no framework. Dentro deste repositório, os agentes leem
+<code>AGENTS.md</code>, que aponta para elas.</p>
+<h1 id="release.md__release">Release</h1>
+<p>Toda alteração publicada sai com versão, changelog, tag e GitHub
+Release.</p>
+<ol type="1">
+<li>Atualize <code>version</code> em <code>package.json</code>
+(SemVer).</li>
+<li>Registre a mudança em <code>CHANGELOG.md</code>, no formato Keep a
+Changelog.</li>
+<li>Se <code>docs/</code> mudou, avance <code>ebook/VERSION</code> e
+rode <code>bun run ebook</code>. O PDF e o EPUB em <code>ebook/</code>
+entram no commit.</li>
+<li>Rode <code>bun run validar</code>.</li>
+<li>Commit: <code>release: &lt;bin&gt; vX.Y.Z</code>.</li>
+<li>Tag: <code>git tag vX.Y.Z</code>.</li>
+<li>Push: <code>git push origin main --tags</code>.</li>
+<li>O workflow <code>release.yml</code> compila os binários para
+linux-x64, linux-arm64, darwin-x64, darwin-arm64 e windows-x64, gera
+<code>SHA256SUMS</code> e publica a GitHub Release com as notas do
+changelog, o PDF e o EPUB do guia.</li>
+<li>Confira a release em
+<code>https://github.com/&lt;org&gt;/&lt;repo&gt;/releases/tag/vX.Y.Z</code>.</li>
+</ol>
+<p>Uma tag publicada nunca é movida. Correção posterior recebe nova
+versão.</p>
+<h2 id="release.md__build-local">Build local</h2>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run build          <span class="co"># dist/&lt;bin&gt; para a plataforma atual</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run build:todos    <span class="co"># dist/&lt;bin&gt;-&lt;plataforma&gt; para todas</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./dist/</span><span class="op">&lt;</span>bin<span class="op">&gt;</span> --version</span></code></pre></div>
+<h2 id="release.md__ebook-do-guia">Ebook do guia</h2>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run ebook          <span class="co"># ebook/&lt;Titulo&gt;-Guia-do-Usuario-v&lt;versão&gt;.{pdf,epub}</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bun</span> run ebook:verify   <span class="co"># confere sem gerar; entra em bun run validar</span></span></code></pre></div>
+<p>A fonte é a própria <code>docs/</code>, com os placeholders
+resolvidos pelo manifesto. Depois de <code>bun run iniciar</code>,
+regenere o ebook para a capa e o rodapé levarem o título novo. Requer
+Pandoc, WeasyPrint, ImageMagick, xmllint, poppler-utils e
+unzip.</p></main>
+</body>
+</html>

@@ -2,6 +2,15 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.4.0] - 2026-11-10
+
+### Removido
+
+- Pipeline de ebook (`.ebook/`, `ebook/`, `docs/reading-order.txt`, scripts
+  `ebook` e `ebook:verify`, dependências `@fontsource/*`, passos nos
+  workflows). O ebook é do framework `promovaweb/termfy`; o starter kit
+  entrega a documentação embutida por `--skill` e o `docs/opencli.json`.
+
 ## [0.3.2] - 2026-11-10
 
 ### Corrigido

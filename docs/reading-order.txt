@@ -1,9 +1,0 @@
-docs/README.md
-docs/cli.md
-docs/tui.md
-docs/mcp.md
-docs/configuration.md
-docs/exit-codes.md
-docs/architecture.md
-docs/customize-template.md
-docs/release.md

@@ -26,10 +26,5 @@ jobs:
       - name: Instalar dependências
         run: bun install --frozen-lockfile
 
-      - name: Instalar ferramentas de conferência do ebook
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libxml2-utils poppler-utils unzip
-
       - name: Validar projeto
         run: bun run validate

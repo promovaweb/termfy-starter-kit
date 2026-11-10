@@ -20,10 +20,9 @@ Este repositório é um template do GitHub. Para iniciar um binário novo:
    registra propósito, commands, options, saídas, screens, tools e keys de
    configuração. As demais skills leem esse arquivo antes de implementar.
 4. Confira: `bun run dev -- --version`, `bun run dev -- --help`, `bun run dev`.
-5. Rode `bun run ebook` para regenerar o guia em PDF e EPUB com o título novo.
-6. Rode `bun run validate`.
-7. Apague a seção "Sobre o template" do README e escreva a do produto.
-8. Faça o primeiro commit e a primeira release conforme [release.md](release.md).
+5. Rode `bun run validate`.
+6. Apague a seção "Sobre o template" do README e escreva a do produto.
+7. Faça o primeiro commit e a primeira release conforme [release.md](release.md).
 
 ## O que mudar depois
 

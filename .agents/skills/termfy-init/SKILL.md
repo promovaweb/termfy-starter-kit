@@ -50,21 +50,18 @@ variáveis `<BIN>_HOME` e `<BIN>_MASTER_KEY` e o esquema das URIs MCP.
    A TUI só abre em terminal interativo. Se o ambiente não tiver TTY, use o
    teste `tests/tui.test.ts`, que monta a interface no renderer de teste.
 
-6. Rode `bun run ebook`. A capa e o rodapé do guia do usuário em PDF e EPUB
-   leem o título novo; os arquivos em `ebook/` entram no primeiro commit.
-7. Rode `bun run validate`. O comando encadeia typecheck, testes, conferência
-   das skills instaladas, conferência do `docs/opencli.json`, conferência do
-   ebook e build.
-8. Reescreva a seção inicial de `README.md` com o propósito do produto e
+6. Rode `bun run validate`. O comando encadeia typecheck, testes, conferência
+   das skills instaladas, conferência do `docs/opencli.json` e build.
+7. Reescreva a seção inicial de `README.md` com o propósito do produto e
    apague o trecho sobre o template. Mantenha as seções de instalação, modos,
    configuração e release.
-9. Registre a versão inicial em `CHANGELOG.md` e siga `docs/release.md` para
+8. Registre a versão inicial em `CHANGELOG.md` e siga `docs/release.md` para
    tag e GitHub Release.
 
 ## Marcos de progresso
 
 Informe ao usuário quando: o bootstrap terminar, as skills estiverem
-atualizadas, o ebook estiver regenerado, `bun run validate` passar e o README
+atualizadas, `bun run validate` passar e o README
 estiver reescrito. Em cada
 marco, liste os arquivos alterados.
 
@@ -76,6 +73,6 @@ pendente. Não declare concluído com `bun run validate` falhando.
 
 ## Compatibilidade
 
-Starter kit 0.3.x. Os caminhos citados (`scripts/init.ts`,
-`docs/customize-template.md`, `tests/tui.test.ts`, `.ebook/build-ebook.mjs`)
+Starter kit 0.4.x. Os caminhos citados (`scripts/init.ts`,
+`docs/customize-template.md`, `tests/tui.test.ts`)
 existem nessa faixa.

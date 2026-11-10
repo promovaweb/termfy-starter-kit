@@ -75,11 +75,9 @@ não existir ou não cobrir o pedido, rode a skill `termfy-spec` primeiro.
 bun run validate
 ```
 
-Encadeia `typecheck`, `bun test`, `skills:check`, `opencli:check`,
-`ebook:verify` e `build`. Quando o registry de commands mudar, rode
-`bun run opencli` antes e revise o diff de `docs/opencli.json`. Quando
-`docs/` mudar, avance `ebook/VERSION`, rode `bun run ebook` e inclua `ebook/`
-no commit. Confira `git status --short` ao final e preserve mudanças que já
+Encadeia `typecheck`, `bun test`, `skills:check`, `opencli:check` e `build`.
+Quando o registry de commands mudar, rode `bun run opencli` antes e revise o
+diff de `docs/opencli.json`. Confira `git status --short` ao final e preserve mudanças que já
 existiam.
 
 ## Publicação

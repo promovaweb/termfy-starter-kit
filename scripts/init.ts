@@ -78,4 +78,4 @@ for (const file of targets) {
   }
 }
 console.log(`\nDone. Check with: bun run dev -- --version && bun run dev -- --help`);
-console.log("Then run: bun run ebook (regenerates the guide with the new title) and bun run validate");
+console.log("Then run: bun run validate");

@@ -53,9 +53,8 @@ argumentos e opções, ou para mudar o formato de saída e os códigos de saída
    lógica pura, em um arquivo próprio.
 6. Rode `bun run opencli` e revise o diff de `docs/opencli.json`.
 7. Rode `bun run validate`.
-8. Atualize `docs/cli.md` quando o comando trouxer conceito novo. Toda mudança
-   em `docs/` avança `ebook/VERSION` e pede `bun run ebook`, porque a mesma
-   pasta vira o guia do usuário em PDF e EPUB.
+8. Atualize `docs/cli.md` quando o comando trouxer conceito novo. A pasta `docs/`
+   é a documentação do próprio projeto e entra no binário pelo `--skill`.
 
 ## Marcos
 
@@ -69,6 +68,6 @@ resultado e exemplos de uso do comando novo em texto e `--json`.
 
 ## Compatibilidade
 
-Starter kit 0.3.x. Caminhos citados: `src/cli/registry.ts`,
+Starter kit 0.4.x. Caminhos citados: `src/cli/registry.ts`,
 `src/cli/commands.ts`, `src/cli/commands/*.ts`, `template/command/example.ts`,
 `tests/cli.test.ts`, `docs/cli.md` e `docs/opencli.json`.

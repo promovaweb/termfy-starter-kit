@@ -15,7 +15,6 @@
 - [ ] `bun run dev -- --version` imprime o nome do binário e a versão de `package.json`.
 - [ ] `bun run dev -- about --json` traz `data.author`, `data.site` e `data.repository` preenchidos.
 - [ ] `bun run dev -- config path` aponta para `~/.<bin>/`.
-- [ ] `bun run ebook` gerou `ebook/<Title>-User-Guide-v<version>.pdf` com o título novo na capa e a versão de `ebook/VERSION`.
 
 ## O que o bootstrap não faz
 

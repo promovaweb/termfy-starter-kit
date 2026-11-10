@@ -59,8 +59,8 @@ Model Context Protocol, ou para revisar o que já está exposto.
    `npx @modelcontextprotocol/inspector bun run src/main.ts mcp`.
 6. Rode `bun run validate`.
 7. Atualize a tabela de tools em `docs/mcp.md` e a `longDescription` do
-   comando `mcp` em `src/cli/commands/mcp.ts`. Avance `ebook/VERSION` e rode
-   `bun run ebook`.
+   comando `mcp` em `src/cli/commands/mcp.ts`.
+
 
 ## Marcos
 
@@ -74,6 +74,6 @@ saída, e informe os testes executados.
 
 ## Compatibilidade
 
-Starter kit 0.3.x. Caminhos citados: `src/mcp/server.ts`, `src/mcp/tools/`,
+Starter kit 0.4.x. Caminhos citados: `src/mcp/server.ts`, `src/mcp/tools/`,
 `src/mcp/resources/`, `src/mcp/prompts.ts`, `template/tool/example.ts`,
 `tests/mcp.test.ts`, `docs/mcp.md` e `src/cli/commands/mcp.ts`.

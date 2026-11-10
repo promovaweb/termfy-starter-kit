@@ -75,5 +75,5 @@ passo.
 
 ## Compatibilidade
 
-Starter kit 0.3.x. O arquivo `CLISPEC.md` nasce na raiz do starter kit com um
+Starter kit 0.4.x. O arquivo `CLISPEC.md` nasce na raiz do starter kit com um
 exemplo, e `AGENTS.md` manda lê-lo antes de implementar.

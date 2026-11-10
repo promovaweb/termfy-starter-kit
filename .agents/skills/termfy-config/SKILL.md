@@ -47,8 +47,7 @@ credenciais, mudar a política da chave mestra ou depurar a pasta
    correspondentes. Para `tui.theme`, mantenha os valores do esquema
    alinhados às paletas de `src/tui/theme.ts`.
 4. Teste em `tests/config.test.ts` (conversão e padrão).
-5. Atualize a tabela em `docs/configuration.md`, avance `ebook/VERSION` e rode
-   `bun run ebook`.
+5. Atualize a tabela em `docs/configuration.md`.
 
 ## Passos para consumir uma credencial
 
@@ -71,6 +70,6 @@ executados. Nunca cole valores de credenciais na resposta.
 
 ## Compatibilidade
 
-Starter kit 0.3.x. Caminhos citados: `src/config/paths.ts`,
+Starter kit 0.4.x. Caminhos citados: `src/config/paths.ts`,
 `src/config/settings.ts`, `src/config/crypto.ts`,
 `src/config/credentials.ts`, `tests/config.test.ts` e `docs/configuration.md`.
