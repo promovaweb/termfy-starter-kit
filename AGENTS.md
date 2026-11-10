@@ -60,7 +60,9 @@ Português do Brasil. Termos técnicos consagrados ficam em inglês (`build`,
 bun run validar
 ```
 
-Encadeia `typecheck`, `bun test`, `skills:check`, `opencli:check` e `build`.
+Encadeia `typecheck`, `bun test`, `skills:check`, `opencli:check`,
+`ebook:verify` e `build`. Quando `docs/` mudar, avance `ebook/VERSION`, rode
+`bun run ebook` e inclua `ebook/` no commit.
 Quando o registro de comandos mudar, rode `bun run opencli` antes e revise o
 diff de `docs/opencli.json`. Confira `git status --short` ao final e preserve
 mudanças que já existiam.

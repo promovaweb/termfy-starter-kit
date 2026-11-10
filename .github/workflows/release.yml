@@ -27,6 +27,11 @@ jobs:
       - name: Instalar pacotes nativos do OpenTUI para todos os alvos
         run: bun install --os="*" --cpu="*" @opentui/core
 
+      - name: Instalar ferramentas de conferência do ebook
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxml2-utils poppler-utils unzip
+
       - name: Validar projeto
         run: bun run validar
 
@@ -52,3 +57,5 @@ jobs:
           body_path: notas.md
           files: |
             dist/*
+            ebook/ebook-*.pdf
+            ebook/ebook-*.epub

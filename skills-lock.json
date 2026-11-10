@@ -5,31 +5,31 @@
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-cli/SKILL.md",
-      "computedHash": "a86b59af71987130d46e625ec7006c2aba464fd6bba3edaece0c5fe35b5d2e7b"
+      "computedHash": "b2050481e43597c3c6ade73ad9ad507e95c03b4e84e1f45e0977cddf9a7e4439"
     },
     "termfy-config": {
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-config/SKILL.md",
-      "computedHash": "6eb0b696f1847f6768cac65c8d4c8487ba158991721a223b2cfb1ebe39b6ad5e"
+      "computedHash": "85066149372a4554a72043550d4ce204bc4272d1da5f3d66687fd53f8ba0518c"
     },
     "termfy-iniciar": {
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-iniciar/SKILL.md",
-      "computedHash": "ab1659c7a1d2d805e6b03323837deba18657ae52a8b34581a1e8c1d65df2dac1"
+      "computedHash": "e9e4bcaa97008858af416d827fda678c87e58ce8e707b9c65464635dfa301080"
     },
     "termfy-mcp": {
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-mcp/SKILL.md",
-      "computedHash": "14b737af03e9e454695b466995060e9c8a42449209a17d96f0d8508b9602ce5b"
+      "computedHash": "2172f4cba2cf2089c66685023b2077513cc0345e60bb4623f7643b203d99e978"
     },
     "termfy-tui": {
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-tui/SKILL.md",
-      "computedHash": "42d466924cce4668981848d7141d4c383079be4619d19ec75ec60d8409d64167"
+      "computedHash": "0271b92029c252fe1693d2f17517d6d2e506c1c48e6c0de76b74cda0df16cc08"
     }
   }
 }

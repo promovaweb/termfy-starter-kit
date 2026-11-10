@@ -35,7 +35,8 @@ src/
     telas/                uma aba por arquivo
   skill/
     index.ts              docs/ embutida + referência gerada do registro
-docs/                     documentação do binário; entra no --skill
+docs/                     documentação do binário; entra no --skill e vira o ebook
+.ebook/ e ebook/          pipeline e saída do guia do usuário em PDF e EPUB
 template/                 stubs de comando, tela e tool
 .agents/skills/           skills do framework Termfy, instaladas via npx skills
 scripts/                  build, bootstrap do template e validações

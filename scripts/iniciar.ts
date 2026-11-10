@@ -78,3 +78,4 @@ for (const arquivo of alvos) {
   }
 }
 console.log(`\nPronto. Confira com: bun run dev -- --version && bun run dev -- --help`);
+console.log("Depois rode: bun run ebook (regenera o guia com o título novo) e bun run validar");

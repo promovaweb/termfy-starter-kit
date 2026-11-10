@@ -1,0 +1,9 @@
+docs/README.md
+docs/cli.md
+docs/tui.md
+docs/mcp.md
+docs/configuracao.md
+docs/codigos-de-saida.md
+docs/arquitetura.md
+docs/personalizar-template.md
+docs/release.md

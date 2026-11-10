@@ -43,7 +43,8 @@ credenciais, mudar a política da chave mestra ou depurar a pasta
 3. Se a chave alimentar `--aba`, `--tema` ou outra opção, atualize os
    `valores` da opção correspondente.
 4. Teste em `tests/config.test.ts` (conversão e padrão).
-5. Atualize a tabela em `docs/configuracao.md`.
+5. Atualize a tabela em `docs/configuracao.md`, avance `ebook/VERSION` e rode
+   `bun run ebook`.
 
 ## Passos para consumir uma credencial
 
@@ -66,6 +67,6 @@ executados. Nunca cole valores de credenciais na resposta.
 
 ## Compatibilidade
 
-Starter kit 0.1.x. Caminhos citados: `src/config/caminhos.ts`,
+Starter kit 0.2.x. Caminhos citados: `src/config/caminhos.ts`,
 `src/config/settings.ts`, `src/config/cripto.ts`,
 `src/config/credenciais.ts`, `tests/config.test.ts` e `docs/configuracao.md`.

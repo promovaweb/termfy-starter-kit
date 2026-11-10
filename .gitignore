@@ -3,6 +3,7 @@ node_modules/
 
 # Artefatos de build
 dist/
+.ebook/build/
 *.tsbuildinfo
 
 # Logs e temporários

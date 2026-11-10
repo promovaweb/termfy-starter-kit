@@ -17,9 +17,10 @@ Este repositório é um template do GitHub. Para iniciar um binário novo:
    então `docs/` não precisa de edição.
 
 3. Confira: `bun run dev -- --version`, `bun run dev -- --help`, `bun run dev`.
-4. Rode `bun run validar`.
-5. Apague a seção "Sobre o template" deste README e escreva a do produto.
-6. Faça o primeiro commit e a primeira release conforme [release.md](release.md).
+4. Rode `bun run ebook` para regenerar o guia em PDF e EPUB com o título novo.
+5. Rode `bun run validar`.
+6. Apague a seção "Sobre o template" deste README e escreva a do produto.
+7. Faça o primeiro commit e a primeira release conforme [release.md](release.md).
 
 ## O que mudar depois
 

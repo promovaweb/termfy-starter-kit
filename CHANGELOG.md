@@ -2,6 +2,26 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.2.0] - 2026-11-10
+
+### Adicionado
+
+- Guia do usuário em PDF e EPUB em `ebook/`, gerado por `bun run ebook` a
+  partir da mesma `docs/` embutida no binário, com os placeholders
+  `{{bin}}`, `{{titulo}}`, `{{versao}}` e `{{BIN}}` resolvidos pelo
+  manifesto. Saída `<Titulo>-Guia-do-Usuario-v<versão>.{pdf,epub}`, aliases
+  `ebook-<bin>.*`, `ebook/VERSION` e `ebook/build.json`, com o design system
+  de PDF da Promovaweb (`pdf-design-system: 1.0.0`).
+- `bun run ebook:verify` entra em `bun run validar`; CI e release instalam
+  as ferramentas de conferência e a release anexa o PDF e o EPUB.
+- `docs/reading-order.txt` define a ordem dos capítulos.
+
+### Alterado
+
+- `docs/release.md`, `docs/personalizar-template.md`, `docs/arquitetura.md`,
+  `README.md`, `AGENTS.md` e o aviso final de `bun run iniciar` orientam a
+  regenerar o ebook depois do bootstrap e sempre que `docs/` mudar.
+
 ## [0.1.0] - 2026-11-10
 
 ### Adicionado

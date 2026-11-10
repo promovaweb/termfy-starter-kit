@@ -50,7 +50,8 @@ interação por teclado da interface de terminal.
 5. Escreva o teste em `tests/tui.test.ts` ou em arquivo próprio com
    `createTestRenderer` e `captureCharFrame`.
 6. Rode `bun run validar`.
-7. Atualize `docs/tui.md` com a aba nova e suas teclas.
+7. Atualize `docs/tui.md` com a aba nova e suas teclas, avance `ebook/VERSION`
+   e rode `bun run ebook`.
 
 ## Marcos
 
@@ -64,6 +65,6 @@ comandos de validação executados.
 
 ## Compatibilidade
 
-Starter kit 0.1.x. Caminhos citados: `src/tui/index.ts`, `src/tui/tela.ts`,
+Starter kit 0.2.x. Caminhos citados: `src/tui/index.ts`, `src/tui/tela.ts`,
 `src/tui/componentes.ts`, `src/tui/tema.ts`, `src/tui/telas/`,
 `template/tela/exemplo.ts`, `tests/tui.test.ts` e `docs/tui.md`.

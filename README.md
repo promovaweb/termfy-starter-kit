@@ -92,7 +92,9 @@ termfy --opencli        # descrição OpenCLI em JSON
 ```
 
 A pasta [docs/](docs/README.md) entra no binário em tempo de build. Um agente
-lê a documentação sem acesso ao repositório.
+lê a documentação sem acesso ao repositório. A mesma pasta vira o guia do
+usuário em PDF e EPUB em [ebook/](ebook/README.md), gerado por `bun run ebook`
+com o design system de PDF da Promovaweb.
 
 ## Códigos de saída
 
@@ -140,7 +142,8 @@ Detalhes em [docs/mcp.md](docs/mcp.md).
 
 ```text
 src/        código do binário (app, cli, config, mcp, tui, skill)
-docs/       documentação embutida e opencli.json
+docs/       documentação embutida, opencli.json e fonte do ebook
+ebook/      guia do usuário em PDF e EPUB
 template/   stubs de comando, tela e tool
 .agents/    skills do framework instaladas via npx skills (skills-lock.json)
 scripts/    build, bootstrap e validações
@@ -152,7 +155,8 @@ Arquitetura em [docs/arquitetura.md](docs/arquitetura.md).
 ## Validar, compilar e publicar
 
 ```bash
-bun run validar       # typecheck, testes, skills:check, opencli:check, build
+bun run validar       # typecheck, testes, skills:check, opencli:check, ebook:verify, build
+bun run ebook         # guia do usuário em PDF e EPUB a partir de docs/
 bun run skills:update # atualiza as skills do framework
 bun run build         # dist/termfy
 bun run build:todos   # linux-x64, linux-arm64, darwin-x64, darwin-arm64, windows-x64
