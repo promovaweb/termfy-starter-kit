@@ -89,6 +89,6 @@ saída, e informe os testes executados.
 
 ## Compatibilidade
 
-Starter kit 0.5.x. Caminhos citados: `src/mcp/server.ts`, `src/mcp/tools/`,
+Starter kit 0.6.x. Caminhos citados: `src/mcp/server.ts`, `src/mcp/tools/`,
 `src/mcp/resources/`, `src/mcp/prompts.ts`, `template/tool/example.ts`,
 `tests/mcp.test.ts`, `docs/mcp.md` e `src/cli/commands/mcp.ts`.

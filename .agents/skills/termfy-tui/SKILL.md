@@ -89,6 +89,6 @@ comandos de validação executados.
 
 ## Compatibilidade
 
-Starter kit 0.5.x. Caminhos citados: `src/tui/index.ts`, `src/tui/screen.ts`,
+Starter kit 0.6.x. Caminhos citados: `src/tui/index.ts`, `src/tui/screen.ts`,
 `src/tui/components.ts`, `src/tui/theme.ts`, `src/tui/screens/`,
 `template/screen/example.ts`, `tests/tui.test.ts` e `docs/tui.md`.

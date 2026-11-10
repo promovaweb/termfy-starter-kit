@@ -3,7 +3,7 @@
   "opencli": "0.1",
   "info": {
     "title": "Termfy",
-    "version": "0.5.1",
+    "version": "0.6.0",
     "summary": "CLI, TUI and MCP stdio server skeleton in Bun, with the Termfy framework skills installed.",
     "description": "CLI, TUI and MCP stdio server skeleton in Bun, with the Termfy framework skills installed. Without arguments it opens the TUI; \"termfy mcp\" starts the MCP server over stdio; any other command runs as a CLI with text or --json output.",
     "contact": {

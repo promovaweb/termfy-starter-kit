@@ -44,12 +44,14 @@ Elas ensinam um agente a evoluir o projeto:
 
 | Skill | Uso |
 | --- | --- |
-| `termfy-spec` | entrevistar a pessoa e montar o `CLISPEC.md` |
 | `termfy-init` | criar o binário a partir do template e fazer o primeiro commit |
+| `termfy-brand` | ajustar nome, título, descrição, autor, links, créditos e paleta |
+| `termfy-spec` | entrevistar a pessoa e montar o `CLISPEC.md` |
 | `termfy-cli` | commands, options, saída texto/JSON, exit codes e OpenCLI |
 | `termfy-tui` | screens, componentes, tema e o visual modern unix |
 | `termfy-mcp` | tools, resources, prompts e testes com o Inspector |
 | `termfy-config` | settings, credenciais, master key e variáveis |
+| `termfy-docs` | melhorar a documentação embutida e passar no `docs:check` |
 
 Atualize para a versão mais recente do framework com `bun run skills:update`.
 Se a pasta sumir, reinstale com `bun run skills:install`. Não edite as skills

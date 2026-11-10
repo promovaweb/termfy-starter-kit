@@ -5,37 +5,43 @@
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-cli/SKILL.md",
-      "computedHash": "947c048aa22e8eb1fb7ad91f0da6506f79e5bcb83c54aabe7f6e3334b511d289"
+      "computedHash": "b58eb1bed636b5c0553a84d6271a687406c7e9c65de226a907ee19982277bccf"
     },
     "termfy-config": {
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-config/SKILL.md",
-      "computedHash": "1934b6c55c8ead7955a1a1845549719b249f63c484d55517f04a203b4b75b8fe"
+      "computedHash": "9803bdd9b9af416bfd4178200f748c5433a27dc4c6a0d9efc610a69a4d361b35"
+    },
+    "termfy-docs": {
+      "source": "promovaweb/termfy",
+      "sourceType": "github",
+      "skillPath": "skills/termfy-docs/SKILL.md",
+      "computedHash": "69864bef9760d916e4a0792a78fe0bafc87f0ab621291a634de0142d446a667c"
     },
     "termfy-init": {
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-init/SKILL.md",
-      "computedHash": "9ae1a87c4d83a3beb2859fd8b35da7859268db26bb98a06840eba95fa6140954"
+      "computedHash": "1fe1a54cf8519822e9cb6556722dc96d475580b0e2e2faf8765e553b1254d8ba"
     },
     "termfy-mcp": {
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-mcp/SKILL.md",
-      "computedHash": "2a7752641a1ee9992cc2b2d0e2cb8be4c51b7e37809f85b61c3343d76045b568"
+      "computedHash": "f23320f86cb81c1eaab3a4f31c1bd50753ec53c9f70559917dbefbc783adbc42"
     },
     "termfy-spec": {
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-spec/SKILL.md",
-      "computedHash": "8cc684860efcf064b03ca58a8831145d816a5d01f77c2e05321a613108642637"
+      "computedHash": "84ad0987ff038ed1540528163912d039926b5fa6d11c97c8e5a159801bce87a3"
     },
     "termfy-tui": {
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-tui/SKILL.md",
-      "computedHash": "c2d0118b6256d40ee18e356b262f1b420e1c501454259a3130ecf0ad48fffbb3"
+      "computedHash": "307692e03e1846a7cf2d3a5d56ae78b6d7fc1d6d26a8cc5847065a971533a8b5"
     }
   }
 }

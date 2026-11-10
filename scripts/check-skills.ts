@@ -11,7 +11,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-const expected = ["termfy-spec", "termfy-init", "termfy-cli", "termfy-tui", "termfy-mcp", "termfy-config"];
+const expected = ["termfy-spec", "termfy-init", "termfy-brand", "termfy-cli", "termfy-tui", "termfy-mcp", "termfy-config", "termfy-docs"];
 const errors: string[] = [];
 const warnings: string[] = [];
 

@@ -2,6 +2,16 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.6.0] - 2026-11-10
+
+### Adicionado
+
+- `scripts/check-docs.ts` e o script `docs:check`, em `validate`: todo
+  command, screen, tool, resource, prompt, key de configuração e exit code
+  do código precisa aparecer em `docs/`.
+- `skills:check` passa a exigir as oito skills do framework, incluindo
+  `termfy-brand` e `termfy-docs`.
+
 ## [0.5.1] - 2026-11-10
 
 ### Corrigido

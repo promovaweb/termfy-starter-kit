@@ -157,7 +157,7 @@ Arquitetura em [docs/architecture.md](docs/architecture.md).
 ## Validar, compilar e publicar
 
 ```bash
-bun run validate      # typecheck, testes, skills:check, opencli:check, spec:check, build
+bun run validate      # typecheck, testes, skills:check, opencli:check, spec:check, docs:check, build
 bun run skills:update # atualiza as skills do framework
 bun run build         # dist/termfy
 bun run build:all     # linux-x64, linux-arm64, darwin-x64, darwin-arm64, windows-x64

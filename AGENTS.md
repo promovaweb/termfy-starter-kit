@@ -41,12 +41,14 @@ precisa passar antes de entregar; `bun run spec:check` entra em
 2. `CLISPEC.md`.
 3. `docs/architecture.md` para entender as camadas.
 4. A skill compatível com a tarefa em `.agents/skills/`:
-   - `termfy-spec`: montar ou revisar o `CLISPEC.md`;
    - `termfy-init`: personalizar este starter kit para um binário novo;
+   - `termfy-brand`: nome, título, descrição, autor, links, créditos e paleta;
+   - `termfy-spec`: montar ou revisar o `CLISPEC.md`;
    - `termfy-cli`: commands, options, saída e exit codes;
    - `termfy-tui`: screens, tema e interação por teclado;
    - `termfy-mcp`: tools, resources e prompts;
-   - `termfy-config`: settings, credenciais e variáveis.
+   - `termfy-config`: settings, credenciais e variáveis;
+   - `termfy-docs`: melhorar a documentação embutida em `docs/`.
 5. As `references/` indicadas pela skill. Citar uma referência não substitui
    abri-la.
 
@@ -81,7 +83,8 @@ bun run validate
 ```
 
 Encadeia `typecheck`, `bun test`, `skills:check`, `opencli:check`,
-`spec:check` e `build`.
+`spec:check`, `docs:check` e `build`. `docs:check` exige que todo command,
+screen, tool, resource, prompt, key e exit code do código apareça em `docs/`.
 Quando o registry de commands mudar, rode `bun run opencli` antes e revise o
 diff de `docs/opencli.json`. Confira `git status --short` ao final e preserve mudanças que já
 existiam.
