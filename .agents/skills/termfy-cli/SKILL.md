@@ -89,6 +89,6 @@ resultado e exemplos de uso do comando novo em texto e `--json`.
 
 ## Compatibilidade
 
-Starter kit 0.6.x. Caminhos citados: `src/cli/registry.ts`,
+Starter kit 0.7.x. Caminhos citados: `src/cli/registry.ts`,
 `src/cli/commands.ts`, `src/cli/commands/*.ts`, `template/command/example.ts`,
 `tests/cli.test.ts`, `docs/cli.md` e `docs/opencli.json`.

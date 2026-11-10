@@ -1,53 +1,101 @@
 {
   "version": 1,
   "skills": {
+    "termfy-api": {
+      "source": "promovaweb/termfy",
+      "sourceType": "github",
+      "skillPath": "skills/termfy-api/SKILL.md",
+      "computedHash": "f2479078d5c3e70b33107dfe7c5eace5860940c2c024bc59f9feb9a7b328e5f1"
+    },
+    "termfy-api-import": {
+      "source": "promovaweb/termfy",
+      "sourceType": "github",
+      "skillPath": "skills/termfy-api-import/SKILL.md",
+      "computedHash": "a340ad7c3a9d10395408e94c4ec01456fd3f97fdb450094432b37170a127c35f"
+    },
     "termfy-brand": {
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-brand/SKILL.md",
-      "computedHash": "558f30fb5b5a0b4c30d1404492b0e8d2539f404da1349ed866f3df07853351d1"
+      "computedHash": "4f903877c81f00ef43b6c1c8c92e1fe9cfb1360286f06d09029333d4c1854569"
+    },
+    "termfy-build": {
+      "source": "promovaweb/termfy",
+      "sourceType": "github",
+      "skillPath": "skills/termfy-build/SKILL.md",
+      "computedHash": "f2abec12da24a599f2acac19ed9bce9fd456ea728a696412661ede9e20ec1dfc"
     },
     "termfy-cli": {
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-cli/SKILL.md",
-      "computedHash": "b58eb1bed636b5c0553a84d6271a687406c7e9c65de226a907ee19982277bccf"
+      "computedHash": "dba51553d0ed8a371413f8f4496c402ac0e73b9a38c1ad593ba863f7b4e50b1e"
+    },
+    "termfy-command-set": {
+      "source": "promovaweb/termfy",
+      "sourceType": "github",
+      "skillPath": "skills/termfy-command-set/SKILL.md",
+      "computedHash": "0178e4cceedaed658e0594fe58c33142aa00952fe7b69f99ab90c0a12c0024d5"
     },
     "termfy-config": {
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-config/SKILL.md",
-      "computedHash": "9803bdd9b9af416bfd4178200f748c5433a27dc4c6a0d9efc610a69a4d361b35"
+      "computedHash": "7e3c320a740b4900cb59ca8fa589e3bf6309e11e5eddad3d97aed40761c30d96"
     },
     "termfy-docs": {
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-docs/SKILL.md",
-      "computedHash": "69864bef9760d916e4a0792a78fe0bafc87f0ab621291a634de0142d446a667c"
+      "computedHash": "8ad2cfb4f0405667ababbf9be1c6b92ca4c26b803148cc4efffe49c96d303763"
     },
     "termfy-init": {
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-init/SKILL.md",
-      "computedHash": "1fe1a54cf8519822e9cb6556722dc96d475580b0e2e2faf8765e553b1254d8ba"
+      "computedHash": "ec6d90afe2e5527529983b122d9b007ea87d4343982361d841b29e2fa8193c0a"
     },
     "termfy-mcp": {
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-mcp/SKILL.md",
-      "computedHash": "f23320f86cb81c1eaab3a4f31c1bd50753ec53c9f70559917dbefbc783adbc42"
+      "computedHash": "3ff5c3be3dbdcf7e24e58c9df63bce26f7069f7a84166450beca95c0a4912bdb"
+    },
+    "termfy-mcp-client": {
+      "source": "promovaweb/termfy",
+      "sourceType": "github",
+      "skillPath": "skills/termfy-mcp-client/SKILL.md",
+      "computedHash": "0f4d08b1be1a7bdf6d802e190dffc9dcb1fed68716307f16735609a128006c2c"
+    },
+    "termfy-release": {
+      "source": "promovaweb/termfy",
+      "sourceType": "github",
+      "skillPath": "skills/termfy-release/SKILL.md",
+      "computedHash": "cfad386d15f36ac651ae7938a98b906d92f0286bcd731ff48e05bd9e378a595a"
+    },
+    "termfy-review": {
+      "source": "promovaweb/termfy",
+      "sourceType": "github",
+      "skillPath": "skills/termfy-review/SKILL.md",
+      "computedHash": "662c5e3785d5e2c591a5d99e4cf9784fb41078b8cd64fa5fba0d60f0183e513b"
     },
     "termfy-spec": {
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-spec/SKILL.md",
-      "computedHash": "84ad0987ff038ed1540528163912d039926b5fa6d11c97c8e5a159801bce87a3"
+      "computedHash": "9167be285e449eef8b71f57f719ecb40f2e755b0ab71ec0d0a2252e777b41133"
+    },
+    "termfy-test": {
+      "source": "promovaweb/termfy",
+      "sourceType": "github",
+      "skillPath": "skills/termfy-test/SKILL.md",
+      "computedHash": "14771e7ae521a7d15a6cfeb93af1a0837d45ec1a84e1be100351b6897fd8e7ba"
     },
     "termfy-tui": {
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-tui/SKILL.md",
-      "computedHash": "307692e03e1846a7cf2d3a5d56ae78b6d7fc1d6d26a8cc5847065a971533a8b5"
+      "computedHash": "37da62749ef6c4491778e76df95eb1246b92e5d5104766e0a45d4f21d6ca5314"
     }
   }
 }

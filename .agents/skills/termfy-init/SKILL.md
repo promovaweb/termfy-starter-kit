@@ -82,6 +82,6 @@ terminou, informe isso; não declare o produto validado com
 
 ## Compatibilidade
 
-Starter kit 0.6.x. Os caminhos citados (`scripts/init.ts`,
+Starter kit 0.7.x. Os caminhos citados (`scripts/init.ts`,
 `docs/customize-template.md`, `tests/tui.test.ts`)
 existem nessa faixa.

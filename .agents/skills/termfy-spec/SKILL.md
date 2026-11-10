@@ -91,6 +91,6 @@ pendências abertas e a skill sugerida para o próximo passo.
 
 ## Compatibilidade
 
-Starter kit 0.6.x. Caminhos citados: `CLISPEC.md`, `docs/spec.md`,
+Starter kit 0.7.x. Caminhos citados: `CLISPEC.md`, `docs/spec.md`,
 `src/spec/schema.ts`, `src/cli/commands/spec.ts` e `tests/spec.test.ts`.
 Confira o contrato com `bun run spec:check`.

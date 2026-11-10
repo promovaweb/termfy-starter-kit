@@ -89,6 +89,6 @@ executados. Nunca cole valores de credenciais na resposta.
 
 ## Compatibilidade
 
-Starter kit 0.6.x. Caminhos citados: `src/config/paths.ts`,
+Starter kit 0.7.x. Caminhos citados: `src/config/paths.ts`,
 `src/config/settings.ts`, `src/config/crypto.ts`,
 `src/config/credentials.ts`, `tests/config.test.ts` e `docs/configuration.md`.

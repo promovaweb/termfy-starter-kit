@@ -73,7 +73,7 @@ reescritas e os comandos de validação executados.
 
 ## Compatibilidade
 
-Starter kit 0.6.x. Caminhos citados: `docs/README.md`, `docs/cli.md`,
+Starter kit 0.7.x. Caminhos citados: `docs/README.md`, `docs/cli.md`,
 `docs/tui.md`, `docs/mcp.md`, `docs/configuration.md`, `docs/exit-codes.md`,
 `docs/opencli.json`, `scripts/check-docs.ts` e os scripts `docs:check`,
 `opencli` e `opencli:check`.

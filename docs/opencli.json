@@ -3,7 +3,7 @@
   "opencli": "0.1",
   "info": {
     "title": "Termfy",
-    "version": "0.6.0",
+    "version": "0.7.0",
     "summary": "CLI, TUI and MCP stdio server skeleton in Bun, with the Termfy framework skills installed.",
     "description": "CLI, TUI and MCP stdio server skeleton in Bun, with the Termfy framework skills installed. Without arguments it opens the TUI; \"termfy mcp\" starts the MCP server over stdio; any other command runs as a CLI with text or --json output.",
     "contact": {
@@ -820,7 +820,7 @@
       },
       {
         "name": "spec",
-        "description": "Read and check the embedded CLISPEC.md contract.",
+        "description": "Read, check and sync the embedded CLISPEC.md contract.",
         "commands": [
           {
             "name": "show",
@@ -903,6 +903,63 @@
               {
                 "code": 3,
                 "description": "CONFIG: settings.json missing, invalid or unknown key."
+              }
+            ]
+          },
+          {
+            "name": "sync",
+            "description": "List code entries missing from the spec and, with --write, append them to CLISPEC.md as a draft.",
+            "options": [
+              {
+                "name": "--write",
+                "description": "Rewrite the front matter of the file with the missing entries appended."
+              },
+              {
+                "name": "--file",
+                "description": "Spec file to read and write.",
+                "arguments": [
+                  {
+                    "name": "path",
+                    "required": true,
+                    "arity": {
+                      "minimum": 1,
+                      "maximum": 1
+                    }
+                  }
+                ],
+                "metadata": [
+                  {
+                    "name": "x-default",
+                    "value": "CLISPEC.md"
+                  }
+                ]
+              }
+            ],
+            "examples": [
+              " spec sync",
+              " spec sync --write",
+              " spec sync --json"
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCCESS: Operation completed."
+              },
+              {
+                "code": 1,
+                "description": "GENERIC_ERROR: Unexpected failure without a specific classification."
+              },
+              {
+                "code": 2,
+                "description": "USAGE: Invalid arguments, options or subcommand."
+              },
+              {
+                "code": 3,
+                "description": "CONFIG: settings.json missing, invalid or unknown key."
+              },
+              {
+                "code": 7,
+                "description": "PERMISSION: Permission denied on the file system."
               }
             ]
           }

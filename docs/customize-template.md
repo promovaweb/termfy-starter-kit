@@ -44,14 +44,22 @@ Elas ensinam um agente a evoluir o projeto:
 
 | Skill | Uso |
 | --- | --- |
+| `termfy-build` | descrever a ferramenta em uma frase e deixar a skill conduzir o ciclo |
 | `termfy-init` | criar o binário a partir do template e fazer o primeiro commit |
 | `termfy-brand` | ajustar nome, título, descrição, autor, links, créditos e paleta |
 | `termfy-spec` | entrevistar a pessoa e montar o `CLISPEC.md` |
+| `termfy-api-import` | converter a documentação de uma API em entradas da spec |
+| `termfy-api` | client HTTP de serviço externo |
+| `termfy-command-set` | família `recurso verbo` com tools e screen |
 | `termfy-cli` | commands, options, saída texto/JSON, exit codes e OpenCLI |
 | `termfy-tui` | screens, componentes, tema e o visual modern unix |
 | `termfy-mcp` | tools, resources, prompts e testes com o Inspector |
 | `termfy-config` | settings, credenciais, master key e variáveis |
+| `termfy-test` | testes de CLI, MCP, TUI e config |
+| `termfy-review` | auditoria da entrega por gravidade |
 | `termfy-docs` | melhorar a documentação embutida e passar no `docs:check` |
+| `termfy-release` | versão, changelog, tag e release |
+| `termfy-mcp-client` | configuração nos clientes de agente |
 
 Atualize para a versão mais recente do framework com `bun run skills:update`.
 Se a pasta sumir, reinstale com `bun run skills:install`. Não edite as skills

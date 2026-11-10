@@ -156,6 +156,7 @@ A leitura relata o estado declarado; não o infere.
 | `{{bin}} spec show [--json]` | front matter, seções e progresso |
 | `{{bin}} spec check [--json] [--strict]` | valida o contrato e cruza com o código |
 | `{{bin}} spec progress [--json]` | só a contagem da checklist |
+| `{{bin}} spec sync [--write] [--file <path>]` | lista o que o código tem e a spec não; com `--write`, acrescenta ao front matter como rascunho |
 
 Em texto, `spec show` apresenta identidade, status, contagens de commands,
 screens, tools, settings e credentials, progresso e trechos de Purpose e
@@ -176,10 +177,12 @@ arredondado para até duas casas decimais nesse resumo.
 - uma tool, resource ou prompt da spec não existe no catalog MCP;
 - uma setting da spec não existe em `SETTINGS_SCHEMA` ou tem `type` diferente;
 - `usedBy` de uma credencial cita command ou tool inexistente;
+- um command declara em `credentials` um nome ausente da lista
+  `credentials` da spec;
 - `status: done` com item pendente.
 
 Avisos (não falham, salvo `--strict`): command, screen, tool ou setting do
-código ausente da spec.
+código ausente da spec; item da checklist sem tag de skill.
 
 Paths de commands usam os nomes principais do registry, incluindo os
 agrupadores, como `config`, e os subcommands, como `config get`. Options
@@ -203,6 +206,23 @@ disso, confere que todo `getCredential("<name>")` em `src/` aparece em
 O script sai com 1 quando há erro e com 0 quando passa; avisos não falham.
 A busca considera chamadas diretas com nome literal entre aspas ou crases,
 ignora comentários e exemplos em strings, e não resolve nomes calculados.
+
+## Manter a spec alinhada ao código
+
+`spec check` aponta divergências; `spec sync` resolve a metade mais comum.
+Ele compara o código (registry, screens, catalog MCP, `SETTINGS_SCHEMA`) com
+o front matter e lista o que falta na spec: commands com arguments, options,
+exit codes e exemplo vindos do registry; screens; tools (com `effect: read`
+por padrão), resources e prompts; settings. Com `--write`, reescreve o
+front matter do arquivo com essas entradas acrescentadas, preserva as
+entradas existentes e o corpo Markdown, e avança `updatedAt`. O resultado é
+um rascunho para a pessoa revisar: ajuste `effect` das tools, `data` e
+`credentials` dos commands e acrescente itens à checklist.
+
+O emissor YAML grava em estilo de blocos e omite arrays vazios e
+`interactive: false`, então `spec sync --write` também serve para compactar
+uma spec escrita à mão. `screens`, `mcp`, `settings` e `credentials` podem
+ficar ausentes do front matter; o schema assume listas vazias.
 
 ## Tool MCP
 

@@ -77,9 +77,53 @@ const progress: Command = {
   },
 };
 
+const sync: Command = {
+  name: "sync",
+  description: "List code entries missing from the spec and, with --write, append them to CLISPEC.md as a draft.",
+  longDescription:
+    "Reads CLISPEC.md from the current directory (or the embedded copy when the file is absent),\n" +
+    "compares it with the registry, screens, MCP catalog and settings schema, and builds the\n" +
+    "entries the code has and the spec lacks. With --write, rewrites the front matter with those\n" +
+    "entries appended, keeping existing entries and the Markdown body. Review the draft: tool\n" +
+    "effects default to read and descriptions come from the code.",
+  options: [
+    { name: "--write", description: "Rewrite the front matter of the file with the missing entries appended." },
+    { name: "--file", argument: { name: "path" }, description: "Spec file to read and write.", default: "CLISPEC.md" },
+  ],
+  examples: [` spec sync`, ` spec sync --write`, ` spec sync --json`],
+  exitCodes: [ExitCode.CONFIG, ExitCode.PERMISSION],
+  run: async (ctx) => {
+    const { computeSync, mergedFrontmatter, writeFrontmatter } = await import("../../spec/sync.ts");
+    const { parseSpec } = await import("../../spec/parse.ts");
+    const { existsSync, readFileSync } = await import("node:fs");
+    const file = typeof ctx.options.file === "string" ? ctx.options.file : "CLISPEC.md";
+    const spec = existsSync(file) ? parseSpec(readFileSync(file, "utf8")) : loadSpec();
+    const additions = computeSync(spec);
+    const write = ctx.options.write === true;
+    if (write) {
+      if (!existsSync(file)) throw new (await import("../../app/errors.ts")).AppError(ExitCode.CONFIG, `${file} not found; --write needs the spec file on disk.`);
+      writeFrontmatter(file, mergedFrontmatter(spec, additions));
+    }
+    const summary: Array<[string, string]> = [
+      ["Commands", String(additions.commands.length)], ["Screens", String(additions.screens.length)],
+      ["Tools", String(additions.tools.length)], ["Resources", String(additions.resources.length)],
+      ["Prompts", String(additions.prompts.length)], ["Settings", String(additions.settings.length)],
+    ];
+    return {
+      data: { file, written: write, ...additions },
+      text: () => blocks(
+        section(additions.total ? `${additions.total} entries missing from the spec` : "Spec already covers the code"),
+        table(summary),
+        additions.commands.length ? additions.commands.map((c) => `  + command ${c.path}`).join("\n") : undefined,
+        write ? `Front matter of ${file} rewritten.` : additions.total ? `Run with --write to append them to ${file}.` : undefined,
+      ),
+    };
+  },
+};
+
 export const specCommand: Command = {
   name: "spec",
-  description: "Read and check the embedded CLISPEC.md contract.",
-  subcommands: [show, check, progress],
+  description: "Read, check and sync the embedded CLISPEC.md contract.",
+  subcommands: [show, check, progress, sync],
   exitCodes: [ExitCode.CONFIG],
 };

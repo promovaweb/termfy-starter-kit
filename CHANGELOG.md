@@ -2,6 +2,27 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.7.0] - 2026-11-10
+
+### Adicionado
+
+- `spec sync [--write] [--file <path>]`: lista o que o código tem e a spec
+  não (commands com arguments, options, exit codes e exemplo; screens;
+  tools, resources e prompts; settings) e, com `--write`, acrescenta ao
+  front matter como rascunho, preservando entradas e corpo. Emissor YAML em
+  estilo de blocos (`src/spec/yaml.ts`) que omite arrays vazios.
+- `spec check` passa a exigir que credenciais citadas em commands estejam
+  declaradas em `credentials` e avisa item de checklist sem tag de skill.
+- `skills:check` exige as dezesseis skills do framework 0.7.0.
+
+### Alterado
+
+- `screens`, `mcp`, `settings` e `credentials` do front matter passam a ser
+  opcionais (listas vazias por padrão); `CLISPEC.md` do esqueleto
+  compactado por `spec sync --write`.
+- `AGENTS.md` aponta `termfy-build` como porta de entrada para pedidos em
+  linguagem natural.
+
 ## [0.6.1] - 2026-11-10
 
 ### Corrigido

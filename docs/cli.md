@@ -59,7 +59,7 @@ os dois: o envelope para a mensagem, o code para a classe da falha.
 | `skill [topic]` | Mesmo efeito de `--skill`. |
 | `doctor` | Confere runtime, TTY, pasta, settings, chave e cofre. |
 | `completion <shell>` | Gera script para `bash`, `zsh` ou `fish`. |
-| `spec show\|check\|progress` | Lê a spec, confere o contrato com o código e mostra o progresso. `check --strict` também falha com avisos. |
+| `spec show\|check\|progress\|sync` | Lê a spec, confere o contrato com o código e mostra o progresso. `check --strict` também falha com avisos. |
 
 O command `spec` lê o `CLISPEC.md` embutido no binário. `show` apresenta o
 front matter, as seções e o progresso; `check` retorna exit code 3 quando a

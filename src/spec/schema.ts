@@ -32,9 +32,9 @@ export const specMcpSchema = z.strictObject({
   tools: z.array(z.strictObject({
     name: text, description: z.string().optional(), input: z.string().optional(),
     output: z.string().optional(), effect: z.enum(["read", "write", "network"]),
-  })),
-  resources: z.array(z.strictObject({ uri: text, description: z.string().optional() })),
-  prompts: z.array(z.strictObject({ name: text, args: z.array(z.string()).optional() })),
+  })).default([]),
+  resources: z.array(z.strictObject({ uri: text, description: z.string().optional() })).default([]),
+  prompts: z.array(z.strictObject({ name: text, args: z.array(z.string()).optional() })).default([]),
 });
 
 export const specSettingSchema = z.strictObject({
@@ -51,8 +51,11 @@ export const specSchema = z.strictObject({
   status: z.enum(["draft", "in_progress", "blocked", "done", "archived"]),
   createdAt: z.iso.datetime({ offset: true }), updatedAt: z.iso.datetime({ offset: true }),
   blockedReason: text.optional(), archivedReason: text.optional(),
-  commands: z.array(specCommandSchema), screens: z.array(specScreenSchema), mcp: specMcpSchema,
-  settings: z.array(specSettingSchema), credentials: z.array(specCredentialSchema),
+  commands: z.array(specCommandSchema).default([]),
+  screens: z.array(specScreenSchema).default([]),
+  mcp: specMcpSchema.default({ tools: [], resources: [], prompts: [] }),
+  settings: z.array(specSettingSchema).default([]),
+  credentials: z.array(specCredentialSchema).default([]),
 }).superRefine((spec, ctx) => {
   for (const [status, field] of [["blocked", "blockedReason"], ["archived", "archivedReason"]] as const) {
     if (spec.status === status && !spec[field]?.trim()) {

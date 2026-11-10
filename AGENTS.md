@@ -40,15 +40,25 @@ precisa passar antes de entregar; `bun run spec:check` entra em
 1. Este arquivo.
 2. `CLISPEC.md`.
 3. `docs/architecture.md` para entender as camadas.
-4. A skill compatível com a tarefa em `.agents/skills/`:
+4. A skill compatível com a tarefa em `.agents/skills/`. Quando a pessoa
+   descrever a ferramenta em linguagem natural sem nomear uma skill, use
+   `termfy-build`, que orquestra as demais na ordem do guia do framework:
+   - `termfy-build`: porta de entrada; conduz o ciclo inteiro;
    - `termfy-init`: personalizar este starter kit para um binário novo;
    - `termfy-brand`: nome, título, descrição, autor, links, créditos e paleta;
    - `termfy-spec`: montar ou revisar o `CLISPEC.md`;
-   - `termfy-cli`: commands, options, saída e exit codes;
-   - `termfy-tui`: screens, tema e interação por teclado;
-   - `termfy-mcp`: tools, resources e prompts;
+   - `termfy-api-import`: converter a documentação de uma API em spec;
    - `termfy-config`: settings, credenciais e variáveis;
-   - `termfy-docs`: melhorar a documentação embutida em `docs/`.
+   - `termfy-api`: client HTTP de serviço externo;
+   - `termfy-cli`: commands, options, saída e exit codes;
+   - `termfy-command-set`: família `recurso verbo` com tools e screen;
+   - `termfy-mcp`: tools, resources e prompts;
+   - `termfy-tui`: screens, tema e interação por teclado;
+   - `termfy-test`: testes nos três modos;
+   - `termfy-review`: auditoria da entrega, sem editar;
+   - `termfy-docs`: melhorar a documentação embutida em `docs/`;
+   - `termfy-release`: versão, changelog, tag e release;
+   - `termfy-mcp-client`: configuração nos clientes de agente.
 5. As `references/` indicadas pela skill. Citar uma referência não substitui
    abri-la.
 

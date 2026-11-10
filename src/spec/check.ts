@@ -72,6 +72,15 @@ export function checkSpec(spec: ParsedSpec, { strict = false }: { strict?: boole
       if (!commands.has(name) && !catalog.tools.some((tool) => tool.name === name)) errors.push(`Unknown credential consumer ${name} for ${credential.name}.`);
     }
   }
+  const declaredCredentials = new Set(declared.credentials.map((credential) => credential.name));
+  for (const command of declared.commands) {
+    for (const name of command.credentials ?? []) {
+      if (!declaredCredentials.has(name)) errors.push(`Command ${command.path} uses credential ${name} that is not declared in credentials.`);
+    }
+  }
+  for (const item of spec.checklist) {
+    if (!item.skill) warnings.push(`Checklist item ${item.id} has no skill tag.`);
+  }
   const ids = new Set<string>();
   for (const item of spec.checklist) {
     if (!/^[a-z0-9]{4}$/.test(item.id) || ids.has(item.id)) errors.push(`Invalid or repeated checklist ID: ${item.id}.`);

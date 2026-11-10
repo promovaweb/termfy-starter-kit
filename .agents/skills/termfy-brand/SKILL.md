@@ -82,7 +82,7 @@ quando `bin` mudou.
 
 ## Compatibilidade
 
-Starter kit 0.6.x. Caminhos citados: `package.json`, `src/app/manifest.ts`,
+Starter kit 0.7.x. Caminhos citados: `package.json`, `src/app/manifest.ts`,
 `src/tui/theme.ts`, `src/tui/screens/about.ts`, `src/cli/commands/about.ts`,
 `scripts/init.ts`, `CLISPEC.md` e os scripts `init`, `opencli`, `spec:check`
 e `validate`.
