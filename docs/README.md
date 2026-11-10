@@ -21,6 +21,7 @@ mesma configuração (`~/.{{bin}}/settings.json`), o mesmo cofre de credenciais
 - [exit-codes.md](exit-codes.md): tabela de exit codes e como tratá-los.
 - [architecture.md](architecture.md): pastas, camadas e fluxo de execução.
 - [customize-template.md](customize-template.md): usar este repositório como ponto de partida de um novo binário.
+- [spec.md](spec.md): contrato do `CLISPEC.md`, lido por `{{bin}} spec show`, `spec check` e `spec progress`.
 - [release.md](release.md): versão, changelog, tag, GitHub Release e binários.
 - [opencli.json](opencli.json): descrição OpenCLI gerada por `bun run opencli`.
 
@@ -35,7 +36,9 @@ repositório:
 {{bin}} --skill mcp --json
 ```
 
-Os tópicos aceitos são `cli`, `tui`, `mcp`, `config` e `exit-codes`.
+Os tópicos aceitos são `cli`, `tui`, `mcp`, `config`, `exit-codes` e
+`reference`. O topic `reference` contém somente a referência gerada do
+registry, com commands, options e exit codes.
 
 ## Idioma
 

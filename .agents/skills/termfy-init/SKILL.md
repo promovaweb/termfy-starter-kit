@@ -39,7 +39,10 @@ variáveis `<BIN>_HOME` e `<BIN>_MASTER_KEY` e o esquema das URIs MCP.
    bun run skills:check
    ```
 
-5. Confira a identidade nos três modos:
+5. Rode a skill `termfy-spec` para escrever o `CLISPEC.md` do produto no
+   lugar do exemplo do esqueleto. Sem spec, as demais skills não têm o que
+   implementar.
+6. Confira a identidade nos três modos:
 
    ```bash
    bun run dev -- --version
@@ -50,12 +53,12 @@ variáveis `<BIN>_HOME` e `<BIN>_MASTER_KEY` e o esquema das URIs MCP.
    A TUI só abre em terminal interativo. Se o ambiente não tiver TTY, use o
    teste `tests/tui.test.ts`, que monta a interface no renderer de teste.
 
-6. Rode `bun run validate`. O comando encadeia typecheck, testes, conferência
+7. Rode `bun run validate`. O comando encadeia typecheck, testes, conferência
    das skills instaladas, conferência do `docs/opencli.json` e build.
-7. Reescreva a seção inicial de `README.md` com o propósito do produto e
+8. Reescreva a seção inicial de `README.md` com o propósito do produto e
    apague o trecho sobre o template. Mantenha as seções de instalação, modos,
    configuração e release.
-8. Registre a versão inicial em `CHANGELOG.md` e siga `docs/release.md` para
+9. Registre a versão inicial em `CHANGELOG.md` e siga `docs/release.md` para
    tag e GitHub Release.
 
 ## Marcos de progresso
@@ -73,6 +76,6 @@ pendente. Não declare concluído com `bun run validate` falhando.
 
 ## Compatibilidade
 
-Starter kit 0.4.x. Os caminhos citados (`scripts/init.ts`,
+Starter kit 0.5.x. Os caminhos citados (`scripts/init.ts`,
 `docs/customize-template.md`, `tests/tui.test.ts`)
 existem nessa faixa.

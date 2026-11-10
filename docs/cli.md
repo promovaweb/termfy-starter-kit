@@ -21,7 +21,7 @@
 | `-h`, `--help` | Help do command atual. Exit code 0. |
 | `-V`, `--version` | Imprime `{{bin}} <version>`. Exit code 0. |
 | `--json` | Saída em JSON com envelope estável. Erros também saem em JSON, em stdout. |
-| `--skill [topic]` | Documentação embutida. Topics: `cli`, `tui`, `mcp`, `config`, `exit-codes`. |
+| `--skill [topic]` | Documentação embutida. Topics: `cli`, `tui`, `mcp`, `config`, `exit-codes`, `reference`. |
 | `--opencli` | Descrição OpenCLI 0.1 da árvore de commands em JSON. |
 | `--no-color` | Desliga cores ANSI. `NO_COLOR=1` tem o mesmo efeito. |
 
@@ -54,9 +54,17 @@ os dois: o envelope para a mensagem, o code para a classe da falha.
 | `tui [--tab <tab>]` | Abre a TUI. Exige TTY. |
 | `about` | Version, executable, runtime, platform e credits. |
 | `config list\|get\|set\|unset\|path\|schema` | Preferências em settings.json. |
-| `credentials set\|get\|list\|remove\|status\|clear` | Cofre cifrado em credentials.json. |
+| `credentials set\|get\|list\|remove\|status\|clear\|rotate-key` | Cofre cifrado em credentials.json. |
 | `mcp [--list]` | Servidor MCP via stdio, ou listagem do que ele registra. |
 | `skill [topic]` | Mesmo efeito de `--skill`. |
+| `doctor` | Confere runtime, TTY, pasta, settings, chave e cofre. |
+| `completion <shell>` | Gera script para `bash`, `zsh` ou `fish`. |
+| `spec show\|check\|progress` | Lê a spec, confere o contrato com o código e mostra o progresso. `check --strict` também falha com avisos. |
+
+O command `spec` lê o `CLISPEC.md` embutido no binário. `show` apresenta o
+front matter, as seções e o progresso; `check` retorna exit code 3 quando a
+conferência falha; `progress` mostra a contagem da checklist. Os três aceitam
+`--json`. O formato do arquivo está em [docs/spec.md](spec.md).
 
 ## Como adicionar um command
 
@@ -73,3 +81,29 @@ os dois: o envelope para a mensagem, o code para a classe da falha.
 Segredos nunca entram por argument de linha de comando. Leia pelo stdin ou
 por `readSecret()`; grave com `setCredential()`; recupere com
 `getCredential()`, que encerra com exit code 4 quando o valor não existe.
+
+## Diagnóstico e completion
+
+`{{bin}} doctor` confere Bun 1.3.14 ou superior, TTY de stdin/stdout,
+pasta de dados com 0700, leitura de settings.json, origem da master key,
+decifragem do cofre, versão e plataforma. Cada linha usa ✓, ! ou ✗.
+Em JSON, `data` contém `{ checks, ok }`; cada check tem `name`, `status`
+e `detail`. Ausência de TTY ou de arquivos ainda não criados gera `warn`.
+Uma verificação com `fail` produz exit code 3; as demais retornam 0.
+O diagnóstico não cria arquivos nem mostra segredos.
+
+`{{bin}} completion <shell>` imprime o script em stdout. O argument `shell`
+aceita `bash`, `zsh` ou `fish`; subcommands, options locais e globais e valores
+de enum vêm do registry. Com `--json`, `data` contém `{ shell, script }`.
+Instale na sessão atual ou acrescente a linha ao arquivo de inicialização:
+
+```bash
+eval "$({{bin}} completion bash)"
+eval "$({{bin}} completion zsh)"
+# fish
+{{bin}} completion fish | source
+```
+
+`{{bin}} --skill reference` retorna somente a referência gerada, com
+commands, arguments, options e exit codes. `skill reference` tem o mesmo
+resultado, sem os capítulos da documentação.

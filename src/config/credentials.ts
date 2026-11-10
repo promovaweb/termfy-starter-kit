@@ -9,9 +9,11 @@
  * `credentials get` command masks by default and only reveals with
  * `--reveal`. The MCP server exposes names and metadata only.
  */
-import { readFileSync, writeFileSync, unlinkSync } from "node:fs";
-import { paths, exists, ensureBaseDir } from "./paths.ts";
-import { encrypt, decrypt, isEnvelope, getMasterKey, masterKeySource, type MasterKeySource } from "./crypto.ts";
+import { readFileSync, writeFileSync, unlinkSync, mkdtempSync, renameSync, rmSync, chmodSync } from "node:fs";
+import { randomBytes } from "node:crypto";
+import { join } from "node:path";
+import { paths, exists, ensureBaseDir, MASTER_KEY_VARIABLE } from "./paths.ts";
+import { encrypt, decrypt, isEnvelope, getMasterKey, masterKeySource, keyFromEnv, type MasterKeySource } from "./crypto.ts";
 import { classifyFsError, error } from "../app/errors.ts";
 import { ExitCode } from "../app/exit-codes.ts";
 
@@ -32,7 +34,7 @@ export function validateName(name: string): string {
 }
 
 /** Reads and decrypts the vault. A missing file yields an empty vault. */
-export function readVault(): Vault {
+export function readVault(keyOverride?: Buffer): Vault {
   const path = paths.credentials();
   if (!exists(path)) return {};
   let raw: string;
@@ -50,7 +52,7 @@ export function readVault(): Vault {
   if (!isEnvelope(envelope)) {
     throw error.credentials(`${path} is not in the expected encrypted format.`, { path });
   }
-  const key = getMasterKey(false);
+  const key = keyOverride ?? getMasterKey(false);
   const text = decrypt(envelope, key);
   let vault: unknown;
   try {
@@ -154,4 +156,44 @@ export function vaultStatus(): {
     }
   }
   return { file, exists: present, masterKeySource: source, count: names.length, names };
+}
+
+/**
+ * Re-encrypts the vault and replaces the disk key with mode 0600.
+ * With fromEnv, the disk key opens the vault and the environment supplies
+ * the replacement. Both files are staged before replacement; an ordinary
+ * write failure restores the previous key. Concurrent vault writes are unsupported.
+ */
+export function rotateMasterKey(fromEnv = false): { rotated: true; source: "env" | "file" } {
+  if (!exists(paths.credentials())) throw error.credentials("No credentials vault found.");
+  const current = getMasterKey(false, fromEnv);
+  const vault = readVault(current);
+  const fresh = fromEnv ? keyFromEnv() : randomBytes(32);
+  if (!fresh) throw error.credentials(`${MASTER_KEY_VARIABLE} must supply the new master key.`);
+  const envelope = encrypt(JSON.stringify(vault), fresh);
+  const keyPath = paths.masterKey();
+  const previous = exists(keyPath) ? readFileSync(keyPath) : undefined;
+  let staging: string | undefined;
+  let replaced = false;
+  try {
+    staging = mkdtempSync(join(paths.base(), ".rotate-"));
+    chmodSync(staging, 0o700);
+    const stagedKey = join(staging, "master.key");
+    const stagedVault = join(staging, "credentials.json");
+    writeFileSync(stagedKey, `${fresh.toString("hex")}\n`, { mode: 0o600 });
+    writeFileSync(stagedVault, `${JSON.stringify(envelope, null, 2)}\n`, { mode: 0o600 });
+    renameSync(stagedKey, keyPath);
+    replaced = true;
+    renameSync(stagedVault, paths.credentials());
+  } catch {
+    if (replaced) {
+      if (previous) { writeFileSync(keyPath, previous, { mode: 0o600 }); chmodSync(keyPath, 0o600); }
+      else unlinkSync(keyPath);
+    }
+    throw error.credentials("Could not rotate the master key; the vault was not changed.");
+  } finally {
+    if (staging) rmSync(staging, { recursive: true, force: true });
+  }
+  if (!fromEnv) delete process.env[MASTER_KEY_VARIABLE];
+  return { rotated: true, source: fromEnv ? "env" : "file" };
 }

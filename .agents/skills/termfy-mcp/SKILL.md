@@ -10,9 +10,10 @@ Model Context Protocol, ou para revisar o que já está exposto.
 
 ## Leia antes
 
-- `CLISPEC.md` na raiz do projeto: a seção que descreve o que será
-  implementado. Se o arquivo não existir ou não cobrir o pedido, rode a
-  skill `termfy-spec` antes de continuar.
+- `CLISPEC.md` na raiz do projeto e `bun run dev -- spec show --json`: a
+  entrada do front matter e o item da checklist que descrevem o que será
+  implementado. Se o arquivo não cobrir o pedido, rode a skill `termfy-spec`
+  antes de continuar.
 - `docs/mcp.md`.
 - `src/mcp/server.ts`, `src/mcp/tools/base.ts`, `src/mcp/resources/base.ts`
   e `src/mcp/prompts.ts`.
@@ -62,6 +63,14 @@ Model Context Protocol, ou para revisar o que já está exposto.
    comando `mcp` em `src/cli/commands/mcp.ts`.
 
 
+## Checklist da spec
+
+Ao concluir cada entrega, marque o item correspondente em `## Checklist` do
+`CLISPEC.md` de `- [ ]` para `- [x]` pelo `{#id}`, sem mudar texto nem id,
+e avance `updatedAt`. Registre em `## Notes` uma linha datada quando a
+implementação se afastar do combinado. Rode `bun run dev -- spec check` antes
+de entregar: avisos sobre o item recém-implementado devem ter sumido.
+
 ## Marcos
 
 Tool listada em `mcp --list`; chamada bem-sucedida pelo Client de teste;
@@ -74,6 +83,6 @@ saída, e informe os testes executados.
 
 ## Compatibilidade
 
-Starter kit 0.4.x. Caminhos citados: `src/mcp/server.ts`, `src/mcp/tools/`,
+Starter kit 0.5.x. Caminhos citados: `src/mcp/server.ts`, `src/mcp/tools/`,
 `src/mcp/resources/`, `src/mcp/prompts.ts`, `template/tool/example.ts`,
 `tests/mcp.test.ts`, `docs/mcp.md` e `src/cli/commands/mcp.ts`.

@@ -96,3 +96,24 @@ resposta de tool MCP.
 | `{{BIN}}_HOME` | troca `~/.{{bin}}/` por outra pasta |
 | `{{BIN}}_MASTER_KEY` | master key em hex; dispensa `master.key` |
 | `NO_COLOR` | desliga cores na saída de texto |
+
+## Rotação da master key
+
+| Command ou option | Efeito |
+| --- | --- |
+| `credentials rotate-key` | Gera chave aleatória, recifra o cofre e grava `master.key` com 0600. |
+| `credentials rotate-key --from-env` | Lê a chave atual de `master.key` e usa `{{BIN}}_MASTER_KEY` como chave nova. |
+
+`{{bin}} credentials rotate-key` abre o cofre com a chave atual e preserva
+seus valores ao recifrar. A opção `--from-env` exige a chave atual em disco
+e uma chave nova de 64 caracteres hexadecimais na variável. A chave nova
+também é gravada em `master.key` com 0600. Sem cofre ou chave atual, o command
+retorna exit code 4 (`CREDENTIALS`). Em JSON, retorna `{ rotated, source }`,
+sem o conteúdo das chaves.
+
+Sem `--from-env`, se a chave anterior veio da variável, remova essa variável
+do shell após a rotação: `unset {{BIN}}_MASTER_KEY`. Ela tem prioridade sobre
+o arquivo nas próximas execuções. Não execute gravações no cofre durante a
+rotação. Os dois arquivos são preparados antes da substituição; falhas de
+gravação comuns restauram a chave anterior. Como são dois arquivos, uma
+interrupção do processo entre as substituições exige recuperação de backup.

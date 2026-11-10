@@ -10,9 +10,10 @@ interação por teclado da interface de terminal.
 
 ## Leia antes
 
-- `CLISPEC.md` na raiz do projeto: a seção que descreve o que será
-  implementado. Se o arquivo não existir ou não cobrir o pedido, rode a
-  skill `termfy-spec` antes de continuar.
+- `CLISPEC.md` na raiz do projeto e `bun run dev -- spec show --json`: a
+  entrada do front matter e o item da checklist que descrevem o que será
+  implementado. Se o arquivo não cobrir o pedido, rode a skill `termfy-spec`
+  antes de continuar.
 - `docs/tui.md`.
 - `src/tui/index.ts` (montagem), `src/tui/screen.ts` (contrato),
   `src/tui/components.ts` e `src/tui/theme.ts`.
@@ -27,7 +28,10 @@ interação por teclado da interface de terminal.
    `src/tui/screens/index.ts`. A ordem da lista é a ordem das abas.
 2. Nenhuma cor literal nas telas. Use `ctx.theme.*`. Cor nova entra em
    `src/tui/theme.ts`, nas duas paletas, com nome de papel.
-3. Use os componentes de `src/tui/components.ts`. Se precisar de um novo,
+3. Use os componentes de `src/tui/components.ts`: `panel`, `keyValueTable`,
+   `list`, `heading`, `dim` e `listPanel` (lista com rolagem e seleção por
+   teclado, com `select`, `selected` e `move` para a screen tratar em
+   `onKey`). Se precisar de um novo,
    crie lá, com tema como parâmetro, e documente no cabeçalho do arquivo.
 4. Painéis vizinhos não têm gap. Padding interno de uma célula. Bordas
    `rounded` com título na borda. Acento só no painel em foco.
@@ -55,6 +59,14 @@ interação por teclado da interface de terminal.
 6. Rode `bun run validate`.
 7. Atualize `docs/tui.md` com a aba nova e suas teclas.
 
+## Checklist da spec
+
+Ao concluir cada entrega, marque o item correspondente em `## Checklist` do
+`CLISPEC.md` de `- [ ]` para `- [x]` pelo `{#id}`, sem mudar texto nem id,
+e avance `updatedAt`. Registre em `## Notes` uma linha datada quando a
+implementação se afastar do combinado. Rode `bun run dev -- spec check` antes
+de entregar: avisos sobre o item recém-implementado devem ter sumido.
+
 ## Marcos
 
 Tela registrada e visível no frame de teste; teclas da tela na barra; testes
@@ -67,6 +79,6 @@ comandos de validação executados.
 
 ## Compatibilidade
 
-Starter kit 0.4.x. Caminhos citados: `src/tui/index.ts`, `src/tui/screen.ts`,
+Starter kit 0.5.x. Caminhos citados: `src/tui/index.ts`, `src/tui/screen.ts`,
 `src/tui/components.ts`, `src/tui/theme.ts`, `src/tui/screens/`,
 `template/screen/example.ts`, `tests/tui.test.ts` e `docs/tui.md`.

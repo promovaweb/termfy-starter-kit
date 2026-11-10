@@ -20,10 +20,9 @@ falha ao decifrar e o comando encerra com código 4.
 32 bytes. Fonte, em ordem: `<BIN>_MASTER_KEY` (64 hex) e depois
 `~/.<bin>/master.key`. O arquivo é criado na primeira gravação com 0600.
 
-Rotação: exporte as credenciais com `credentials get --reveal` para um lugar
-seguro, apague `credentials.json` e `master.key`, defina a nova chave e
-grave de novo. Projetos derivados podem automatizar com um comando
-`credentials rotate-key` que decifra com a chave antiga e cifra com a nova.
+Rotação: `credentials rotate-key` decifra o cofre com a chave atual, gera
+uma chave nova (ou lê `<BIN>_MASTER_KEY` com `--from-env`), regrava
+`master.key` com 0600 e recifra o cofre.
 
 ## O que a cifra cobre
 

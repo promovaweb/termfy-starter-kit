@@ -1,6 +1,6 @@
 # Contrato de uma tool
 
-Exemplo para `src/mcp/tools/example.ts`:
+Exemplo para um arquivo novo em `src/mcp/tools/`:
 
 ```ts
 import { z } from "zod";

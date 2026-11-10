@@ -41,7 +41,8 @@ export function masterKeySource(): MasterKeySource {
   return "none";
 }
 
-function keyFromEnv(): Buffer | null {
+/** Reads and validates the optional environment key without file fallback. */
+export function keyFromEnv(): Buffer | null {
   const value = process.env[MASTER_KEY_VARIABLE];
   if (!value) return null;
   const clean = value.trim();
@@ -57,8 +58,8 @@ function keyFromEnv(): Buffer | null {
  * Reads the master key. With `createIfMissing`, generates `master.key` when
  * neither the variable nor the file exists. Otherwise throws CREDENTIALS.
  */
-export function getMasterKey(createIfMissing: boolean): Buffer {
-  const fromEnv = keyFromEnv();
+export function getMasterKey(createIfMissing: boolean, ignoreEnvironment = false): Buffer {
+  const fromEnv = ignoreEnvironment ? null : keyFromEnv();
   if (fromEnv) return fromEnv;
 
   const path = paths.masterKey();

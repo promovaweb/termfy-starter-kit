@@ -20,12 +20,14 @@ Para desenvolvimento, sem compilar: `"command": "bun", "args": ["run", "src/main
 
 | Tool | Entrada | Saída |
 | --- | --- | --- |
+| `doctor` | nenhuma | `{ checks, ok }`; `isError: true` se houver `fail` |
 | `about` | nenhuma | identity, runtime, platform, data directory e credits |
 | `exit_codes` | nenhuma | tabela de exit codes |
-| `skill` | `topic?` (`cli`, `tui`, `mcp`, `config`, `exit-codes`) | documentação em Markdown |
+| `skill` | `topic?` (`cli`, `tui`, `mcp`, `config`, `exit-codes`, `reference`) | documentação em Markdown |
 | `config_list` | nenhuma | keys de settings.json em vigor e o schema |
 | `config_get` | `key` | valor da key; `isError` quando não existe |
 | `credentials_status` | nenhuma | file, master key source, count e names |
+| `spec` | nenhuma | front matter, seções e progresso do `CLISPEC.md` |
 
 Nenhuma tool devolve o valor de uma credencial, e nenhuma tool grava. Escrita
 continua no CLI, onde há confirmação humana.
@@ -74,3 +76,8 @@ inspecionar as mensagens JSON-RPC.
 
 Nomes de tools usam `snake_case`. Tools que gravam ou chamam APIs externas
 precisam dizer isso na description e nunca devem ecoar segredos na resposta.
+
+A tool `doctor` usa a mesma coleta do command CLI: confere runtime, terminal,
+permissões da pasta, settings, origem da chave e leitura do cofre. Não grava
+arquivos e não retorna valores de credenciais. Cada check traz `name`,
+`status` (`ok`, `warn` ou `fail`) e `detail`.

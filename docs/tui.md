@@ -66,3 +66,22 @@ renderables do pacote. Sempre devolva o terminal com `renderer.destroy()`;
 `@opentui/core/testing`, pressiona teclas com `mockInput.pressKey` e confere
 o frame com `captureCharFrame`. `mountTui` aceita qualquer renderer;
 `startTui` cria o renderer real.
+
+## Lista com seleção
+
+`listPanel(renderer, theme, { title, items, onSelect })` monta uma lista
+com `ScrollBoxRenderable`. O item atual recebe `theme.surfaceHigh` no fundo
+e `theme.accent` no texto. A rolagem acompanha o item selecionado.
+
+| Retorno | Uso |
+| --- | --- |
+| `box` | Adicione ao layout; `handleKeyPress` trata up/down, j/k e Enter. |
+| `move(delta)` | Move o destaque sem chamar `onSelect`; respeita os limites. |
+| `selected()` | Retorna o índice atual, ou -1 para lista vazia. |
+| `select(index)` | Destaca o índice e chama `onSelect(index)`. |
+
+Na screen, trate up/k com `move(-1)`, down/j com `move(1)` e Enter com
+`select(selected())` dentro de `onKey`. A tecla `r` pode voltar ao primeiro
+item com `move(-selected())`. Declare essas teclas em `keys` para aparecerem
+na barra inferior. O exemplo completo está em `template/screen/example.ts`.
+Não encaminhe a mesma tecla pelo foco de `box` e por `onKey` simultaneamente.

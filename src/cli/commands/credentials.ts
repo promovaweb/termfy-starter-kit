@@ -11,6 +11,7 @@ import { ExitCode } from "../../app/exit-codes.ts";
 import { error } from "../../app/errors.ts";
 import { MASTER_KEY_VARIABLE, paths } from "../../config/paths.ts";
 import {
+  rotateMasterKey,
   setCredential,
   clearVault,
   listCredentials,
@@ -154,6 +155,20 @@ const clear: Command = {
   },
 };
 
+const rotateKey: Command = {
+  name: "rotate-key",
+  description: "Re-encrypt the existing vault with a new master key and write master.key with mode 0600.",
+  longDescription: `With --from-env, master.key decrypts the vault and ${MASTER_KEY_VARIABLE} supplies the new key. Without it, a random key is generated; unset the old environment variable in your shell afterward.`,
+  options: [{ name: "--from-env", description: `Use ${MASTER_KEY_VARIABLE} (64 hex characters) as the new key; read the current key from master.key.` }],
+  exitCodes: codes,
+  run: (ctx) => {
+    const hadEnvironment = Boolean(process.env[MASTER_KEY_VARIABLE]);
+    const data = rotateMasterKey(ctx.options["from-env"] === true);
+    if (hadEnvironment && data.source === "file") ctx.stderr(`Unset ${MASTER_KEY_VARIABLE} in your shell before reading the vault again.`);
+    return { data, text: "✓ Master key rotated; vault re-encrypted." };
+  },
+};
+
 export const credentialsCommand: Command = {
   name: "credentials",
   aliases: ["cred"],
@@ -163,6 +178,6 @@ export const credentialsCommand: Command = {
     `${MASTER_KEY_VARIABLE} (64 hex characters) or from master.key, created with mode 0600 on\n` +
     `first write. Commands that call APIs read the value with getCredential(name) and exit\n` +
     `with code 4 when the credential does not exist.`,
-  subcommands: [set, get, list, remove, status, clear],
+  subcommands: [set, get, list, remove, status, clear, rotateKey],
   exitCodes: codes,
 };

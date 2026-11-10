@@ -15,6 +15,8 @@ import { registerBaseTools } from "./tools/base.ts";
 import { registerConfigTools } from "./tools/config.ts";
 import { registerResources } from "./resources/base.ts";
 import { registerPrompts } from "./prompts.ts";
+import { registerDoctorTools } from "./tools/doctor.ts";
+import { registerSpecTools } from "./tools/spec.ts";
 
 /** Metadata collected during registration, for `mcp --list`. */
 export interface Catalog {
@@ -50,8 +52,10 @@ function createServer(): Registrar {
 function registerAll(r: Registrar): void {
   registerBaseTools(r);
   registerConfigTools(r);
+  registerDoctorTools(r);
   registerResources(r);
   registerPrompts(r);
+  registerSpecTools(r);
 }
 
 /** Describes the server without opening a transport. */

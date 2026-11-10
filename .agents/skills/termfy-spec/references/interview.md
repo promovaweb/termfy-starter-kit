@@ -10,7 +10,8 @@ uma resposta livre.
 - Qual o título legível e a frase de descrição, em inglês?
 - Quem assina: autor, repositório, site?
 
-Define: tabela "Identidade" e os argumentos de `bun run init`.
+Define: `bin`, `title`, `description` do front matter e os argumentos de
+`bun run init`.
 
 ## 2. Propósito e públicos
 
@@ -18,7 +19,7 @@ Define: tabela "Identidade" e os argumentos de `bun run init`.
 - Quem usa no terminal, quem chama por script e que agente vai operá-lo?
 - O que cada público precisa conseguir fazer na primeira versão?
 
-Define: "Propósito" e "Públicos". Se um público não existir, registre e
+Define: `## Purpose` e `## Audiences`. Se um público não existir, registre e
 remova o modo correspondente do escopo (uma TUI sem público pode ficar só
 com Overview e About).
 
@@ -29,7 +30,7 @@ com Overview e About).
   estável.
 - Agentes vão operar pelo MCP? Então cada ação relevante vira tool.
 
-Define: quais seções "TUI" e "MCP" entram na spec.
+Define: se `screens` e `mcp` do front matter ficam vazios ou não.
 
 ## 4. Commands
 
@@ -44,7 +45,7 @@ Para cada ação que a pessoa citou:
 - Precisa de confirmação ou de terminal? Então `interactive` e uma saída não
   interativa (`--yes`, `--stdin`).
 
-Define: tabela e blocos de "Commands". Recomende o padrão `recurso verbo`
+Define: a lista `commands` do front matter. Recomende o padrão `recurso verbo`
 (`orders list`, `orders show`) quando houver mais de uma ação sobre o mesmo
 recurso.
 
@@ -56,7 +57,7 @@ Para cada aba nova:
 - O que ela faz ali? (vira teclas próprias)
 - Os dados vêm de onde? (reaproveita um command ou função de `config/`)
 
-Define: tabela "TUI". Recomende poucas abas, cada uma com até quatro painéis.
+Define: a lista `screens`. Recomende poucas abas, cada uma com até quatro painéis.
 
 ## 6. MCP
 
@@ -68,7 +69,7 @@ Para cada ação que um agente vai executar:
 - Efeito: só leitura, grava em disco, chama rede.
 
 Para dados passivos (documentação, listas estáveis): resource com URI.
-Define: tabela "MCP". Lembre que nenhuma tool devolve valor de credencial.
+Define: `mcp.tools`, `mcp.resources` e `mcp.prompts`. Lembre que nenhuma tool devolve valor de credencial.
 
 ## 7. Configuração e credenciais
 
@@ -77,13 +78,13 @@ Define: tabela "MCP". Lembre que nenhuma tool devolve valor de credencial.
   `service.purpose`.
 - Como a pessoa obtém cada credencial?
 
-Define: "Configuração" e "Credenciais".
+Define: `settings` e `credentials`.
 
 ## 8. Fora de escopo
 
 - O que fica para depois, mesmo que pareça óbvio?
 
-Define: "Fora de escopo". Uma lista curta evita que o agente amplie o
+Define: `## Out of scope`. Uma lista curta evita que o agente amplie o
 trabalho.
 
 ## 9. Checagens de aceite
@@ -91,10 +92,10 @@ trabalho.
 - Como a pessoa vai saber que está pronto? Que comando ela roda e o que
   espera ver?
 
-Define: "Checagens de aceite", em frases verificáveis com command, saída e
-exit code.
+Define: os itens de `## Checklist`, um por entrega, cada um com `{#id}` e a
+tag da skill responsável. Frases verificáveis: command, saída e exit code.
 
 ## Fechamento
 
-Releia a spec com a pessoa, registre as "Pendências" e indique a próxima
-skill.
+Releia a spec com a pessoa, rode `bun run dev -- spec check --json`, registre
+as pendências em `## Notes` e indique a próxima skill.

@@ -11,9 +11,10 @@ credenciais, mudar a política da chave mestra ou depurar a pasta
 
 ## Leia antes
 
-- `CLISPEC.md` na raiz do projeto: a seção que descreve o que será
-  implementado. Se o arquivo não existir ou não cobrir o pedido, rode a
-  skill `termfy-spec` antes de continuar.
+- `CLISPEC.md` na raiz do projeto e `bun run dev -- spec show --json`: a
+  entrada do front matter e o item da checklist que descrevem o que será
+  implementado. Se o arquivo não cobrir o pedido, rode a skill `termfy-spec`
+  antes de continuar.
 - `docs/configuration.md`.
 - `src/config/paths.ts`, `src/config/settings.ts`, `src/config/crypto.ts`
   e `src/config/credentials.ts`.
@@ -37,7 +38,9 @@ credenciais, mudar a política da chave mestra ou depurar a pasta
    `github.token`, `openai.api_key`, `smtp.password`.
 6. Arquivos continuam com permissão 0600 e a pasta com 0700. Não relaxe.
 7. A variável `<BIN>_MASTER_KEY` tem prioridade sobre `master.key`. Em CI e
-   em servidores, use a variável e não grave a chave em disco.
+   em servidores, use a variável e não grave a chave em disco. Para trocar a
+   chave, `credentials rotate-key` decifra com a atual e recifra com a nova;
+   não oriente apagar o cofre.
 
 ## Passos para uma chave de configuração
 
@@ -58,6 +61,14 @@ credenciais, mudar a política da chave mestra ou depurar a pasta
 3. Em `--help`, acrescente `ExitCode.CREDENTIALS` em `exitCodes`.
 4. Oriente a gravação com `<bin> credentials set <name>` na mensagem de erro.
 
+## Checklist da spec
+
+Ao concluir cada entrega, marque o item correspondente em `## Checklist` do
+`CLISPEC.md` de `- [ ]` para `- [x]` pelo `{#id}`, sem mudar texto nem id,
+e avance `updatedAt`. Registre em `## Notes` uma linha datada quando a
+implementação se afastar do combinado. Rode `bun run dev -- spec check` antes
+de entregar: avisos sobre o item recém-implementado devem ter sumido.
+
 ## Marcos
 
 Esquema atualizado e `config schema` exibindo a chave; testes verdes;
@@ -70,6 +81,6 @@ executados. Nunca cole valores de credenciais na resposta.
 
 ## Compatibilidade
 
-Starter kit 0.4.x. Caminhos citados: `src/config/paths.ts`,
+Starter kit 0.5.x. Caminhos citados: `src/config/paths.ts`,
 `src/config/settings.ts`, `src/config/crypto.ts`,
 `src/config/credentials.ts`, `tests/config.test.ts` e `docs/configuration.md`.

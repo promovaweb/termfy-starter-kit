@@ -124,7 +124,7 @@ export const GLOBAL_OPTIONS: readonly OptionDefinition[] = Object.freeze([
   },
   {
     name: "--skill",
-    argument: { name: "topic", optional: true, values: ["cli", "tui", "mcp", "config", "exit-codes"] },
+    argument: { name: "topic", optional: true, values: ["cli", "tui", "mcp", "config", "exit-codes", "reference"] },
     description:
       "Print the full documentation embedded in the binary, written for AI agents. With a topic, print only that section.",
     recursive: true,

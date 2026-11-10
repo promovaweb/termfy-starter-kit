@@ -12,12 +12,15 @@ import { credentialsCommand } from "./commands/credentials.ts";
 import { mcpCommand } from "./commands/mcp.ts";
 import { createSkillCommand } from "./commands/skill.ts";
 import { tuiCommand } from "./commands/tui.ts";
+import { doctorCommand } from "./commands/doctor.ts";
+import { createCompletionCommand } from "./commands/completion.ts";
+import { specCommand } from "./commands/spec.ts";
 import type { Command } from "./registry.ts";
 
 export const root: Command = {
   name: manifest.bin,
   description: manifest.description,
-  subcommands: [tuiCommand, aboutCommand, configCommand, credentialsCommand, mcpCommand, createSkillCommand(() => root)],
+  subcommands: [tuiCommand, aboutCommand, configCommand, credentialsCommand, mcpCommand, createSkillCommand(() => root), doctorCommand, createCompletionCommand(() => root), specCommand],
   examples: [
     `${manifest.bin}`,
     `${manifest.bin} about --json`,

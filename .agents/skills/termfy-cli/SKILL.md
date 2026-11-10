@@ -10,9 +10,10 @@ argumentos e opções, ou para mudar o formato de saída e os códigos de saída
 
 ## Leia antes
 
-- `CLISPEC.md` na raiz do projeto: a seção que descreve o que será
-  implementado. Se o arquivo não existir ou não cobrir o pedido, rode a
-  skill `termfy-spec` antes de continuar.
+- `CLISPEC.md` na raiz do projeto e `bun run dev -- spec show --json`: a
+  entrada do front matter e o item da checklist que descrevem o que será
+  implementado. Se o arquivo não cobrir o pedido, rode a skill `termfy-spec`
+  antes de continuar.
 - `docs/cli.md` e `docs/exit-codes.md`.
 - `src/cli/registry.ts` (tipos) e `src/cli/commands/config.ts` (exemplo
   completo com subcomandos).
@@ -38,9 +39,14 @@ argumentos e opções, ou para mudar o formato de saída e os códigos de saída
 5. Comandos que exigem terminal recebem `interactive: true` e oferecem uma
    saída não interativa (`--stdin`, `--yes`).
 6. Stdout só recebe dados. Progresso e avisos vão para `ctx.stderr`.
-7. O parâmetro `--skill` continua imprimindo toda a documentação embutida.
+7. `completion <shell>` e `--opencli` são gerados do registry: um command novo
+   aparece neles sem trabalho extra. `doctor` confere o ambiente; se o
+   command novo depender de algo do ambiente (binário externo, pasta),
+   acrescente a verificação em `src/cli/commands/doctor.ts`.
+8. O parâmetro `--skill` continua imprimindo toda a documentação embutida.
    Se o comando novo merecer explicação além da referência gerada, escreva
-   em `docs/cli.md`; o texto entra no binário no próximo build.
+   em `docs/cli.md`; o texto entra no binário no próximo build. O topic
+   `--skill reference` devolve só a referência gerada do registry.
 
 ## Passos
 
@@ -56,6 +62,14 @@ argumentos e opções, ou para mudar o formato de saída e os códigos de saída
 8. Atualize `docs/cli.md` quando o comando trouxer conceito novo. A pasta `docs/`
    é a documentação do próprio projeto e entra no binário pelo `--skill`.
 
+## Checklist da spec
+
+Ao concluir cada entrega, marque o item correspondente em `## Checklist` do
+`CLISPEC.md` de `- [ ]` para `- [x]` pelo `{#id}`, sem mudar texto nem id,
+e avance `updatedAt`. Registre em `## Notes` uma linha datada quando a
+implementação se afastar do combinado. Rode `bun run dev -- spec check` antes
+de entregar: avisos sobre o item recém-implementado devem ter sumido.
+
 ## Marcos
 
 Comando registrado e `--help` exibindo-o; testes verdes; `opencli.json`
@@ -68,6 +82,6 @@ resultado e exemplos de uso do comando novo em texto e `--json`.
 
 ## Compatibilidade
 
-Starter kit 0.4.x. Caminhos citados: `src/cli/registry.ts`,
+Starter kit 0.5.x. Caminhos citados: `src/cli/registry.ts`,
 `src/cli/commands.ts`, `src/cli/commands/*.ts`, `template/command/example.ts`,
 `tests/cli.test.ts`, `docs/cli.md` e `docs/opencli.json`.

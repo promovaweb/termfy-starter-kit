@@ -23,12 +23,17 @@ registradas em `skills-lock.json`. Atualize com `bun run skills:update`.
 
 ## Especificação
 
-`CLISPEC.md`, na raiz, descreve o que o binário faz: propósito, públicos,
-commands com arguments e options, formatos de saída, screens da TUI, tools e
-resources MCP, keys de configuração, credenciais e exit codes. A skill
-`termfy-spec` monta esse arquivo em entrevista com a pessoa. Antes de
-implementar qualquer command, screen ou tool, leia o `CLISPEC.md`; se ele
-não existir ou não cobrir o pedido, rode a skill `termfy-spec` primeiro.
+`CLISPEC.md`, na raiz, descreve o que o binário faz no contrato de
+`docs/spec.md`: front matter validado por schema (`commands`, `screens`,
+`mcp`, `settings`, `credentials`), seções `Purpose`, `Audiences`,
+`Out of scope`, `Checklist` e `Notes`, e checklist com `{#id}` por entrega.
+A skill `termfy-spec` monta esse arquivo em entrevista com a pessoa. Antes de
+implementar qualquer command, screen ou tool, leia a entrada correspondente
+da spec (`bun run dev -- spec show --json`); se ela não cobrir o pedido,
+rode a skill `termfy-spec` primeiro. Ao concluir uma entrega, marque o item
+da checklist pelo `{#id}` e avance `updatedAt`. `bun run dev -- spec check`
+precisa passar antes de entregar; `bun run spec:check` entra em
+`bun run validate`.
 
 ## Ordem de leitura
 
@@ -75,7 +80,8 @@ não existir ou não cobrir o pedido, rode a skill `termfy-spec` primeiro.
 bun run validate
 ```
 
-Encadeia `typecheck`, `bun test`, `skills:check`, `opencli:check` e `build`.
+Encadeia `typecheck`, `bun test`, `skills:check`, `opencli:check`,
+`spec:check` e `build`.
 Quando o registry de commands mudar, rode `bun run opencli` antes e revise o
 diff de `docs/opencli.json`. Confira `git status --short` ao final e preserve mudanças que já
 existiam.

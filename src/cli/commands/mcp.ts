@@ -14,7 +14,7 @@ export const mcpCommand: Command = {
   description: "Start the MCP server (stdio) with tools, resources and prompts for agents.",
   longDescription:
     `Configure in the MCP client: { "command": "${manifest.bin}", "args": ["mcp"] }.\n` +
-    `Tools: about, exit_codes, skill, config_list, config_get, credentials_status.\n` +
+    `Tools: about, exit_codes, skill, config_list, config_get, credentials_status, doctor.\n` +
     `Resources: ${manifest.bin}://about, ${manifest.bin}://exit-codes, ${manifest.bin}://skill/{topic}.\n` +
     `No tool returns the value of a credential.`,
   options: [{ name: "--list", description: "Instead of starting the server, list registered tools, resources and prompts and exit." }],

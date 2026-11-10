@@ -2,6 +2,31 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.5.0] - 2026-11-10
+
+### Adicionado
+
+- Contrato estruturado do `CLISPEC.md` (`docs/spec.md`): front matter
+  validado por schema Zod (`src/spec/schema.ts`), seções `Purpose`,
+  `Audiences`, `Out of scope`, `Checklist` e `Notes`, checklist com `{#id}`.
+  Command `spec show|check|progress` (`spec check --strict` trata avisos
+  como erros), tool MCP `spec`, script `spec:check` em `validate` que ainda
+  confere `getCredential()` contra a spec, e `CLISPEC.md` do esqueleto
+  reescrito no contrato.
+- Command `doctor` e tool MCP `doctor`: Bun, TTY, pasta de dados, settings,
+  master key, cofre, versão e plataforma, com exit code 3 em falha.
+- Command `completion bash|zsh|fish`, gerado do registry
+  (`src/cli/completion.ts`).
+- Subcommand `credentials rotate-key [--from-env]` (`rotateMasterKey` em
+  `src/config/crypto.ts`).
+- Componente `listPanel` em `src/tui/components.ts` (lista com rolagem,
+  seleção e navegação por teclado); `template/screen/example.ts` o usa.
+- Topic `reference` no `--skill`: só a referência gerada do registry.
+- `scripts/check-skills.ts` avisa quando a faixa de compatibilidade das
+  skills instaladas difere da versão do projeto.
+- Testes: 90 no total (`spec`, `doctor`, `completion`, `rotate-key`,
+  `tui-list`, `reference`).
+
 ## [0.4.0] - 2026-11-10
 
 ### Removido
