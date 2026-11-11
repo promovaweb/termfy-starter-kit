@@ -28,5 +28,5 @@ com a versão aplicada em `PRAGMA user_version`. As migrations são módulos
 importados estaticamente, então o build as embute no executável; o binário
 não lê SQL do disco. Ele recusa um banco mais novo que ele e, antes de
 aplicar migrations num banco que já tem schema, copia o arquivo para
-`data.db.v<versão>.bak`. As tabelas entram em `storage.tables` do
-`CLISPEC.md`, e `spec check` as compara com o que as migrations criam.
+`data.db.v<versão>.bak`. As tabelas ficam descritas na spec que
+as criou e na superfície do `CLISPEC.md`.

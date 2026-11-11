@@ -1,8 +1,8 @@
 # Cobertura antes de concluir uma entrega
 
-Cada item de `## Tests` da spec aberta é um teste de aceite: relacione seu
-`{#id}` a pelo menos um teste que confira o comando e o resultado esperado
-que o item descreve, e o `{#id}` da tarefa aos testes que exercitam seu
+Cada item de `## Tests` da spec aberta é um teste de aceite: relacione cada
+item a pelo menos um teste que confira o comando e o resultado esperado
+que ele descreve, e cada tarefa aos testes que exercitam seu
 comportamento. O Behavior da spec diz as saídas, erros e exit codes que as
 assertions conferem. Escolha os casos aplicáveis abaixo; explique os que não se aplicam. Percentual
 de linhas executadas não substitui assertions sobre a saída e os efeitos.
@@ -56,9 +56,9 @@ de linhas executadas não substitui assertions sobre a saída e os efeitos.
 
 ## Fechamento
 
-Rode `bun run typecheck`, `bun test` e `bun run dev -- spec check --strict`.
+Rode `bun run typecheck`, `bun test` e `bun run validate`.
 Associe o resultado ao estado atual dos arquivos. Se um caso essencial falhar
 ou não puder rodar, não marque o item como concluído. Uma suíte sem assertions
 sobre a entrega não autoriza marcar `[x]`. Marque os itens no arquivo da
 spec, nunca no `CLISPEC.md`. Um item de `## Tests` sem teste correspondente
-fica `[ ]`, e o `spec close` recusa spec com item pendente.
+fica `[ ]`, e a spec só fecha com todos os itens marcados.

@@ -13,11 +13,11 @@ não arquivos já fornecidos pelo starter kit.
 
 ## Leia antes
 
-- A spec aberta (`bun run dev -- spec show <id> --json`): `changes` com
-  commands, settings e credentials do serviço, Behavior, Design e os itens
-  `#termfy-api` de Tasks e Tests. O `CLISPEC.md`
-  (`bun run dev -- spec show --json`) mostra o que já foi entregue.
-- `docs/configuration.md`, `docs/cli.md` e `docs/spec.md`.
+- A spec aberta em `specs/` (status `in_progress`): a Surface com
+  commands, settings e credenciais do serviço, Behavior, Design e os itens
+  `#termfy-api` de Tasks e Tests. A seção Surface do `CLISPEC.md` mostra o
+  que já foi entregue.
+- `docs/configuration.md` e `docs/cli.md`.
 - `src/config/credentials.ts`, `src/config/settings.ts`,
   `src/config/paths.ts`, `src/app/errors.ts` e `src/app/exit-codes.ts`.
 - `tests/config.test.ts` para isolar configuração e cofre.
@@ -63,8 +63,8 @@ não arquivos já fornecidos pelo starter kit.
 2. Crie a pasta `api` sob `src/` e o módulo `<service>.ts`. Separe montagem
    da request, execução com timeout, retries, validação e normalização.
 3. Acrescente a key de URL em `src/config/settings.ts`. Confira que a key,
-   a credencial e seus consumidores estão em `changes` da spec aberta; o
-   `CLISPEC.md` recebe essas entradas no `spec close`. Use `termfy-config` para
+   a credencial e seus consumidores estão na Surface da spec aberta; o
+   `CLISPEC.md` recebe essas entradas quando a spec fecha. Use `termfy-config` para
    manter o mesmo contrato de armazenamento.
 4. Implemente a leitura do token e URL em tempo de chamada. Crie erros de
    transporte usando `src/app/errors.ts`; não encerre o processo no client.
@@ -76,16 +76,17 @@ não arquivos já fornecidos pelo starter kit.
    quando aplicáveis. Nas tools, transforme falhas previstas em
    `isError: true`; na TUI, apresente estado de erro sem expor segredos.
 7. Documente a configuração em `docs/configuration.md` e o uso nos capítulos
-   existentes que cobrem os consumidores. Rode `bun test`,
-   `bun run typecheck` e `bun run spec:check`. Se a CLI mudar, rode
-   `bun run opencli` antes de `bun run validate`.
-8. Marque somente os itens implementados e testados com
-   `bun run dev -- spec done <id> <item>`; não edite o checkbox à mão nem
-   marque nada no `CLISPEC.md`. Mantenha `in_progress` enquanto
-   houver entregas pendentes. Registre desvios em `## Notes` da spec. Código
-   à frente do `CLISPEC.md` aparece como `pending` em `spec check` enquanto
-   a spec está aberta; com todos os itens marcados, a spec é fechada com
-   `bun run dev -- spec close <id>`.
+   existentes que cobrem os consumidores. Rode `bun test` e
+   `bun run typecheck`. Se a CLI mudar, rode `bun run opencli` antes de
+   `bun run validate`.
+8. Marque `[x]` somente nos itens implementados e testados, editando o
+   arquivo da spec em `specs/`. Não mexa na superfície do `CLISPEC.md`
+   enquanto a spec está aberta. Mantenha `in_progress` enquanto houver
+   entregas pendentes. Registre desvios em `## Notes` da spec. Com todos
+   os itens marcados, feche a spec pelo ciclo de `termfy-spec`: faça a
+   conferência manual descrita em `references/spec-contract.md` daquela
+   skill, aplique a Surface às tabelas do `CLISPEC.md` e troque o status
+   para `done`.
 
 ## Marcos
 
@@ -101,8 +102,9 @@ dos testes. Informe pendências sem imprimir valores de credenciais.
 
 ## Compatibilidade
 
-Starter kit 0.8.x. Referências existentes em `src/config/settings.ts`,
+Starter kit a partir da v0.9.0 (specs em Markdown puro, sem command
+`spec`). Referências existentes em `src/config/settings.ts`,
 `src/config/credentials.ts`, `src/config/paths.ts`, `src/app/errors.ts`,
-`src/app/exit-codes.ts`, `tests/config.test.ts`, `docs/configuration.md`,
-`docs/cli.md` e `docs/spec.md`. A pasta `api` sob `src/` e o teste por
+`src/app/exit-codes.ts`, `tests/config.test.ts`, `docs/configuration.md`
+e `docs/cli.md`. A pasta `api` sob `src/` e o teste por
 serviço sob `tests/` são criados pela aplicação desta skill.

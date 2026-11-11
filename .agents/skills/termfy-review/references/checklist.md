@@ -7,19 +7,15 @@ sozinhas, que o comportamento esteja correto. Confirme cada achado no código.
 
 ## Escopo e itens da spec
 
-Troque `0002` pelo ID da spec sob revisão.
+Troque `0002` pelo número da spec sob revisão.
 
 ```bash
 git status --short
 git diff --stat
 git diff
 git diff --cached
-rg -n '^status:|^updatedAt:|^- \[[xX ]\].*\{#[a-z0-9]{4}\}' specs/0002-*.md
-bun run dev -- spec show 0002 --json
-bun run dev -- spec progress 0002
-bun run dev -- spec list
-bun run dev -- spec check --strict
-bun run spec:check
+rg -n '^Status:|^- \[[xX ]\]' specs/0002-*.md
+rg -n '^Status:' specs
 bun run typecheck
 bun test
 ```
@@ -32,23 +28,59 @@ rg -n '\b(test|it|describe)\.(skip|todo|only)|expect\(' tests
 ```
 
 Um item marcado sem teste pertinente é achado mesmo quando a suíte passa.
-Confira `{#id}` preservado, `updatedAt` e `status` da spec contra
-`docs/spec.md`. Itens marcados no `CLISPEC.md` em vez da spec, ou seção
-`## Checklist` no `CLISPEC.md`, também são achados.
+Confira na spec a linha `Status:` com um dos valores `draft`,
+`in_progress`, `done` ou `archived`, as seções na ordem do contrato e a tag
+da skill responsável no fim de cada tarefa. Front matter YAML, IDs de item entre chaves
+nos itens, itens marcados no `CLISPEC.md` em vez da spec, trabalho
+pendente no `CLISPEC.md` ou seção `## Checklist` nele também são achados.
 
 ## Behavior, Design e fechamento
 
 Leia o Behavior e confronte cada fluxo, saída em texto e em `--json`,
 mensagem de erro, exit code, tecla e tool com o código e os testes. Leia o
 Design e confira os arquivos criados, a camada de cada função, as funções
-compartilhadas entre CLI, MCP e TUI e as dependências novas. Entradas em
-`pending` no `spec check` são esperadas enquanto a spec está aberta; erros
-não são. A spec pode ser fechada quando Goal, Behavior e Design têm texto,
-todos os itens estão `[x]` e `spec check` passa. Relate essa condição sem
-rodar `spec close`, que grava o `CLISPEC.md`.
+compartilhadas entre CLI, MCP e TUI e as dependências novas. Confira que
+cada item de Surface da spec existe no código com o nome, as options, o
+`data`, os exit codes e as credenciais descritos. A spec pode ser fechada
+quando Goal, Behavior e Design têm texto, todos os itens estão `[x]` e a
+conferência manual abaixo não acha divergências. Relate essa condição sem
+fechar a spec, pois o fechamento grava o `CLISPEC.md`.
 Leia também arquivos novos apontados por `git status`, pois `git diff` não
 mostra seu conteúdo. Não rode `bun run validate` nesta revisão, pois inclui
 build; execute suas verificações sem geração de artefatos separadamente.
+
+## Conferência manual do CLISPEC.md
+
+Nenhum script lê `CLISPEC.md` nem `specs/`. Confronte os documentos com o
+código pela leitura. As buscas abaixo listam os nomes do lado do código:
+
+```bash
+rg -n 'name: "' src/cli/commands.ts src/cli/commands
+rg -n 'export const screens' src/tui/screens/index.ts
+rg -n '^  id: "' src/tui/screens
+rg -n 'registerTool|registerResource|registerPrompt' src/mcp
+rg -n 'key: "' src/config/settings.ts
+rg -no 'getCredential\("[^"]+"\)' src
+rg -n 'CREATE TABLE|ALTER TABLE' src
+ls specs
+```
+
+- Cada linha de Commands, Screens, MCP e Settings do `CLISPEC.md` existe no
+  registry, em `src/tui/screens/index.ts`, em `src/mcp/` e em
+  `SETTINGS_SCHEMA`, e nada entregue falta nas tabelas.
+- Options, exit codes e `data` de cada command batem com o registry e com
+  `docs/cli.md`.
+- Cada `getCredential("<nome>")` de `src/` aparece em Credentials, com os
+  commands e tools que a usam. Credencial listada sem chamada no código
+  também é achado.
+- Quando há banco, cada tabela das migrations aparece em `### Storage` com
+  colunas, tipo, chave primária e `NOT NULL` iguais aos dos `CREATE TABLE` e
+  `ALTER TABLE` lidos em ordem.
+- O índice `## Specs` tem uma linha por arquivo de `specs/`, com título e
+  status iguais aos da spec. Spec `done` tem Surface aplicada ao
+  `CLISPEC.md` e uma linha datada em Notes.
+- A linha abaixo do título traz `bin` e `description` iguais aos do
+  `package.json`.
 
 ## Descriptions e registry
 

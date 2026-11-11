@@ -21,7 +21,6 @@ mesma configuração (`~/.{{bin}}/settings.json`), o mesmo cofre de credenciais
 - [exit-codes.md](exit-codes.md): tabela de exit codes e como tratá-los.
 - [architecture.md](architecture.md): pastas, camadas e fluxo de execução.
 - [customize-template.md](customize-template.md): usar este repositório como ponto de partida de um novo binário.
-- [spec.md](spec.md): contrato do `CLISPEC.md` e das specs de `specs/`, lido e mantido pelos subcommands de `{{bin}} spec`.
 - [release.md](release.md): versão, changelog, tag, GitHub Release e binários.
 - [opencli.json](opencli.json): descrição OpenCLI gerada por `bun run opencli`.
 

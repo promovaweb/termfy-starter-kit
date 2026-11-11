@@ -60,8 +60,8 @@ separada.
 ## Tools MCP
 
 Uma tool por command de leitura, com o mesmo nome em `snake_case`
-(`orders_list`, `orders_show`), `effect: network`. Commands de escrita só
-viram tool quando a pessoa pedir, com `effect: write` e descrição que
+(`orders_list`, `orders_show`), efeito `network`. Commands de escrita só
+viram tool quando a pessoa pedir, com efeito `write` e descrição que
 avisa o efeito.
 
 ## Screens

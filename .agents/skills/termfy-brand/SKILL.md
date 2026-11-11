@@ -18,8 +18,9 @@ cuida do rename inicial; esta skill cuida de tudo que vem depois e do que o
   consome.
 - `src/app/manifest.ts`, o bloco `termfy` do `package.json`,
   `src/tui/theme.ts` e `src/tui/screens/about.ts`.
-- `CLISPEC.md`, campos de identidade do front matter (`bin`, `title`,
-  `description`). As specs de `specs/` não guardam identidade.
+- `CLISPEC.md`: a identidade fica no título `# <title>` e na linha logo
+  abaixo dele, com o `bin` e a `description`. As specs de `specs/` não
+  guardam identidade.
 
 ## Regras
 
@@ -32,9 +33,9 @@ cuida do rename inicial; esta skill cuida de tudo que vem depois e do que o
    MCP SDK enquanto o binário os usar.
 3. Mudar `bin` é um rename: use `bun run init -- --name <bin>`, que
    reescreve `package.json`, `.env.example`, `README.md`, `AGENTS.md`,
-   `CHANGELOG.md` e workflows. Depois ajuste `bin` e `updatedAt` no
-   `CLISPEC.md`, sem tocar na superfície nem no índice `specs`, e rode
-   `bun run spec:check`. A pasta `~/.<bin>/`, o prefixo `<BIN>_` e o esquema
+   `CHANGELOG.md` e workflows. Depois ajuste o título e a linha do `bin`
+   no `CLISPEC.md`, sem tocar na superfície nem no índice `## Specs`, e
+   acrescente a mudança às Notes dele. A pasta `~/.<bin>/`, o prefixo `<BIN>_` e o esquema
    `<bin>://` mudam junto; avise a pessoa que dados antigos ficam na pasta
    antiga.
 4. `description` é uma frase em inglês, sem ponto final duplicado, e aparece
@@ -50,8 +51,9 @@ cuida do rename inicial; esta skill cuida de tudo que vem depois e do que o
 7. Nada de logo em ASCII ocupando linhas: o cabeçalho da TUI usa o glifo
    `▌` mais o título. Se a pessoa quiser um glifo próprio, troque
    `glyphs.block` em `src/tui/theme.ts`.
-8. Depois de qualquer mudança: `bun run opencli` (o `info` do OpenCLI muda),
-   `bun run spec:check` e `bun run validate`.
+8. Depois de qualquer mudança: `bun run opencli` (o `info` do OpenCLI muda)
+   e `bun run validate`. Confira à mão que o título, o `bin` e a
+   `description` do `CLISPEC.md` batem com o `package.json`.
 
 ## Passos
 
@@ -63,7 +65,7 @@ cuida do rename inicial; esta skill cuida de tudo que vem depois e do que o
 3. Aplique no `package.json` (bloco `termfy` e campos raiz) e, para
    créditos e paleta, em `src/app/manifest.ts` e `src/tui/theme.ts`.
 4. Se `bin` mudou, rode `bun run init` e ajuste `CLISPEC.md`.
-5. Rode `bun run opencli`, `bun run spec:check` e `bun run validate`.
+5. Rode `bun run opencli` e `bun run validate`.
 6. Confira as superfícies: `bun run dev -- --version`,
    `bun run dev -- about`, `bun run dev -- --help | head`, a aba About no
    teste `tests/tui.test.ts` (ou `bun run dev` em terminal) e
@@ -83,7 +85,8 @@ quando `bin` mudou.
 
 ## Compatibilidade
 
-Starter kit 0.8.x. Caminhos citados: `package.json`, `src/app/manifest.ts`,
+Starter kit a partir da v0.9.0 (specs em Markdown puro, sem command
+`spec`). Caminhos citados: `package.json`, `src/app/manifest.ts`,
 `src/tui/theme.ts`, `src/tui/screens/about.ts`, `src/cli/commands/about.ts`,
-`scripts/init.ts`, `CLISPEC.md` e os scripts `init`, `opencli`, `spec:check`
-e `validate`.
+`scripts/init.ts`, `CLISPEC.md` e os scripts `init`, `opencli` e
+`validate`.

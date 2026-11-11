@@ -22,8 +22,10 @@ const serviceSetting = {
 Acrescente a entrada a `SETTINGS_SCHEMA`. Leia-a com
 `getPath(readSettings(), "shop.baseUrl")` e o token com
 `getCredential("shop.token")`. O nome literal também permite a conferência
-de consumo por `bun run spec:check`. Declare `credentials` e `usedBy` na
-spec com os commands ou tools consumidores, não com o nome do módulo.
+manual de consumo: cada `getCredential("<nome>")` de `src/` precisa
+aparecer em Credentials do `CLISPEC.md` quando a spec fecha. Declare a
+credencial na Surface da spec com os commands ou tools consumidores em
+"usada por", não com o nome do módulo.
 
 Defina um contrato por operação. Exemplo de tipos locais a criar:
 

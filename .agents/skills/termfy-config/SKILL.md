@@ -11,10 +11,10 @@ credenciais, mudar a política da chave mestra ou depurar a pasta
 
 ## Leia antes
 
-- A spec aberta, com `bun run dev -- spec show <id> --json`: as entradas
-  de `settings` e `credentials` em `changes`, o Behavior, o Design e os
-  itens `#termfy-config` de Tasks e Tests. O `CLISPEC.md`
-  (`bun run dev -- spec show --json`) mostra o que já foi entregue. Se
+- A spec aberta em `specs/` (status `in_progress`): as entradas de setting
+  e credencial em `## Surface`, o Behavior, o Design e os itens
+  `#termfy-config` de Tasks e Tests. As subseções `### Settings` e
+  `### Credentials` do `CLISPEC.md` mostram o que já foi entregue. Se
   nenhuma spec aberta cobrir o pedido, rode a skill `termfy-spec` antes de
   continuar.
 - `docs/configuration.md`.
@@ -68,18 +68,19 @@ credenciais, mudar a política da chave mestra ou depurar a pasta
 
 ## Itens da spec
 
-Ao concluir e testar cada entrega, marque o item com
-`bun run dev -- spec done <id> <item>`, usando o `{#id}` sem `{#}`. Não edite
-o checkbox à mão nem marque nada no `CLISPEC.md`. Item novo entra por
-`spec task add` ou `spec test add`, que geram o id. Ao começar,
-rode `spec start <id>`; não mude o status para `done` à mão.
-Se o escopo mudar, revise `changes`, Behavior, Design e o texto do item com
-`termfy-spec`; registre a alteração em `## Notes` da spec.
-Rode `bun run dev -- spec check --json`: a key nova aparece em `pending`
-enquanto a spec está aberta, sem virar aviso. Relate separadamente as
-pendências de outras entregas. Ao concluir o escopo inteiro, rode
-`bun run validate` e exija saída 0; com todos os itens da spec marcados,
-ela é fechada com `bun run dev -- spec close <id>`.
+Ao começar, troque `Status:` para `in_progress` na spec e na linha dela no
+índice do `CLISPEC.md`. Ao concluir e testar cada entrega, marque `[x]` no
+item da spec, editando o arquivo em `specs/`. Item novo entra no fim de
+Tasks ou Tests, com a tag `#termfy-config`. Se o escopo mudar, revise
+Surface, Behavior, Design e o texto do item com `termfy-spec` e registre a
+alteração em `## Notes` da spec. Não mexa na superfície do `CLISPEC.md`
+enquanto a spec está aberta: a key ou credencial nova fica só na Surface
+da spec. Relate separadamente as pendências de outras entregas. Ao
+concluir o escopo inteiro, rode `bun run validate` e exija saída 0. Com
+todos os itens marcados, feche a spec pelo ciclo de `termfy-spec`: faça a
+conferência manual descrita em `references/spec-contract.md` daquela
+skill, aplique a Surface às tabelas do `CLISPEC.md` e troque o status para
+`done`.
 
 ## Marcos
 
@@ -93,6 +94,7 @@ executados. Nunca cole valores de credenciais na resposta.
 
 ## Compatibilidade
 
-Starter kit 0.8.x. Caminhos citados: `src/config/paths.ts`,
+Starter kit a partir da v0.9.0 (specs em Markdown puro, sem command
+`spec`). Caminhos citados: `src/config/paths.ts`,
 `src/config/settings.ts`, `src/config/crypto.ts`,
 `src/config/credentials.ts`, `tests/config.test.ts` e `docs/configuration.md`.

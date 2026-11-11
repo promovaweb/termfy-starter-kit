@@ -9,7 +9,7 @@ cor e peso em vez de espaço em branco.
 Esquema ilustrativo com rótulos traduzidos; a interface do binário usa inglês.
 
 ```text
-▌ Título v<version>   │  descrição em uma linha            linux-x64 • Bun 1.3.14
+▌ Título v<version>   │  descrição em uma linha            linux-x64 • Bun 1.4.4 
 ──────────────────────────────────────────────────────────────────────────────
  Overview      About
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬

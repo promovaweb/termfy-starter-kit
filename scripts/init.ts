@@ -10,17 +10,10 @@
  * AGENTS.md, CHANGELOG.md and .github/workflows/*.yml. It does not touch
  * src/ or docs/, which read the identity from the manifest at runtime.
  *
- * CLISPEC.md gets the new bin, title, description and resource URIs
- * (`<bin>://`). When the previous identity is the template itself
- * (`termfy`), init also resets the spec history: fresh dates, an empty
- * `specs` index and the template specs/NNNN-*.md files removed. The
- * delivered surface stays, since the new binary starts with the skeleton
- * commands. A later run on a derived project keeps its specs.
  * Prints what changed and exits with 0; invalid arguments exit with 2.
  */
-import { existsSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { compact, emitYaml } from "../src/spec/yaml.ts";
 
 const argv = process.argv.slice(2);
 function option(name: string): string | undefined {
@@ -84,29 +77,6 @@ for (const file of targets) {
     writeFileSync(file, next);
     console.log(`✓ ${file}`);
   }
-}
-const fromTemplate = previous === "termfy" && name !== "termfy";
-if (existsSync("CLISPEC.md")) {
-  const lines = readFileSync("CLISPEC.md", "utf8").replace(/\r\n/g, "\n").split("\n");
-  const end = lines.indexOf("---", 1);
-  const parsed: unknown = lines[0] === "---" && end > 0 ? Bun.YAML.parse(lines.slice(1, end).join("\n")) : undefined;
-  if (parsed && typeof parsed === "object" && (parsed as { schemaVersion?: unknown }).schemaVersion === "2.0.0") {
-    // Resource URIs carry the bin as scheme; rename them with the identity.
-    const frontmatter = JSON.parse(JSON.stringify(parsed).replaceAll(`"${previous}://`, `"${name}://`)) as Record<string, unknown>;
-    Object.assign(frontmatter, { bin: name, title, description: pkg.description });
-    if (fromTemplate) {
-      const now = new Date().toISOString();
-      Object.assign(frontmatter, { createdAt: now, updatedAt: now, specs: [] });
-    }
-    writeFileSync("CLISPEC.md", `---\n${emitYaml(compact(frontmatter)).join("\n")}\n---\n${lines.slice(end + 1).join("\n")}`);
-    console.log(`✓ CLISPEC.md: identity updated${fromTemplate ? ", spec index cleared" : ""}`);
-  }
-}
-if (fromTemplate && existsSync("specs")) {
-  for (const file of readdirSync("specs")) {
-    if (/^\d{4}-[a-z0-9-]+\.md$/.test(file)) rmSync(join("specs", file));
-  }
-  console.log("✓ specs/: template specs removed");
 }
 console.log(`\nDone. Check with: bun run dev -- --version && bun run dev -- --help`);
 console.log("Then run: bun run validate");

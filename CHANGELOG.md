@@ -2,6 +2,27 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.9.0] - 2026-11-11
+
+### Removido
+
+- Subsistema de specs do binário: o command `spec` e seus subcommands, as
+  tools MCP `spec` e `specs`, a aba Specs da TUI, `src/spec/`,
+  `bun run spec:check`, `scripts/check-spec.ts` e
+  `scripts/credential-calls.ts`. O esqueleto volta a ter só o que demonstra
+  os três modos.
+- `CLISPEC.md`, `specs/0001` a `0005` e `docs/spec.md`. As specs passam a
+  ser Markdown puro, criadas pelas skills `termfy-clispec` e `termfy-spec`
+  no projeto derivado.
+- Valor `specs` de `tui.initialTab` e de `tui --tab`.
+- Saídas antigas de ebook versionadas em `.ebook/build/`.
+
+### Alterado
+
+- `bun run init` não reescreve mais o `CLISPEC.md` nem apaga specs.
+- Skills do framework atualizadas para o Termfy 0.9.0, com specs em
+  Markdown puro.
+
 ## [0.8.2] - 2026-11-11
 
 ### Corrigido

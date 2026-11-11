@@ -1,20 +1,23 @@
 ---
 name: termfy-review
-description: Audita entregas Termfy contra a spec aberta (Behavior, Design, Tasks e Tests), o CLISPEC.md e as regras do starter kit e relata achados por gravidade sem editar arquivos.
+description: Audita entregas Termfy contra a spec aberta (Behavior, Design, Surface, Tasks e Tests), faz a conferência manual do CLISPEC.md e das specs contra o código e as regras do starter kit e relata achados por gravidade sem editar arquivos.
 ---
 
 # Revisar uma entrega
 
 Use esta skill para auditar código, documentação e o andamento da spec
 aberta. A saída é um relatório. Não implemente correções, não marque itens
-da spec nem rode `spec close`.
+da spec nem feche a spec. A revisão é o momento da conferência manual:
+nenhum script lê `CLISPEC.md` ou `specs/`, então o confronto com o código
+acontece aqui, pela leitura dos arquivos.
 
 ## Leia antes
 
-- `AGENTS.md`, `CLISPEC.md`, `docs/spec.md` e `docs/architecture.md`.
-- A spec sob revisão, com `bun run dev -- spec show <id> --json` e
-  `bun run dev -- spec progress <id>`: `changes`, Behavior, Design, Tasks e
-  Tests.
+- `AGENTS.md`, `CLISPEC.md` e `docs/architecture.md`.
+- A spec sob revisão em `specs/NNNN-slug.md`: Status, Goal, Behavior,
+  Design, Surface, Tasks, Tests e Notes.
+- O contrato dos dois documentos, na seção "Conferência manual" da
+  referência `spec-contract.md` de `termfy-spec`.
 - O diff da entrega e os arquivos completos que ele altera, incluindo testes.
 - `src/cli/registry.ts`, `src/app/exit-codes.ts`, `src/app/errors.ts`,
   `src/config/credentials.ts`, `src/mcp/server.ts` e `src/tui/theme.ts`.
@@ -31,9 +34,10 @@ da spec nem rode `spec close`.
    Desvio sem registro em `## Notes` da spec é achado. Não trate
    preferência pessoal de estilo como defeito.
 3. Um item `[x]` em Tasks ou Tests precisa de teste verde que exercite a
-   entrega no código atual. Cada entrada de `changes` precisa de tarefa e
-   teste. Diga se a spec está pronta para `spec close`: Goal, Behavior e
-   Design com texto, todos os itens marcados e `spec check` sem erros. Não presuma aprovação a
+   entrega no código atual. Cada item de Surface precisa de tarefa e
+   teste. Diga se a spec está pronta para fechar: Goal, Behavior e Design
+   com texto, todos os itens marcados e a conferência manual sem
+   divergências. Não presuma aprovação a
    partir de um resultado antigo ou de um teste sem assertions pertinentes.
 4. Confira descriptions, exit codes, segredos, stdout do MCP, cores da TUI,
    documentação e idioma conforme `references/checklist.md`.
@@ -43,6 +47,12 @@ da spec nem rode `spec close`.
    fixtures sintéticas. Não use a pasta real de configuração do usuário.
 7. Se uma checagem não puder executar, registre a limitação e seu impacto.
    Não declare a entrega aprovada enquanto faltar confirmação essencial.
+8. Faça a conferência manual do `CLISPEC.md` e das specs contra o código,
+   conforme `references/checklist.md`: Surface contra registry, screens,
+   `src/mcp/`, `SETTINGS_SCHEMA` e `docs/cli.md`; cada
+   `getCredential("<nome>")` de `src/` contra Credentials; as tabelas das
+   migrations contra `### Storage`; o índice contra os arquivos de `specs/`.
+   Cada divergência é achado.
 
 ## Passos
 
@@ -58,8 +68,8 @@ da spec nem rode `spec close`.
 
 ## Marcos
 
-Escopo lido; Behavior, Design e testes confrontados; prontidão para
-`spec close` informada; verificações concluídas ou limitações
+Escopo lido; Behavior, Design e testes confrontados; conferência manual do
+`CLISPEC.md` e das specs feita; prontidão para fechar a spec informada; verificações concluídas ou limitações
 registradas; achados localizados e ordenados; repositório sem edições da revisão.
 
 ## Saída
@@ -67,12 +77,14 @@ registradas; achados localizados e ordenados; repositório sem edições da revi
 Entregue uma lista ordenada de P0 a P3. Cada item contém gravidade,
 `arquivo:linha`, comportamento observado, consequência e correção sugerida.
 Depois liste verificações e resultados, os itens da spec ainda pendentes e
-se ela pode ser fechada com `bun run dev -- spec close <id>`. Se não houver achados, diga isso e
+se ela pode ser fechada pelo fluxo de `termfy-spec`. Se não houver achados, diga isso e
 cite o que foi conferido, sem prometer ausência de falhas fora do escopo.
 
 ## Compatibilidade
 
-Starter kit 0.8.x. Caminhos usados incluem `specs/`,
+Starter kit a partir da v0.9.0, com specs em Markdown puro e sem command
+`spec`. Caminhos usados incluem `specs/`,
 `src/cli/commands.ts`, `src/cli/registry.ts`, `src/app/exit-codes.ts`,
 `src/app/errors.ts`, `src/config/credentials.ts`, `src/mcp/server.ts`,
-`src/tui/theme.ts`, `tests/`, `docs/cli.md` e `docs/spec.md`.
+`src/tui/theme.ts`, `src/tui/screens/index.ts`, `src/mcp/`, `tests/` e
+`docs/cli.md`.

@@ -12,11 +12,9 @@
 `command` é a cadeia resolvida, por exemplo `termfy config get`. Se o
 parser falhar antes de devolver a cadeia, o campo contém só o nome do binário.
 
-O envelope com `error` é usado para exceções. `doctor` e `spec check`
-podem devolver `{ ok: true, command, data }` com saída 3: nesses casos,
-`data.ok` é `false`. Confira o exit code e os campos de `data`. Em
-`spec check`, `data.pending` lista o que uma spec aberta explica e não
-conta como falha.
+O envelope com `error` é usado para exceções. `doctor` pode devolver
+`{ ok: true, command, data }` com saída 3: nesse caso, `data.ok` é
+`false`. Confira o exit code e os campos de `data`.
 `--opencli` imprime o documento OpenCLI sem envelope; o servidor MCP
 reserva stdout ao protocolo.
 

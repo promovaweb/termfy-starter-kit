@@ -59,4 +59,7 @@ pessoa. Slugs em kebab-case, em inglês (`shop-client`, `orders-list`,
 `orders-export`); títulos no idioma da pessoa.
 
 Proponha a lista à pessoa com a ordem recomendada e pergunte se o recorte
-faz sentido antes de rodar `spec new`.
+faz sentido antes de criar os arquivos. Para cada spec aprovada, grave
+`specs/NNNN-slug.md` com o próximo número livre, `Status: draft` e as
+seções de `../../termfy-spec/references/spec-contract.md`, e acrescente a
+linha ao índice `## Specs` do `CLISPEC.md`.

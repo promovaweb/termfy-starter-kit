@@ -45,19 +45,18 @@ variáveis `<BIN>_HOME` e `<BIN>_MASTER_KEY` e o esquema das URIs MCP.
    bun run init -- --name <bin> --title "<Título>" --description "<frase>" --author "<Autor>" --repository <url> --site <url>
    ```
 
-   O script também atualiza a identidade do `CLISPEC.md` e, ao partir do
-   template, limpa o índice `specs` e remove as specs do esqueleto. O
-   projeto novo começa sem specs, e a primeira criada pela
-   `termfy-clispec` recebe o ID 0001.
+   O script não mexe em `CLISPEC.md` nem em `specs/`: o starter kit não
+   traz nenhum dos dois. O projeto novo começa sem specs, e a primeira
+   criada pela `termfy-clispec` recebe o número 0001.
 
 4. Execute a manutenção das skills descrita abaixo e retome o setup depois
    que a instalação e a compatibilidade forem conferidas.
 
-5. O bootstrap não atualiza `CLISPEC.md` nem regenera `docs/opencli.json`.
+5. O bootstrap não cria `CLISPEC.md` nem regenera `docs/opencli.json`.
    Rode `bun run opencli` e passe para a skill `termfy-clispec`, que
-   entrevista a pessoa, escreve a visão macro do produto no lugar da do
-   esqueleto, alinha `bin` e `description` ao `package.json` e cria as
-   specs iniciais com `spec new`. A `termfy-spec` detalha depois a primeira
+   entrevista a pessoa, escreve o primeiro `CLISPEC.md` com a visão macro
+   do produto, alinha `bin` e `description` ao `package.json` e grava os
+   arquivos das specs iniciais em `specs/`. A `termfy-spec` detalha depois a primeira
    spec. Sem `CLISPEC.md` e spec, as demais skills não têm o que
    implementar.
 6. Confira a identidade nos três modos:
@@ -72,10 +71,10 @@ variáveis `<BIN>_HOME` e `<BIN>_MASTER_KEY` e o esquema das URIs MCP.
    teste `tests/tui.test.ts`, que monta a interface no renderer de teste.
 
 7. Rode `bun run validate`. O comando encadeia typecheck, testes, conferência
-   das skills instaladas, conferência de `docs/opencli.json`,
-   `spec:check` e build. Entradas planejadas em specs abertas não falham o
-   `spec check`; elas só entram no `CLISPEC.md` no `spec close`. Erros
-   restantes indicam divergência real entre o `CLISPEC.md` e o código.
+   das skills instaladas, conferência de `docs/opencli.json`, cobertura da
+   documentação embutida e build. Ele não lê `CLISPEC.md` nem `specs/`; a
+   conferência desses arquivos com o código é manual, feita pela
+   `termfy-spec` e pela `termfy-review`.
 8. Reescreva a seção inicial de `README.md` com o propósito do produto e
    apague o trecho sobre o template. Mantenha as seções de instalação, modos,
    configuração e release.
@@ -121,6 +120,7 @@ terminou, informe isso; não declare o produto validado com
 
 ## Compatibilidade
 
-Starter kit 0.8.x. Os caminhos citados (`scripts/init.ts`,
-`docs/customize-template.md`, `tests/tui.test.ts`)
+Starter kit a partir da v0.9.0: specs em Markdown puro, sem command
+`spec`, e o kit não traz `CLISPEC.md` nem `specs/`. Os caminhos citados
+(`scripts/init.ts`, `docs/customize-template.md`, `tests/tui.test.ts`)
 existem nessa faixa.

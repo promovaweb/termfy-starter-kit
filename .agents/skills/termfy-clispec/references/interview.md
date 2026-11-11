@@ -64,6 +64,7 @@ o trabalho.
 ## Fechamento
 
 Releia o `CLISPEC.md` com a pessoa. Mostre a lista de specs iniciais com a
-recomendada primeiro e pergunte se a ordem e o recorte fazem sentido. Crie
-as aprovadas com `spec new`, registre dúvidas em `## Notes` e passe para a
+recomendada primeiro e pergunte se a ordem e o recorte fazem sentido. Grave
+cada spec aprovada em `specs/NNNN-slug.md` como `draft`, com a linha no
+índice `## Specs`, registre dúvidas em `## Notes` e passe para a
 `termfy-spec` com a primeira spec.

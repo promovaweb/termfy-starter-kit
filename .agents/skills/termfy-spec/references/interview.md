@@ -34,19 +34,19 @@ Preenche: `## Behavior`, em fluxos e exemplos com saída e exit code.
 
 Traduza o comportamento em entradas, com nomes em inglês:
 
-- Commands: `path` (`orders export`), arguments, options com tipo, padrão
-  e valores aceitos, `data` do `--json`, `exitCodes`, `credentials`,
-  `interactive`, `example`. Recomende `recurso verbo` quando houver mais de
-  uma ação sobre o mesmo recurso.
-- Screens: `id`, `title`, painéis e teclas.
+- Commands: caminho (`orders export`), função, arguments, options com
+  tipo, padrão e valores aceitos, `data` do `--json`, exit codes,
+  credenciais e se pede confirmação. Recomende `recurso verbo` quando
+  houver mais de uma ação sobre o mesmo recurso.
+- Screens: id, função, painéis e teclas.
 - Tools MCP: nome em `snake_case`, o command que espelham, entrada, saída
-  e `effect`. Dados passivos viram resource com URI.
+  e efeito (`read`, `write` ou `network`). Dados passivos viram resource
+  com URI.
 - Settings e credenciais novas.
-- O que muda ou sai de entradas que o `CLISPEC.md` já tem (`update`,
-  `remove`).
+- O que muda ou sai de entradas que o `CLISPEC.md` já tem.
 
-Preenche: `changes.add`, `changes.update` e `changes.remove`. Mostre o
-YAML à pessoa.
+Preenche: `## Surface`, um item por entrada, começando por Adiciona,
+Altera ou Remove. Mostre a lista à pessoa.
 
 ## 4. Dados e integrações
 
@@ -59,9 +59,9 @@ YAML à pessoa.
 - Se precisar: que dados, quais consultas, por quanto tempo. O banco fica
   em `~/.<bin>/data.db` e muda só por migration embutida no binário.
 
-Preenche: credenciais e settings em `changes`; com banco, as tabelas em
-`changes.add.storage.tables` (nome, colunas, tipo, `primaryKey`,
-`notNull`) e as notas de dados para o Design.
+Preenche: credenciais e settings em `## Surface`; com banco, as tabelas
+em Surface (nome, colunas, tipo, chave primária e `NOT NULL`) e as notas
+de dados para o Design.
 
 ## 5. Desenho do código
 
@@ -84,12 +84,12 @@ Preenche: `## Design`.
   espera ver?
 - Que caso de erro precisa estar coberto?
 
-Preenche: `## Tests`, um item por teste de aceite, com
-`spec test add <id> "<texto>"`, e `## Tasks`, um item por entrega, com
-`spec task add <id> "<texto>" --tag <skill>`. Cite pelo nome cada entrada
-de `changes` em ao menos um item.
+Preenche: `## Tests`, um item `- [ ]` por teste de aceite, e `## Tasks`,
+um item `- [ ]` por entrega, com a tag da skill responsável no fim. Cite
+pelo nome cada item de Surface em ao menos uma tarefa ou teste.
 
 ## Fechamento
 
-Releia a spec com a pessoa, rode `bun run dev -- spec check --json`,
-registre as dúvidas em `## Notes` e indique a skill da primeira tarefa.
+Releia a spec com a pessoa, faça a conferência manual de
+`spec-contract.md`, registre as dúvidas em `## Notes` e indique a skill
+da primeira tarefa.

@@ -11,9 +11,9 @@ as alterações e as verificações; o usuário descreve a interface desejada.
 
 ## Leia antes
 
-1. Leia `AGENTS.md`, `CLISPEC.md` e `docs/tui.md` do projeto. Abra a spec
-   aberta com `bun run dev -- spec show <id> --json` e localize a screen em
-   `changes`, o Behavior (teclas, estados, o que a tela mostra), o Design e
+1. Leia `AGENTS.md`, `CLISPEC.md` e `docs/tui.md` do projeto. Leia a spec
+   aberta em `specs/` (status `in_progress`) e localize a screen em
+   `## Surface`, o Behavior (teclas, estados, o que a tela mostra), o Design e
    os itens `#termfy-tui` de Tasks e Tests. Se faltar a descrição do
    comportamento, use `termfy-spec`.
 2. Confira a versão instalada de `@opentui/core`, o lock e o runtime.
@@ -89,18 +89,23 @@ comportamentos, exemplos escolhidos e verificações antes de editar.
 7. Confira `night` e `day` em 80×24, 110×30 e 160×40. Acrescente 40×12 para
    verificar a mensagem de terminal pequeno ou a composição compacta.
 8. Atualize `docs/tui.md` e os exemplos de uso. Se a tela mudou em relação
-   à spec, revise `changes` e o Behavior com `termfy-spec`.
+   à spec, revise a Surface e o Behavior com `termfy-spec`.
    Execute a validação do projeto e relate falhas alheias ao escopo.
 
 ## Itens da spec
 
-Depois de implementar e testar, marque o item com
-`bun run dev -- spec done <id> <item>`, sem editar o checkbox à mão. Não marque nada no `CLISPEC.md`. Mantenha
-`in_progress` enquanto houver entregas por fazer. Use `termfy-spec` se o
-comportamento combinado mudar. No starter kit 0.8.x, execute
-`bun run dev -- spec check --json` e `bun run validate`. A screen nova
-aparece em `pending` enquanto a spec está aberta. Com todos os
-itens marcados, a spec é fechada com `bun run dev -- spec close <id>`. Uma verificação reprovada não equivale a entrega validada.
+Ao começar, troque `Status:` para `in_progress` na spec e na linha dela no
+índice do `CLISPEC.md`. Depois de implementar e testar, marque `[x]` no
+item da spec, editando o arquivo em `specs/`. Item novo entra no fim de
+Tasks ou Tests, com a tag `#termfy-tui`. Mantenha `in_progress` enquanto
+houver entregas por fazer. Use `termfy-spec` se o comportamento combinado
+mudar e registre a alteração em `## Notes` da spec. Não mexa na
+superfície do `CLISPEC.md` enquanto a spec está aberta: a screen nova fica
+só na Surface da spec. Execute `bun run validate`. Com todos os itens
+marcados, feche a spec pelo ciclo de `termfy-spec`: faça a conferência
+manual descrita em `references/spec-contract.md` daquela skill, aplique a
+Surface às tabelas do `CLISPEC.md` e troque o status para `done`. Uma
+verificação reprovada não equivale a entrega validada.
 
 ## Marcos e saída
 
@@ -112,7 +117,9 @@ executados, exemplos apenas compilados e comportamentos ainda não exercitados.
 
 ## Compatibilidade
 
-Starter kit 0.8.x e OpenTUI Core 0.8.3, conferidos no checkout. A faixa
+Starter kit a partir da v0.9.0 (specs em Markdown puro, sem command
+`spec`; `tui.initialTab` aceita `overview` e `about`) e OpenTUI Core 0.8.3,
+conferidos no checkout. A faixa
 `^0.8.3` não prova qual versão está instalada. Não atualize dependências
 somente porque a documentação online apresenta uma versão posterior.
 As referências originais em `references/opentui/` permanecem com licença e

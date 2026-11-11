@@ -13,8 +13,9 @@ solicitados. Esses arquivos são novos; as pastas e os registros já existem.
 
 ## Leia antes
 
-- A spec aberta (`bun run dev -- spec show <id> --json`), com `changes`,
-  Behavior, Design, Tasks e Tests; o `CLISPEC.md` e `docs/spec.md`.
+- A spec aberta em `specs/` (status `in_progress`), com Surface, Behavior,
+  Design, Tasks e Tests; o `CLISPEC.md`; e `references/spec-contract.md`
+  da skill `termfy-spec`.
 - `src/cli/registry.ts`, `src/cli/commands.ts`, `src/cli/format.ts` e
   `template/command/example.ts`.
 - `src/mcp/server.ts`, `src/mcp/tools/config.ts` e
@@ -30,7 +31,7 @@ solicitados. Esses arquivos são novos; as pastas e os registros já existem.
 
 ## Regras
 
-1. Gere somente o subconjunto combinado em `changes` da spec aberta. Leia
+1. Gere somente o subconjunto combinado na Surface da spec aberta. Leia
    commands, arguments, options, exit codes, dados de saída, tools,
    screens, settings e credenciais, e siga o Behavior e o Design da spec.
    Se tools ou screen faltarem na spec, revise com `termfy-spec` antes de
@@ -65,7 +66,7 @@ solicitados. Esses arquivos são novos; as pastas e os registros já existem.
 ## Passos
 
 1. Rode `git status --short`. Relacione cada verbo e cada modo aos itens
-   `{#id}` de Tasks e Tests da spec. Confira o contrato antes de gerar arquivos.
+   de Tasks e Tests da spec. Confira o contrato antes de gerar arquivos.
 2. Implemente as operações compartilhadas em módulo próprio sob `src/`,
    separado dos adaptadores. Se houver HTTP, crie o client com `termfy-api`
    e use o cofre e `SETTINGS_SCHEMA` conforme `termfy-config`.
@@ -93,17 +94,18 @@ solicitados. Esses arquivos são novos; as pastas e os registros já existem.
 8. Atualize `docs/cli.md`, `docs/mcp.md` e `docs/tui.md`. Se houver novas
    keys ou credenciais, atualize `docs/configuration.md`. Use `termfy-docs`
    para conferir a documentação embutida.
-9. Rode `bun run opencli`, `bun test`, `bun run typecheck`,
-   `bun run spec:check` e `bun run docs:check`. Confira `--help`,
-   `--skill reference`, `mcp --list` e os frames da screen.
-10. Marque os itens implementados e testados com
-    `bun run dev -- spec done <id> <item>`; não edite o checkbox à mão nem
-    marque nada no `CLISPEC.md`. Registre desvios em
-    `## Notes` dela. Mantenha `in_progress` enquanto houver entregas
-    pendentes. Rode `bun run validate` após a atualização final. A família
-    nova aparece em `pending` no `spec check` enquanto a spec está aberta;
-    com todos os itens marcados, a spec é fechada com
-    `bun run dev -- spec close <id>`.
+9. Rode `bun run opencli`, `bun test`, `bun run typecheck` e
+   `bun run docs:check`. Confira `--help`, `--skill reference`,
+   `mcp --list` e os frames da screen.
+10. Marque `[x]` nos itens implementados e testados, editando o arquivo da
+    spec em `specs/`. Não mexa na superfície do `CLISPEC.md` enquanto a
+    spec está aberta: a família nova fica só na Surface da spec. Registre
+    desvios em `## Notes` dela. Mantenha `in_progress` enquanto houver
+    entregas pendentes. Rode `bun run validate` após a atualização final.
+    Com todos os itens marcados, feche a spec pelo ciclo de `termfy-spec`:
+    faça a conferência manual descrita em `references/spec-contract.md`
+    daquela skill, aplique a Surface às tabelas do `CLISPEC.md` e troque o
+    status para `done`.
 
 ## Marcos
 
@@ -115,13 +117,14 @@ aprovada.
 ## Saída
 
 Liste verbos e modos entregues, arquivos criados ou alterados, contratos de
-`data`, itens `{#id}` concluídos e resultados dos comandos de validação.
+`data`, itens da spec marcados com `[x]` e resultados dos comandos de validação.
 Inclua exemplos em texto e JSON, nomes das tools e frame da screen. Informe
 pendências sem marcar funcionalidades que ainda não foram testadas.
 
 ## Compatibilidade
 
-Starter kit 0.8.x. Referências existentes em `src/cli/registry.ts`,
+Starter kit a partir da v0.9.0 (specs em Markdown puro, sem command
+`spec`). Referências existentes em `src/cli/registry.ts`,
 `src/cli/commands.ts`, `src/mcp/server.ts`, `src/tui/screen.ts`,
 `src/tui/components.ts`, `src/tui/screens/index.ts`,
 `src/config/settings.ts`, `src/cli/commands/tui.ts`,

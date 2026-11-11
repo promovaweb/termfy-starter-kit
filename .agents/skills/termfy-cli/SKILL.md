@@ -10,11 +10,11 @@ argumentos e opções, ou para mudar o formato de saída e os códigos de saída
 
 ## Leia antes
 
-- A spec aberta, com `bun run dev -- spec show <id> --json`: a entrada de
-  `changes`, o Behavior (como o command funciona), o Design (como o código
-  deve ser feito) e os itens `#termfy-cli` de Tasks e Tests. O `CLISPEC.md`
-  (`bun run dev -- spec show --json`) mostra o que já foi entregue. Se
-  nenhuma spec aberta cobrir o pedido, rode a skill `termfy-spec` antes de
+- A spec aberta em `specs/` (status `in_progress`): a entrada de
+  `## Surface`, o Behavior (como o command funciona), o Design (como o
+  código deve ser feito) e os itens `#termfy-cli` de Tasks e Tests. A
+  seção Surface do `CLISPEC.md` mostra o que já foi entregue. Se nenhuma
+  spec aberta cobrir o pedido, rode a skill `termfy-spec` antes de
   continuar.
 - `docs/cli.md` e `docs/exit-codes.md`.
 - `src/cli/registry.ts` (tipos) e `src/cli/commands/config.ts` (exemplo
@@ -57,7 +57,7 @@ argumentos e opções, ou para mudar o formato de saída e os códigos de saída
 1. Rode `git status --short`.
 2. Copie `template/command/example.ts` para `src/cli/commands/<nome>.ts` e
    ajuste os imports para caminhos relativos ao novo local.
-3. Preencha a definição com os nomes de `changes` e implemente `run`
+3. Preencha a definição com os nomes da Surface e implemente `run`
    seguindo o Behavior e o Design da spec.
 4. Registre em `src/cli/commands.ts`.
 5. Escreva ou ajuste testes em `tests/cli.test.ts` (subprocesso real) e, para
@@ -69,18 +69,18 @@ argumentos e opções, ou para mudar o formato de saída e os códigos de saída
 
 ## Itens da spec
 
-Ao concluir e testar cada entrega, marque o item com
-`bun run dev -- spec done <id> <item>`, usando o `{#id}` sem `{#}`. Não edite
-o checkbox à mão nem marque nada no `CLISPEC.md`. Item novo entra por
-`spec task add` ou `spec test add`, que geram o id. Ao começar,
-rode `spec start <id>`; não mude o status para `done` à mão.
-Se o escopo mudar, revise `changes`, Behavior, Design e o texto do item com
-`termfy-spec`; registre a alteração em `## Notes` da spec.
-Rode `bun run dev -- spec check --json`: o command novo aparece em
-`pending` enquanto a spec está aberta, sem virar aviso. Relate
+Ao começar, troque `Status:` para `in_progress` na spec e na linha dela no
+índice do `CLISPEC.md`. Ao concluir e testar cada entrega, marque `[x]` no
+item da spec, editando o arquivo em `specs/`. Item novo entra no fim de
+Tasks ou Tests, com a tag `#termfy-cli`. Se o escopo mudar, revise Surface,
+Behavior, Design e o texto do item com `termfy-spec` e registre a alteração
+em `## Notes` da spec. Não mexa na superfície do `CLISPEC.md` enquanto a
+spec está aberta: o command novo fica só na Surface da spec. Relate
 separadamente as pendências de outras entregas. Ao concluir o escopo
-inteiro, rode `bun run validate` e exija saída 0; com todos os itens da
-spec marcados, ela é fechada com `bun run dev -- spec close <id>`.
+inteiro, rode `bun run validate` e exija saída 0. Com todos os itens
+marcados, feche a spec pelo ciclo de `termfy-spec`: faça a conferência
+manual descrita em `references/spec-contract.md` daquela skill, aplique a
+Surface às tabelas do `CLISPEC.md` e troque o status para `done`.
 
 ## Marcos
 
@@ -94,6 +94,7 @@ resultado e exemplos de uso do comando novo em texto e `--json`.
 
 ## Compatibilidade
 
-Starter kit 0.8.x. Caminhos citados: `src/cli/registry.ts`,
+Starter kit a partir da v0.9.0 (specs em Markdown puro, sem command
+`spec`). Caminhos citados: `src/cli/registry.ts`,
 `src/cli/commands.ts`, `src/cli/commands/*.ts`, `template/command/example.ts`,
 `tests/cli.test.ts`, `docs/cli.md` e `docs/opencli.json`.

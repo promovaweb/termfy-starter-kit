@@ -68,24 +68,26 @@ export const migrations: readonly Migration[] = checkMigrations([createOrders, a
 
 ## Tabelas no CLISPEC
 
-Cada tabela criada pelas migrations aparece em `storage.tables` do
-`CLISPEC.md`, levada pelo `spec close` da spec que a criou:
+Cada tabela criada pelas migrations aparece na subseção `### Storage` do
+`CLISPEC.md`. A spec que cria ou altera a tabela a lista em `## Surface`, e
+o agente copia a linha para o `CLISPEC.md` ao fechar a spec:
 
-```yaml
-storage:
-  tables:
-    - name: orders
-      columns:
-        - { name: id, type: INTEGER, primaryKey: true }
-        - { name: external_id, type: TEXT, notNull: true }
-        - { name: total_cents, type: INTEGER, notNull: true }
-        - { name: created_at, type: TEXT, notNull: true }
+```markdown
+### Storage
+
+| Tabela | Coluna | Tipo | Chave primária | Not null |
+| --- | --- | --- | --- | --- |
+| `orders` | `id` | `INTEGER` | sim | sim |
+| `orders` | `external_id` | `TEXT` | não | sim |
+| `orders` | `total_cents` | `INTEGER` | não | sim |
+| `orders` | `created_at` | `TEXT` | não | sim |
 ```
 
-`bun run spec:check` aplica as migrations num banco em memória, lê as
-colunas com `PRAGMA table_xinfo` e compara tipo, `primaryKey` e `notNull`.
-Tabela declarada que nenhuma migration cria é erro; tabela ou coluna das
-migrations fora do CLISPEC é aviso, salvo quando uma spec aberta a muda.
+Nenhum script compara essa tabela com o schema. Na conferência manual, leia
+os `CREATE TABLE` e `ALTER TABLE` das migrations em ordem e confira nome,
+colunas, tipo, chave primária e `NOT NULL` de cada linha. Tabela listada que
+nenhuma migration cria, ou tabela das migrations ausente do `CLISPEC.md`
+sem spec aberta que a mude, é divergência a corrigir antes de fechar.
 
 ## Backup antes de migrar
 

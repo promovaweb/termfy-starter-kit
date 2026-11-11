@@ -10,10 +10,10 @@ Model Context Protocol, ou para revisar o que já está exposto.
 
 ## Leia antes
 
-- A spec aberta, com `bun run dev -- spec show <id> --json`: as entradas
-  de `mcp` em `changes` (com `effect`, `input` e `output`), o Behavior, o
-  Design e os itens `#termfy-mcp` de Tasks e Tests. O `CLISPEC.md`
-  (`bun run dev -- spec show --json`) mostra o que já foi entregue. Se
+- A spec aberta em `specs/` (status `in_progress`): as entradas de tool,
+  resource e prompt em `## Surface` (com efeito, entrada e saída), o
+  Behavior, o Design e os itens `#termfy-mcp` de Tasks e Tests. A
+  subseção `### MCP` do `CLISPEC.md` mostra o que já foi entregue. Se
   nenhuma spec aberta cobrir o pedido, rode a skill `termfy-spec` antes de
   continuar.
 - `docs/mcp.md`.
@@ -97,18 +97,18 @@ essas APIs. Cada capacidade requer integração e teste próprios.
 
 ## Itens da spec
 
-Ao concluir e testar cada entrega, marque o item com
-`bun run dev -- spec done <id> <item>`, usando o `{#id}` sem `{#}`. Não edite
-o checkbox à mão nem marque nada no `CLISPEC.md`. Item novo entra por
-`spec task add` ou `spec test add`, que geram o id. Ao começar,
-rode `spec start <id>`; não mude o status para `done` à mão.
-Se o escopo mudar, revise `changes`, Behavior, Design e o texto do item com
-`termfy-spec`; registre a alteração em `## Notes` da spec.
-Rode `bun run dev -- spec check --json`: a tool nova aparece em `pending`
-enquanto a spec está aberta, sem virar aviso. Relate separadamente as
-pendências de outras entregas. Ao concluir o escopo inteiro, rode
-`bun run validate` e exija saída 0; com todos os itens da spec marcados,
-ela é fechada com `bun run dev -- spec close <id>`.
+Ao começar, troque `Status:` para `in_progress` na spec e na linha dela no
+índice do `CLISPEC.md`. Ao concluir e testar cada entrega, marque `[x]` no
+item da spec, editando o arquivo em `specs/`. Item novo entra no fim de
+Tasks ou Tests, com a tag `#termfy-mcp`. Se o escopo mudar, revise Surface,
+Behavior, Design e o texto do item com `termfy-spec` e registre a alteração
+em `## Notes` da spec. Não mexa na superfície do `CLISPEC.md` enquanto a
+spec está aberta: a tool nova fica só na Surface da spec. Relate
+separadamente as pendências de outras entregas. Ao concluir o escopo
+inteiro, rode `bun run validate` e exija saída 0. Com todos os itens
+marcados, feche a spec pelo ciclo de `termfy-spec`: faça a conferência
+manual descrita em `references/spec-contract.md` daquela skill, aplique a
+Surface às tabelas do `CLISPEC.md` e troque o status para `done`.
 
 ## Marcos
 
@@ -125,7 +125,8 @@ apresente uma camada não executada como validada.
 
 ## Compatibilidade
 
-Starter kit 0.8.x, SDK instalado 1.32.2 e Zod 4.6.7, conferidos em
+Starter kit a partir da v0.9.0 (specs em Markdown puro, sem command
+`spec`), SDK instalado 1.32.2 e Zod 4.6.7, conferidos em
 10/11/2026. O Hub executa receitas com Node.js; o produto usa Bun.
 Caminhos citados: `src/mcp/server.ts`, `src/mcp/tools/`,
 `src/mcp/resources/`, `src/mcp/prompts.ts`, `template/tool/example.ts`,

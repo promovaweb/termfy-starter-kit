@@ -27,8 +27,6 @@ Para desenvolvimento, sem compilar: `"command": "bun", "args": ["run", "src/main
 | `config_list` | nenhuma | keys de settings.json em vigor e o schema |
 | `config_get` | `key` | valor da key; `isError` quando não existe |
 | `credentials_status` | nenhuma | file, master key source, count e names |
-| `spec` | nenhuma | front matter e seções do `CLISPEC.md`: identidade, superfície entregue e índice das specs |
-| `specs` | `id?` | sem `id`, lista as specs; com `id`, devolve uma spec com mudanças, tarefas, testes e progresso |
 
 Nenhuma tool devolve o valor de uma credencial, e nenhuma tool grava. Escrita
 continua no CLI, onde há confirmação humana.

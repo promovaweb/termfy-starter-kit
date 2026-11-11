@@ -1,6 +1,6 @@
 {
   "name": "termfy-starter-kit",
-  "version": "0.8.2",
+  "version": "0.9.0",
   "description": "CLI, TUI and MCP stdio server skeleton in Bun, with the Termfy framework skills installed.",
   "type": "module",
   "private": true,
@@ -27,12 +27,11 @@
     "typecheck": "bunx tsc --noEmit",
     "opencli": "bun run src/main.ts --opencli > docs/opencli.json",
     "opencli:check": "bun run scripts/check-opencli.ts",
-    "spec:check": "bun run scripts/check-spec.ts",
     "skills:install": "npx -y skills add https://github.com/promovaweb/termfy -y -a universal -a claude-code -a codex -a opencode -a cursor -a gemini-cli",
     "skills:update": "npx -y skills update -y -p",
     "skills:check": "bun run scripts/check-skills.ts",
     "init": "bun run scripts/init.ts",
-    "validate": "bun run typecheck && bun test && bun run skills:check && bun run opencli:check && bun run spec:check && bun run docs:check && bun run build",
+    "validate": "bun run typecheck && bun test && bun run skills:check && bun run opencli:check && bun run docs:check && bun run build",
     "docs:check": "bun run scripts/check-docs.ts"
   },
   "engines": {

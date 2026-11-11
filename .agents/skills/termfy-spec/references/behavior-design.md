@@ -2,8 +2,8 @@
 
 As duas seções existem para que a skill que implementa não precise voltar
 à pessoa. Behavior responde "como se usa"; Design responde "onde e como se
-constrói". `spec close` recusa uma spec com qualquer uma delas vazia;
-comentários HTML deixados por `spec new` contam como vazio.
+constrói". Uma spec só passa a `in_progress` com as duas preenchidas;
+comentário HTML ou texto de exemplo conta como vazio.
 
 ## Behavior
 
@@ -24,7 +24,7 @@ atual e imprime o caminho e a contagem. Com `--json`, devolve
 `{ file, count }`. Sem `shop.token` no cofre, sai com 4 e sugere
 `mycli credentials set shop.token`. Com a API fora do ar depois de três
 tentativas, sai com 5. A tool `orders_export` recebe `{ since? }`, devolve
-o mesmo `{ file, count }` e tem `effect: write`.
+o mesmo `{ file, count }` e tem efeito `write`.
 ```
 
 ## Design

@@ -19,8 +19,8 @@ migration e liga os repositórios aos commands, tools e screens.
 ## Leia antes
 
 - `AGENTS.md` do repositório.
-- A spec aberta (`bun run dev -- spec show <id> --json`), em especial o
-  Design: tabelas, colunas, consultas e a migration nova.
+- A spec aberta em `specs/NNNN-slug.md`, em especial o Design e a seção
+  Surface: tabelas, colunas, consultas e a migration nova.
 - `template/README.md` e os stubs `template/db/database.ts`,
   `template/db/migrations/index.ts`,
   `template/db/migrations/0001-create-notes.ts`,
@@ -59,20 +59,20 @@ migration e liga os repositórios aos commands, tools e screens.
    para linha ausente. Nenhum stack trace do driver chega à pessoa.
 10. Testes usam `openDatabase(":memory:")`, um banco por teste, sem tocar
     em `~/.<bin>/`.
-11. As tabelas fazem parte da superfície. A spec as declara em
-    `changes.add.storage.tables` (ou `update`, `remove.tables`) com as
-    colunas, o tipo (`INTEGER`, `REAL`, `TEXT`, `BLOB`, `ANY`),
-    `primaryKey` e `notNull`. `bun run spec:check` aplica as migrations num
-    banco em memória e compara; divergência é erro.
+11. As tabelas fazem parte da superfície. A seção `## Surface` da spec
+    lista cada tabela adicionada, alterada ou removida, com colunas, tipo
+    (`INTEGER`, `REAL`, `TEXT`, `BLOB`, `ANY`), chave primária e `NOT NULL`.
+    Ao fechar a spec, essas linhas vão para `### Storage` do `CLISPEC.md`.
+    Nenhum script compara o schema: confira lendo as migrations.
 12. Não há rollback. Antes de migrar um banco que já tem schema,
     `migrate()` copia o arquivo para `data.db.v<versão>.bak`; preserve esse
     comportamento ao copiar o stub.
 
 ## Passos
 
-1. Rode `git status --short` e `bun run dev -- spec show <id> --json`.
-   Confirme que a spec pede armazenamento, que `changes` declara as tabelas
-   em `storage.tables` e que o Design descreve a migration. Se faltar,
+1. Rode `git status --short` e leia a spec aberta em `specs/`. Confirme
+   que ela pede armazenamento, que Surface lista as tabelas com as colunas
+   e que o Design descreve a migration. Se faltar,
    volte à `termfy-spec`.
 2. Na primeira vez no projeto: copie `template/db/database.ts` para
    `db/database.ts` e `template/db/migrations/index.ts` para
@@ -87,7 +87,7 @@ migration e liga os repositórios aos commands, tools e screens.
    `template/db/repository.ts`.
 6. Quando a spec pedir `db status` e `db migrate`, copie
    `template/db/command.ts` para `db.ts` em `src/cli/commands/` e registre em
-   `src/cli/commands.ts`. Os commands entram em `changes` da spec e em
+   `src/cli/commands.ts`. Os commands entram em Surface da spec e em
    `docs/cli.md`.
 7. Ligue os repositórios aos commands, tools e screens da spec. Abra o
    banco no `run` e feche em `finally`.
@@ -99,10 +99,11 @@ migration e liga os repositórios aos commands, tools e screens.
 10. Rode `bun run build` e o binário de `dist/` numa pasta vazia com
    `<BIN>_HOME` temporário, para comprovar que as migrations estão
    embutidas.
-11. Rode `bun run spec:check`: as tabelas da spec aberta aparecem em
-    `pending` até o `spec close`, e qualquer divergência de coluna é erro.
-12. Rode `bun run validate` e marque os itens `#termfy-database` com
-    `bun run dev -- spec done <id> <item>`.
+11. Confira à mão cada tabela de Surface contra as migrations: nome,
+    colunas, tipo, chave primária e `NOT NULL` iguais aos do `CREATE TABLE`
+    e dos `ALTER TABLE`. Corrija a spec ou a migration até baterem.
+12. Rode `bun run validate` e marque `[x]` nas tarefas `#termfy-database`
+    concluídas na spec.
 
 ## Marcos
 
@@ -118,6 +119,7 @@ binário compilado e os itens marcados na spec.
 
 ## Compatibilidade
 
-Starter kit 0.8.x. Caminhos citados: `template/db/`, `template/README.md`,
+Starter kit a partir da v0.9.0, com specs em Markdown puro e sem command
+`spec`. Caminhos citados: `template/db/`, `template/README.md`,
 `src/config/paths.ts`, `src/cli/commands.ts`, `docs/configuration.md` e
 `docs/cli.md`. Confira com `bun run validate`.

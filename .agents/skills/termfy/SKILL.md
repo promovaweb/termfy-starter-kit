@@ -17,9 +17,9 @@ pontos para a pessoa confirmar.
 ## Leia antes
 
 - `AGENTS.md` do repositório.
-- `CLISPEC.md`, `bun run dev -- spec show --json` e
-  `bun run dev -- spec list`, para saber se o projeto está no esqueleto,
-  com visão macro, com spec aberta ou com specs fechadas.
+- `CLISPEC.md` e os arquivos de `specs/`, para saber se o projeto está no
+  esqueleto (sem `CLISPEC.md`), com visão macro, com spec aberta ou com
+  specs fechadas. Os dois são Markdown puro, editados pelo agente.
 - `references/flow.md`: os estágios, o que entra e o que sai de cada um, e
   os checkpoints.
 - `references/first-prompt.md`: como transformar a frase da pessoa em
@@ -41,7 +41,7 @@ pontos para a pessoa confirmar.
    só então a próxima.
 4. Reutilize as skills; não reescreva o que elas fazem. `termfy`
    lê a saída de cada uma e decide o próximo passo.
-5. Quando algo falhar duas vezes seguidas (teste, `spec check`, build),
+5. Quando algo falhar duas vezes seguidas (teste, `validate`, build),
    pare, mostre o erro e pergunte. Não insista em loop.
 6. Nunca peça segredo no chat. Quando um command precisar de credencial,
    oriente `<bin> credentials set <name>` no terminal da pessoa e siga com
@@ -60,14 +60,14 @@ agente dentro da skill, sem exigir que o usuário os rode manualmente.
 ## Passos
 
 1. Diagnóstico: `git status --short`, `bun run dev -- --version`,
-   `bun run dev -- spec show --json`, `bun run dev -- spec list`,
-   `bun run skills:check`. Decida o estágio: esqueleto, visão macro sem
-   specs, spec aberta sem código, spec em andamento ou todas fechadas.
+   `bun run skills:check` e a leitura de `CLISPEC.md` e `specs/`. Escolha
+   o estágio: esqueleto, visão macro sem specs, spec aberta sem código,
+   spec em andamento ou todas fechadas.
 2. Se o projeto está no esqueleto: `termfy-init` (com a identidade
    confirmada) e `termfy-brand` se houver cor, créditos ou links a ajustar.
 3. `termfy-clispec`, alimentando a entrevista com
-   `references/first-prompt.md`. Ela grava a visão macro e cria as specs
-   iniciais com `spec new`.
+   `references/first-prompt.md`. Ela grava a visão macro e cria os
+   arquivos das specs iniciais em `specs/`, como `draft`.
 4. `termfy-spec` para a primeira spec da lista (ou `termfy-api-import`
    quando o ponto de partida é a documentação de uma API). Checkpoint 1:
    mostre o Purpose, os públicos, a lista de specs e a tabela de commands,
@@ -76,12 +76,13 @@ agente dentro da skill, sem exigir que o usuário os rode manualmente.
    cli → mcp → tui: `termfy-config`, `termfy-api` quando houver serviço
    externo, `termfy-database` só quando a spec pede armazenamento,
    `termfy-cli` (ou `termfy-command-set` para uma família
-   `recurso verbo`), `termfy-mcp`, `termfy-tui`. Cada skill lê a spec com
-   `bun run dev -- spec show <id> --json` e segue Behavior e Design. Depois
-   de cada tarefa: `termfy-test` para os itens de Tests.
+   `recurso verbo`), `termfy-mcp`, `termfy-tui`. Cada skill lê o arquivo
+   da spec e segue Behavior, Design e Surface. Depois de cada tarefa:
+   `termfy-test` para os itens de Tests.
 6. `termfy-review` sobre a spec; corrija o que ela apontar. `termfy-docs`
-   em seguida. Com todos os itens marcados, rode
-   `bun run dev -- spec close <id>`. Repita os passos 4 a 6 para a próxima
+   em seguida. Com todos os itens marcados, feche a spec como descreve a
+   `termfy-spec`: Surface aplicada ao `CLISPEC.md`, status `done` na spec
+   e no índice e a linha datada em Notes. Repita os passos 4 a 6 para a próxima
    spec da lista; a entrevista da `termfy-spec` continua, e o checkpoint 1
    só volta quando a spec mudar a visão macro aprovada.
 7. Checkpoint 2: mostre `--help`, o frame da TUI de teste e
@@ -104,6 +105,6 @@ experimentar.
 
 ## Compatibilidade
 
-Starter kit 0.8.x. Caminhos citados: `CLISPEC.md`, `specs/`, `AGENTS.md` e
-os scripts
-`dev`, `skills:check`, `validate`.
+Starter kit a partir da v0.9.0: specs em Markdown puro, sem command
+`spec`. Caminhos citados: `CLISPEC.md`, `specs/`, `AGENTS.md` e os
+scripts `dev`, `skills:check`, `validate`.

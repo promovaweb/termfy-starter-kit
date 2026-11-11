@@ -2,13 +2,13 @@
 
 ## Contrato
 
-- [ ] `changes` da spec aberta lista apenas os verbos pedidos e suas opções,
-  dados e códigos; Behavior e Design descrevem a família.
+- [ ] A Surface da spec aberta lista apenas os verbos pedidos e suas
+  opções, dados e códigos; Behavior e Design descrevem a família.
 - [ ] Tools e screen estão declaradas nos modos combinados com a pessoa.
-- [ ] Credenciais têm nome e `usedBy`; settings têm key, tipo e padrão.
-- [ ] Cada entrega tem `{#id}` estável e responsável pela implementação.
-- [ ] Erros, avisos e `pending` de `spec check` foram lidos separadamente;
-  o código à frente do `CLISPEC.md` aparece em `pending` e não é falha.
+- [ ] Credenciais têm nome e consumidores; settings têm key, tipo e padrão.
+- [ ] Cada entrega é um item de Tasks com a tag da skill responsável.
+- [ ] A superfície do `CLISPEC.md` continua sem a família enquanto a spec
+  está aberta; ela entra só ao fechar a spec.
 
 ## CLI
 
@@ -54,12 +54,12 @@
 - [ ] `docs/cli.md`, `docs/mcp.md`, `docs/tui.md` e, se necessário,
   `docs/configuration.md` descrevem o comportamento implementado.
 - [ ] `bun run opencli` regenerou `docs/opencli.json` e o diff foi revisado.
-- [ ] `bun test`, `bun run typecheck`, `bun run spec:check` e
-  `bun run docs:check` passaram.
-- [ ] Os itens entregues foram marcados no arquivo da spec pelo `{#id}` e
-  `updatedAt` da spec foi atualizado. Itens não implementados continuam
-  pendentes.
-- [ ] `bun run validate` passou após todas as alterações, inclusive a spec.
+- [ ] `bun test`, `bun run typecheck` e `bun run docs:check` passaram.
+- [ ] Os itens entregues foram marcados com `[x]` no arquivo da spec. Itens
+  não implementados continuam com `[ ]`.
+- [ ] `bun run validate` passou após todas as alterações.
+- [ ] Antes de fechar a spec, a conferência manual descrita em
+  `references/spec-contract.md` da skill `termfy-spec` foi feita.
 
 Ao aplicar esta checklist, marque os itens de Tasks e Tests da spec aberta
 em `specs/`. Não edite a cópia instalada desta referência para registrar

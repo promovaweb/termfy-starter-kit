@@ -144,8 +144,6 @@ template/   stubs de command, screen e tool
 .agents/    skills do framework instaladas via npx skills (skills-lock.json)
 scripts/    build, init e checks
 tests/      bun test
-CLISPEC.md  visão macro do binário (contrato em docs/spec.md), mantida com a skill termfy-clispec
-specs/      uma spec por evolução (NNNN-slug.md), escrita com a skill termfy-spec
 ```
 
 Arquitetura em [docs/architecture.md](docs/architecture.md).
@@ -153,7 +151,7 @@ Arquitetura em [docs/architecture.md](docs/architecture.md).
 ## Validar, compilar e publicar
 
 ```bash
-bun run validate      # typecheck, testes, skills:check, opencli:check, spec:check, docs:check, build
+bun run validate      # typecheck, testes, skills:check, opencli:check, docs:check, build
 bun run build         # dist/termfy
 bun run build:all     # linux-x64, linux-arm64, darwin-x64, darwin-arm64, windows-x64
 ```

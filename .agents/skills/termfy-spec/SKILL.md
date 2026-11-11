@@ -1,6 +1,6 @@
 ---
 name: termfy-spec
-description: Entrevista a pessoa e escreve uma spec de evolução em specs/NNNN-slug.md (changes da superfície, Behavior de como o binário vai funcionar, Design de como o código deve ser feito, Tasks e Tests), conferida por `<bin> spec check`, para que as skills de implementação trabalhem com o pedido claro.
+description: Entrevista a pessoa e escreve à mão uma spec de evolução em specs/NNNN-slug.md, em Markdown puro (status, Goal, Behavior de como o binário vai funcionar, Design de como o código deve ser feito, Surface, Tasks e Tests), para que as skills de implementação trabalhem com o pedido claro.
 ---
 
 # Escrever uma spec de evolução
@@ -12,21 +12,23 @@ tem a sua spec em `specs/NNNN-slug.md`; o `CLISPEC.md`, mantido pela
 `termfy-clispec`, segue único e guarda a visão macro.
 
 Uma spec define duas coisas: como o binário vai funcionar depois da
-mudança (`changes` no front matter e a seção `## Behavior`) e como o código
-deve ser feito (`## Design`). `## Tasks` e `## Tests` transformam isso em
-entregas verificáveis. As skills `termfy-cli`, `termfy-tui`, `termfy-mcp`,
+mudança (`## Behavior` e `## Surface`) e como o código deve ser feito
+(`## Design`). `## Tasks` e `## Tests` transformam isso em entregas
+verificáveis. As skills `termfy-cli`, `termfy-tui`, `termfy-mcp`,
 `termfy-config`, `termfy-api` e `termfy-database` leem a spec antes de
 tocar no código e marcam os itens conforme avançam.
+
+Os dois documentos são Markdown puro, sem front matter, schema ou IDs de
+item. O binário não os lê e não tem command para editá-los: o agente cria
+e edita os arquivos diretamente.
 
 ## Leia antes
 
 - `AGENTS.md` do repositório.
-- `CLISPEC.md` (`bun run dev -- spec show --json`) e as specs existentes
-  (`bun run dev -- spec list`), para saber o que já foi entregue e o que
-  está aberto.
-- `docs/spec.md` do starter kit (resumo em `references/spec-contract.md`):
-  front matter, `changes`, seções, checklists e regras de `spec check` e
-  `spec close`.
+- `CLISPEC.md` e os arquivos de `specs/`, para saber o que já foi
+  entregue e o que está aberto.
+- `references/spec-contract.md`: forma da spec, regras das seções, ciclo
+  e conferência manual.
 - `references/interview.md`: os blocos da entrevista e o que cada resposta
   preenche.
 - `references/behavior-design.md`: como escrever Behavior e Design com
@@ -45,87 +47,90 @@ tocar no código e marcam os itens conforme avançam.
    para resposta livre. Pule a pergunta que a pessoa já respondeu.
 3. Uma spec por evolução entregável. Se o pedido mistura capacidades
    independentes, proponha dividir em specs separadas.
-4. `changes` descreve a superfície com os nomes do código, em inglês:
-   `add` para o que é novo, `update` com a entrada completa para o que
-   muda, `remove` com as chaves do que sai. Cada command entra com `path`,
-   `description`, `arguments`, `options`, `data`, `exitCodes`,
-   `credentials` e `example`; cada tool com `effect` (`read`, `write` ou
-   `network`); cada credencial com `name` em `service.purpose` e `usedBy`.
+4. `## Surface` lista o que a spec adiciona, altera ou remove, um item por
+   entrada, com os nomes do código, em inglês, e os mesmos campos das
+   tabelas do `CLISPEC.md`. Cada command entra com função, options, `data`
+   do `--json`, exit codes e credenciais; cada tool com o efeito (`read`,
+   `write` ou `network`); cada credencial com o nome em `service.purpose`
+   e quem a usa. Spec sem mudança de superfície escreve
+   `Nenhuma mudança de superfície.`
 5. `## Behavior` diz como o binário funciona para quem usa: fluxo, saída em
    texto e em `--json`, mensagens de erro, exit codes, teclas da TUI,
    entrada e saída das tools. `## Design` diz como o código deve ser
    feito: arquivos novos e alterados, funções compartilhadas entre CLI,
    MCP e TUI, dependências, tratamento de erro e o padrão do starter kit
-   que se aplica. As duas seções são obrigatórias para `spec close`.
+   que se aplica. Antes de `in_progress`, as duas seções precisam de texto.
 6. Use os exit codes de `src/app/exit-codes.ts`. Família nova entra como
    tarefa da spec, implementada antes do command que a usa.
 7. Banco de dados não é padrão. Só proponha SQLite quando a pessoa disser
-   que precisa guardar dados entre execuções. Nesse caso, as tabelas entram
-   em `changes.add.storage.tables` (ou `update`, `remove.tables`) com nome,
-   colunas, tipo, `primaryKey` e `notNull`; o Design descreve o arquivo
+   que precisa guardar dados entre execuções. Nesse caso, Surface lista as
+   tabelas com colunas e tipos; o Design descreve o arquivo
    `~/.<bin>/data.db`, a migration nova e as funções de repositório; a
-   tarefa leva a tag `#termfy-database`. `spec check` confere as tabelas
-   contra as migrations.
-8. `## Tasks` tem um item por entrega, criado com
-   `bun run dev -- spec task add <id> "<texto>" --tag <skill>`, que gera o
-   `{#id}`. A tag é a skill responsável (`#termfy-cli`,
-   `#termfy-tui`, `#termfy-mcp`, `#termfy-config`, `#termfy-api`,
-   `#termfy-database`, `#termfy-docs`). `## Tests` tem um item por teste de
-   aceite, criado com `spec test add <id> "<texto>"` e escrito como comando
-   e resultado esperado. Cada entrada de `changes` (command, screen, tool,
-   setting, credencial, tabela) aparece pelo nome no texto de ao menos uma
-   tarefa ou teste; `spec check` avisa a que ficar sem.
-9. A entrevista cria itens pendentes. Quem implementa e testa marca o item.
-   Não marque uma entrega como concluída só por descrevê-la.
-10. Crie o arquivo com `bun run dev -- spec new <slug>`; não invente o ID.
-    Ao começar a implementação, rode `bun run dev -- spec start <id>`. Use
-    `spec block <id> --reason` e `spec archive <id> --reason` em vez de
-    editar o status à mão.
-11. Código que já existe sem spec entra por uma spec de adoção:
-    `bun run dev -- spec sync --write --spec <id>` grava as entradas que
-    faltam no `changes.add` dela.
+   tarefa leva a tag `#termfy-database`.
+8. `## Tasks` tem um item por entrega, em checkbox GFM (`- [ ]`), com a
+   tag da skill responsável no fim (`#termfy-cli`, `#termfy-tui`,
+   `#termfy-mcp`, `#termfy-config`, `#termfy-api`, `#termfy-database`,
+   `#termfy-docs`). `## Tests` tem um item por teste de aceite, escrito
+   como comando e resultado esperado. Cada item de Surface aparece pelo
+   nome no texto de ao menos uma tarefa ou teste. Item novo entra no fim
+   da seção.
+9. A entrevista cria itens pendentes. Quem implementa e testa marca o item
+   com `[x]`. Não marque uma entrega como concluída só por descrevê-la.
+10. Siga o ciclo de `references/spec-contract.md` editando os arquivos:
+    criar (próximo número livre em `specs/`, `Status: draft`, linha no
+    índice do `CLISPEC.md`), começar (`in_progress` na spec e no índice),
+    avançar, fechar e arquivar. Uma spec parada por dependência externa
+    continua `in_progress`, com o motivo datado em Notes.
+11. Código que já existe sem spec entra por uma spec de adoção: leia o
+    registry, as screens, as tools e o `SETTINGS_SCHEMA`, liste em Surface
+    o que falta no `CLISPEC.md` e feche a spec para levar essas entradas
+    às tabelas.
 
 ## Passos
 
-1. Rode `git status --short`, `bun run dev -- spec list` e
-   `bun run dev -- spec check --json`. Se o `CLISPEC.md` não descreve o
-   binário (só o esqueleto) ou está em 1.0.0, passe antes pela
+1. Rode `git status --short` e leia `CLISPEC.md` e `specs/`. Se o
+   `CLISPEC.md` não existe ou não descreve o binário, passe antes pela
    `termfy-clispec`.
-2. Se a `termfy-clispec` já criou a spec, abra-a; senão, rode
-   `bun run dev -- spec new <slug> --title "<título>"`.
+2. Se a `termfy-clispec` já criou a spec, abra-a. Senão, escolha o próximo
+   número livre de quatro dígitos, grave `specs/NNNN-slug.md` com o título,
+   `Status: draft` e as seções do contrato, e acrescente a linha ao índice
+   `## Specs` do `CLISPEC.md`.
 3. Conduza a entrevista de `references/interview.md` na ordem: objetivo,
    comportamento, superfície, dados e integrações, desenho do código,
    aceite.
-4. A cada bloco respondido, escreva a parte correspondente da spec (front
-   matter ou seção) e mostre o trecho à pessoa.
-5. Avance `updatedAt` a cada edição.
-6. Rode `bun run dev -- spec check --json`. Corrija erros de schema, de
-   seções, de `{#id}`, de índice e de `changes` que não se aplicam ao
-   `CLISPEC.md`. Entradas que a spec planeja e o código ainda não tem não
-   são erro; o código à frente do `CLISPEC.md` aparece em `pending`.
-7. Releia a spec inteira com a pessoa: Behavior responde como usar, Design
-   responde onde e como implementar, cada entrada de `changes` tem tarefa e
+4. A cada bloco respondido, escreva a seção correspondente da spec e
+   mostre o trecho à pessoa.
+5. Faça a conferência manual de `references/spec-contract.md`: título e
+   status iguais no índice, seções na ordem, Surface com os campos das
+   tabelas, cada item de Surface citado em tarefa ou teste. Entradas que a
+   spec planeja e o código ainda não tem são esperadas.
+6. Releia a spec inteira com a pessoa: Behavior responde como usar, Design
+   responde onde e como implementar, cada item de Surface tem tarefa e
    teste.
-8. Liste as dúvidas de `## Notes` e pergunte se a pessoa quer resolvê-las
-   agora ou seguir para a implementação.
-9. Indique a próxima skill pela primeira tarefa pendente. Ao final da
-   implementação, com todos os itens marcados, `bun run dev -- spec close
-   <id>` incorpora a spec ao `CLISPEC.md`.
+7. Liste as dúvidas de `## Notes` e pergunte se a pessoa quer resolvê-las
+   agora ou seguir para a implementação. Ao seguir, troque o status para
+   `in_progress` na spec e no índice.
+8. Indique a próxima skill pela primeira tarefa pendente. Ao final da
+   implementação, com todos os itens marcados, feche a spec: aplique
+   Surface às tabelas do `CLISPEC.md`, troque o status para `done` na spec
+   e no índice e acrescente `- AAAA-MM-DD: spec NNNN (título) closed.` às
+   Notes do `CLISPEC.md`.
 
 ## Marcos
 
-Objetivo confirmado; comportamento descrito; superfície em `changes`;
-dados e integrações nomeados; Design aprovado; tarefas e testes gravados;
-`spec check` sem erros.
+Objetivo confirmado; comportamento descrito; superfície listada em
+Surface; dados e integrações nomeados; Design aprovado; tarefas e testes
+gravados; conferência manual sem divergência.
 
 ## Saída
 
-Relate o caminho da spec, o status, a contagem de `changes`
-(`+add ~update -remove`), o número de tarefas e testes, o resultado de
-`spec check`, as dúvidas abertas e a skill sugerida para a primeira tarefa.
+Relate o caminho da spec, o status, a contagem de itens de Surface
+(adiciona, altera, remove), o número de tarefas e testes, o resultado da
+conferência manual, as dúvidas abertas e a skill sugerida para a primeira
+tarefa.
 
 ## Compatibilidade
 
-Starter kit 0.8.x. Caminhos citados: `CLISPEC.md`, `specs/`, `docs/spec.md`,
-`src/spec/schema.ts`, `src/spec/files.ts`, `src/cli/commands/spec.ts` e
-`tests/spec-files.test.ts`. Confira o contrato com `bun run spec:check`.
+Starter kit a partir da v0.9.0: specs em Markdown puro, sem command
+`spec`. Caminhos citados: `CLISPEC.md`, `specs/`, `src/app/exit-codes.ts`
+e os documentos de `docs/` listados em Leia antes.

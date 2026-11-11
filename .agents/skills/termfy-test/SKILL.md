@@ -11,8 +11,8 @@ projeto derivado, não no repositório do framework.
 
 ## Leia antes
 
-- `AGENTS.md`, `CLISPEC.md`, `docs/spec.md` e `docs/architecture.md`.
-- A spec aberta (`bun run dev -- spec show <id> --json`): o Behavior diz o
+- `AGENTS.md`, `CLISPEC.md` e `docs/architecture.md`.
+- A spec aberta em `specs/NNNN-slug.md`: o Behavior diz o
   que cada teste confere, e cada item de `## Tests` é um teste de aceite a
   escrever. Leia o código alterado antes de escolher os casos. Uma
   funcionalidade fora da spec precisa passar por `termfy-spec` antes de ser
@@ -49,8 +49,8 @@ projeto derivado, não no repositório do framework.
 
 ## Passos
 
-1. Rode `git status --short` e delimite a entrega pelo `{#id}` da tarefa
-   na spec.
+1. Rode `git status --short` e delimite a entrega pela tarefa da spec
+   com a tag `#termfy-test` ou pela tarefa de implementação que pede o teste.
 2. Relacione cada item de `## Tests` da spec a pelo menos um teste e cada
    comportamento alterado aos casos de sucesso, falha e limite aplicáveis
    em `references/coverage.md`.
@@ -58,13 +58,12 @@ projeto derivado, não no repositório do framework.
    Para uma correção, reproduza primeiro a falha com uma assertion observável.
 4. Rode os arquivos alterados, por exemplo `bun test tests/cli.test.ts`.
    Depois rode `bun run typecheck` e `bun test` para conferir a integração.
-5. Rode `bun run dev -- spec check --strict`. Entradas em `pending` são
-   esperadas enquanto a spec está aberta. Distingua falha da entrega de
-   problemas já presentes; informe comandos que não puderam concluir.
-6. Se a entrega estiver concluída e seus testes passarem, marque a tarefa
-   e os itens de `## Tests` cobertos com `bun run dev -- spec done <id> <item>`.
-   Não edite o checkbox à mão, não marque nada no `CLISPEC.md` nem mude o
-   status para `done`; isso é do `spec close`. Um teste
+5. Rode `bun run validate`. Distingua falha da entrega de problemas já
+   presentes; informe comandos que não puderam concluir.
+6. Se a entrega estiver concluída e seus testes passarem, troque `[ ]` por
+   `[x]` na tarefa e nos itens de `## Tests` cobertos, no arquivo da spec.
+   Não marque nada no `CLISPEC.md` nem mude o status para `done`; isso é
+   do fechamento da spec em `termfy-spec`. Um teste
    isolado verde não conclui outros itens. Se o pedido for apenas testes, relate ao responsável
    pela implementação o item apto a ser marcado.
 
@@ -77,12 +76,13 @@ a entrega.
 ## Saída
 
 Liste arquivos alterados, comportamentos cobertos, comandos executados e
-quantidades de testes que passaram ou falharam. Cite os `{#id}` de Tasks e Tests
+quantidades de testes que passaram ou falharam. Cite o texto das tarefas e dos itens de Tests
 relacionados e as limitações restantes. Não imprima valores reais de credenciais.
 
 ## Compatibilidade
 
-Starter kit 0.8.x. Caminhos usados incluem `specs/`,
+Starter kit a partir da v0.9.0, com specs em Markdown puro e sem command
+`spec`. Caminhos usados incluem `specs/`,
 `src/main.ts`, `src/cli/registry.ts`, `src/app/exit-codes.ts`,
 `src/config/paths.ts`, `src/config/settings.ts`, `src/config/credentials.ts`,
 `src/mcp/server.ts`, `src/tui/index.ts`, `src/tui/components.ts` e `tests/`.

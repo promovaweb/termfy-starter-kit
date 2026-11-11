@@ -2,7 +2,7 @@
 
 ## Antes
 
-- [ ] `bun --version` responde 1.3.14 ou superior.
+- [ ] `bun --version` responde 1.4.4 ou superior.
 - [ ] `git status --short` sem mudanças alheias ao trabalho.
 - [ ] Nome do executável validado: `^[a-z][a-z0-9-]{1,39}$`.
 
@@ -14,8 +14,8 @@
 - [ ] `bun run skills:check` confirma as skills do framework em `.agents/skills/` e no `skills-lock.json`.
 - [ ] `bun run dev -- --version` imprime o nome do binário e a versão de `package.json`.
 - [ ] `bun run dev -- about --json` traz `data.author`, `data.site` e `data.repository` preenchidos.
-- [ ] `CLISPEC.md` tem `bin` e `description` iguais aos de `package.json`; `init` não reescreve o `CLISPEC.md`, e a `termfy-clispec` faz esse ajuste ao escrever a visão macro.
-- [ ] A `termfy-clispec` foi chamada em seguida e criou as specs iniciais em `specs/`.
+- [ ] O projeto ainda não tem `CLISPEC.md` nem `specs/`: `init` não cria nenhum dos dois.
+- [ ] A `termfy-clispec` foi chamada em seguida, escreveu o `CLISPEC.md` com `bin` e `description` iguais aos de `package.json` e criou as specs iniciais em `specs/`.
 - [ ] `bun run opencli` regenerou `docs/opencli.json` com a nova identidade.
 - [ ] `bun run dev -- config path` aponta para `~/.<bin>/`.
 

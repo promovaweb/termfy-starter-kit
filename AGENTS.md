@@ -25,30 +25,28 @@ agente; não transfira esse trabalho ao usuário.
 
 ## Especificação
 
-O contrato de `docs/spec.md` tem dois documentos:
+O binário não lê nem edita specs: elas são Markdown puro, mantidas pelo
+agente com as skills do framework. Projetos derivados criam dois tipos de
+documento, que o esqueleto não traz prontos:
 
 - `CLISPEC.md`, único, na raiz: a visão macro do binário (identidade,
   propósito, públicos, fora de escopo, superfície entregue e índice das
   specs). A skill `termfy-clispec` o escreve em entrevista com a pessoa.
-- `specs/NNNN-slug.md`, um por evolução: `changes` da superfície, como o
-  binário vai funcionar (`Behavior`), como o código deve ser feito
-  (`Design`), tarefas e testes. A skill `termfy-spec` escreve cada spec em
-  entrevista com a pessoa.
+- `specs/NNNN-slug.md`, um por evolução: status, mudanças de superfície,
+  como o binário vai funcionar (`Behavior`), como o código deve ser feito
+  (`Design`), tarefas e testes em checklist. A skill `termfy-spec` escreve
+  cada spec em entrevista com a pessoa.
 
 Antes de implementar qualquer command, screen ou tool, leia a spec aberta
-que cobre o pedido (`bun run dev -- spec list` e
-`bun run dev -- spec show <id> --json`); se nenhuma cobrir, rode a skill
-`termfy-spec` primeiro. Siga o `Behavior` e o `Design` da spec. Edite a
-spec pelo binário, sem YAML à mão: `spec start <id>` ao começar,
-`spec task add` e `spec test add` para novos itens e, ao concluir uma
-entrega, `spec done <id> <item>`. Com tudo marcado, `bun run dev -- spec close <id>` incorpora a
-spec ao `CLISPEC.md`. `bun run dev -- spec check` precisa passar antes de
-entregar; `bun run spec:check` entra em `bun run validate`.
+que cobre o pedido; se nenhuma cobrir, rode a skill `termfy-spec` primeiro.
+Siga o `Behavior` e o `Design` da spec, marque os itens da checklist ao
+concluir cada entrega e, com tudo marcado, atualize a superfície e o índice
+do `CLISPEC.md` e mude o status da spec para `done`.
 
 ## Ordem de leitura
 
 1. Este arquivo.
-2. `CLISPEC.md` e a spec aberta em `specs/`.
+2. `CLISPEC.md` e a spec aberta em `specs/`, quando existirem.
 3. `docs/architecture.md` para entender as camadas.
 4. A skill compatível com a tarefa em `.agents/skills/`. Quando a pessoa
    descrever a ferramenta em linguagem natural sem nomear uma skill, use
@@ -105,7 +103,7 @@ bun run validate
 ```
 
 Encadeia `typecheck`, `bun test`, `skills:check`, `opencli:check`,
-`spec:check`, `docs:check` e `build`. `docs:check` exige que todo command,
+`docs:check` e `build`. `docs:check` exige que todo command,
 screen, tool, resource, prompt, key e exit code do código apareça em `docs/`.
 Quando o registry de commands mudar, rode `bun run opencli` antes e revise o
 diff de `docs/opencli.json`. Confira `git status --short` ao final e preserve mudanças que já
