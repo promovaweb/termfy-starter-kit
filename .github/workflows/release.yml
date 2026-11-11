@@ -27,7 +27,7 @@ jobs:
       # Pacotes nativos de todas as plataformas na versão do lockfile; sem nome de
       # pacote, o install não busca uma versão mais nova que a travada.
       - name: Instalar pacotes nativos do OpenTUI para todos os alvos
-        run: bun install --frozen-lockfile --os="*" --cpu="*"
+        run: bun install --frozen-lockfile --os="*" --cpu="*" --libc="*"
 
       - name: Validar projeto
         run: bun run validate

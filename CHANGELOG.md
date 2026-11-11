@@ -2,6 +2,18 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.8.2] - 2026-11-11
+
+### Corrigido
+
+- `bun run build` falhava depois de um `bun install` comum com Bun 1.4.4 e
+  OpenTUI 0.8.4, porque o bundler tentava resolver os pacotes nativos de
+  todas as plataformas, inclusive os `-musl`. `scripts/build.ts` marca como
+  externos os que não estão instalados; `build:all` avisa quando falta o
+  pacote de um alvo.
+- A release instala os pacotes nativos com `--libc="*"`, que o Bun 1.4
+  exige para os `-musl`.
+
 ## [0.8.1] - 2026-11-11
 
 ### Alterado

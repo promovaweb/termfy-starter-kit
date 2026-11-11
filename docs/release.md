@@ -17,8 +17,14 @@ Uma tag publicada nunca é movida. Correção posterior recebe nova versão.
 
 ## Build local
 
+O OpenTUI carrega um pacote nativo por plataforma. `bun run build` marca
+como externos os que não estão instalados, então funciona depois de um
+`bun install` comum. O build cruzado precisa dos pacotes de todos os alvos,
+instalados a partir do lockfile.
+
 ```bash
 bun run build          # dist/<bin> para a plataforma atual
+bun install --frozen-lockfile --os="*" --cpu="*" --libc="*"  # pacotes nativos de todos os alvos
 bun run build:all      # dist/<bin>-<platform> para todas
 ./dist/<bin> --version
 ```
