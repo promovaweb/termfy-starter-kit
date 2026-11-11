@@ -14,7 +14,9 @@ pela leitura, na revisão de `termfy-review`.
 | `specs/NNNN-slug.md` | um por evolução | status, Goal, Behavior, Design, Surface, Tasks, Tests e Notes | `termfy-spec` |
 
 O starter kit não traz nenhum dos dois. O primeiro `CLISPEC.md` nasce da
-entrevista de `termfy-clispec`; a pasta `specs/` nasce com a primeira spec.
+entrevista de `termfy-clispec`, com a Surface preenchida pelo que o
+esqueleto já entrega (commands, screens, tools, resources, prompts e
+settings lidos do código); a pasta `specs/` nasce com a primeira spec.
 
 ## CLISPEC.md
 

@@ -69,6 +69,12 @@ registra o que já foi entregue e cresce quando uma spec é fechada.
    `CLISPEC.md` e mostre o trecho à pessoa. Em um arquivo novo, comece
    pelo título, pela linha de identidade e pelas seções vazias do
    contrato.
+   Preencha `## Surface` com o que o esqueleto já entrega, lido do código:
+   commands do registry (`bun run dev -- --opencli`), screens de
+   `src/tui/screens/index.ts`, tools, resources e prompts de
+   `bun run dev -- mcp --list`, keys de `SETTINGS_SCHEMA` e as credenciais
+   que o código lê com `getCredential()`. Assim a conferência manual parte
+   de uma Surface igual ao código.
 4. Monte com a pessoa a lista de specs iniciais (`references/macro-view.md`):
    uma por capacidade entregável, na ordem de entrega. Para cada uma
    aprovada, grave `specs/NNNN-slug.md` com o próximo número livre,

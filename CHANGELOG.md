@@ -2,6 +2,22 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.9.1] - 2026-11-11
+
+### Removido
+
+- `docs/tui-overview.txt`, frame antigo da TUI (v0.3.0) que nada
+  referenciava.
+
+### Adicionado
+
+- Teste que garante que o template registra só os commands do esqueleto.
+
+### Alterado
+
+- Skills do Termfy 0.9.3: o primeiro `CLISPEC.md` registra em Surface o
+  que o esqueleto já entrega.
+
 ## [0.9.0] - 2026-11-11
 
 ### Removido

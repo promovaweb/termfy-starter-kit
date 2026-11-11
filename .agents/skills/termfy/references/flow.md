@@ -4,7 +4,7 @@
 | --- | --- | --- | --- | --- |
 | 0. Diagnóstico | `termfy` | repositório | estágio atual | não |
 | 1. Identidade | `termfy-init`, `termfy-brand` | nome, título, descrição, autor, links, cores | `package.json`, manifest, tema | não (a identidade foi confirmada antes) |
-| 2. Visão macro | `termfy-clispec` | frase da pessoa, respostas | `CLISPEC.md` com Purpose, Audiences, Out of scope e os arquivos das specs iniciais em `specs/`, como `draft` | não (segue direto para a primeira spec) |
+| 2. Visão macro | `termfy-clispec` | frase da pessoa, respostas | `CLISPEC.md` com Purpose, Audiences, Out of scope, a Surface do esqueleto e os arquivos das specs iniciais em `specs/`, como `draft` | não (segue direto para a primeira spec) |
 | 3. Spec | `termfy-spec` ou `termfy-api-import` | spec da lista, respostas | `specs/NNNN-slug.md` com Goal, Behavior, Design, Surface, Tasks e Tests | **sim**, na primeira spec: aprovar visão macro, lista de specs, commands, screens, tools |
 | 4. Dados | `termfy-config` | keys e credenciais da spec | `SETTINGS_SCHEMA`, nomes de credenciais | não |
 | 5. Serviço externo | `termfy-api` | base URL, auth, endpoints | client da API em `src/` | não |

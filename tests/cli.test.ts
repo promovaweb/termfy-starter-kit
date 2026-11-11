@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { HOME_VARIABLE } from "../src/config/paths.ts";
 import { manifest } from "../src/app/manifest.ts";
+import { root } from "../src/cli/commands.ts";
 
 let dir: string;
 
@@ -38,6 +39,13 @@ describe("cli", () => {
     expect(r.code).toBe(0);
     for (const c of ["about", "config", "credentials", "mcp", "skill", "tui"]) expect(r.stdout).toContain(c);
     expect(r.stdout).toContain("NO_TTY");
+  });
+
+  test("the skeleton registers only its own commands", () => {
+    // Derived projects add commands; the template itself ships only these.
+    if (manifest.bin !== "termfy") return;
+    const names = (root.subcommands ?? []).map((c) => c.name).sort();
+    expect(names).toEqual(["about", "completion", "config", "credentials", "doctor", "mcp", "skill", "tui"]);
   });
 
   test("no arguments and no TTY prints help and exits with 2", async () => {
