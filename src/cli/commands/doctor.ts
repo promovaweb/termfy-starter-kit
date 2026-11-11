@@ -17,7 +17,7 @@ export interface DoctorCheck {
 export function collectDoctorChecks(runtime = { version: Bun.version, stdin: Boolean(process.stdin.isTTY), stdout: Boolean(process.stdout.isTTY) }) {
   const checks: DoctorCheck[] = [];
   const add = (name: string, status: DoctorCheck["status"], detail: string) => checks.push({ name, status, detail });
-  add("bun", Bun.semver.satisfies(runtime.version, ">=1.3.14") ? "ok" : "fail", `${runtime.version}; minimum 1.3.14`);
+  add("bun", Bun.semver.satisfies(runtime.version, ">=1.4.4") ? "ok" : "fail", `${runtime.version}; minimum 1.4.4`);
   for (const stream of ["stdin", "stdout"] as const) add(stream, runtime[stream] ? "ok" : "warn", runtime[stream] ? "TTY available" : "Not a TTY");
   const inspect = (name: string, path: string, check: () => void, detail: string) => {
     try {

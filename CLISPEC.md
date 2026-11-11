@@ -4,7 +4,7 @@ bin: termfy
 title: Termfy
 description: CLI, TUI and MCP stdio server skeleton in Bun, with the Termfy framework skills installed.
 createdAt: "2026-11-10T12:00:00.000Z"
-updatedAt: "2026-11-11T01:57:50.480Z"
+updatedAt: "2026-11-11T07:25:47.411Z"
 commands:
   - path: tui
     description: Open the terminal interface (Overview and About). Requires a TTY.
@@ -545,6 +545,9 @@ specs:
   - id: "0004"
     title: Ferramentas de spec, storage e aba Specs
     status: done
+  - id: "0005"
+    title: Bun, TypeScript e OpenTUI mais recentes
+    status: done
 ---
 ## Purpose
 
@@ -572,3 +575,4 @@ e permite consultar sua documentação e seu contrato sem acessar o repositório
 - 2026-11-10: nenhuma credencial de serviço é consumida pelo esqueleto.
 - 2026-11-10: resumo textual da spec e conferência de checklist revisados.
 - 2026-11-10: spec 0004 (Ferramentas de spec, storage e aba Specs) closed.
+- 2026-11-11: spec 0005 (Bun, TypeScript e OpenTUI mais recentes) closed.

@@ -106,7 +106,7 @@ por `readSecret()`; grave com `setCredential()`; recupere com
 
 ## Diagnóstico e completion
 
-`{{bin}} doctor` confere Bun 1.3.14 ou superior, TTY de stdin/stdout,
+`{{bin}} doctor` confere Bun 1.4.4 ou superior, TTY de stdin/stdout,
 pasta de dados com 0700, leitura de settings.json, origem da master key,
 decifragem do cofre, versão e plataforma. Cada linha usa ✓, ! ou ✗.
 Em JSON, `data` contém `{ checks, ok }`; cada check tem `name`, `status`

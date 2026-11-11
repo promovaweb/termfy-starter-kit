@@ -13,6 +13,7 @@ import { loadProject, loadSpec } from "../src/spec/index.ts";
 import { parseClispec, parseSpecFile, type ParsedClispec } from "../src/spec/parse.ts";
 import { checkSpec } from "../src/spec/check.ts";
 import { checkCredentialUsage } from "../scripts/check-spec.ts";
+import { credentialCalls } from "../scripts/credential-calls.ts";
 import type { Clispec, SpecFile } from "../src/spec/schema.ts";
 import { root } from "../src/cli/commands.ts";
 
@@ -345,4 +346,16 @@ describe("spec interfaces", () => {
       rmSync(dir, { recursive: true, force: true });
     }
   });
+});
+
+test("credential tokenizer handles templates, comments and property calls", () => {
+  const source = [
+    "/* getCredential(\"block.token\") */",
+    "const a = `getCredential(\"in.template\")`;",
+    "getCredential(`plain.token`);",
+    "getCredential(`computed.${name}`);",
+    "vault.getCredential(\"member.token\");",
+    "const b = `x ${getCredential(\"nested.token\")} y`;",
+  ].join("\n");
+  expect(credentialCalls(source)).toEqual([{ name: "plain.token", line: 3 }, { name: "nested.token", line: 6 }]);
 });

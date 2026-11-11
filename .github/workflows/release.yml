@@ -24,8 +24,10 @@ jobs:
       - name: Instalar dependências
         run: bun install --frozen-lockfile
 
+      # Pacotes nativos de todas as plataformas na versão do lockfile; sem nome de
+      # pacote, o install não busca uma versão mais nova que a travada.
       - name: Instalar pacotes nativos do OpenTUI para todos os alvos
-        run: bun install --os="*" --cpu="*" @opentui/core
+        run: bun install --frozen-lockfile --os="*" --cpu="*"
 
       - name: Validar projeto
         run: bun run validate

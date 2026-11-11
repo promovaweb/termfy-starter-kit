@@ -26,10 +26,10 @@ afterEach(() => {
   if (key === undefined) delete process.env[MASTER_KEY_VARIABLE]; else process.env[MASTER_KEY_VARIABLE] = key;
 });
 test("fresh installation only warns; old Bun and loose permissions fail", () => {
-  const data = collectDoctorChecks({ version: "1.3.14", stdin: false, stdout: false });
+  const data = collectDoctorChecks({ version: "1.4.4", stdin: false, stdout: false });
   expect(data.ok).toBe(true);
   expect(data.checks.find((c) => c.name === "master-key")?.detail).toBe("none");
-  expect(collectDoctorChecks({ version: "1.3.13", stdin: true, stdout: true }).ok).toBe(false);
+  expect(collectDoctorChecks({ version: "1.4.3", stdin: true, stdout: true }).ok).toBe(false);
   chmodSync(dir, 0o755);
   expect(collectDoctorChecks().checks.find((c) => c.name === "directory")?.status).toBe("fail");
 });

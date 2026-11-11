@@ -6,7 +6,7 @@
  * compared with the schema the migrations build.
  */
 import { join } from "node:path";
-import ts from "typescript";
+import { credentialCalls } from "./credential-calls.ts";
 import { checkSpec } from "../src/spec/check.ts";
 import { loadProject, loadSpec } from "../src/spec/index.ts";
 import { actualTables } from "../src/spec/storage.ts";
@@ -18,18 +18,9 @@ export async function checkCredentialUsage(spec: Pick<Clispec, "credentials">, s
   const errors: string[] = [];
   const files = Array.from(new Bun.Glob("**/*.{ts,tsx,js,jsx,mjs,cjs}").scanSync({ cwd: sourceDir })).sort();
   for (const file of files) {
-    const source = ts.createSourceFile(file, await Bun.file(join(sourceDir, file)).text(), ts.ScriptTarget.Latest, true);
-    const visit = (node: ts.Node) => {
-      if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === "getCredential") {
-        const argument = node.arguments[0];
-        if (argument && (ts.isStringLiteral(argument) || ts.isNoSubstitutionTemplateLiteral(argument)) && !names.has(argument.text)) {
-          const { line } = source.getLineAndCharacterOfPosition(node.getStart(source));
-          errors.push(`${file}:${line + 1}: credential ${argument.text} is missing from the spec.`);
-        }
-      }
-      ts.forEachChild(node, visit);
-    };
-    visit(source);
+    for (const call of credentialCalls(await Bun.file(join(sourceDir, file)).text())) {
+      if (!names.has(call.name)) errors.push(`${file}:${call.line}: credential ${call.name} is missing from the spec.`);
+    }
   }
   return errors;
 }

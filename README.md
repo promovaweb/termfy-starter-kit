@@ -55,7 +55,7 @@ manutenção. O guia do método e o ebook ficam no
 
 ## Requisitos
 
-Bun 1.3.14 ou superior. Node.js não é usado.
+Bun 1.4.4 ou superior. Node.js não é usado.
 
 ## Rodar em desenvolvimento
 

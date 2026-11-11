@@ -2,6 +2,23 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.8.1] - 2026-11-11
+
+### Alterado
+
+- Bun 1.4.4 como mínimo (`engines` e `doctor`), `@opentui/core` 0.8.4,
+  `@types/bun` 1.4.4 e TypeScript 7.
+- O scanner de `getCredential` do `spec:check` usa um tokenizador próprio
+  (`scripts/credential-calls.ts`), porque o TypeScript 7 não traz a API
+  JavaScript do compilador.
+
+### Corrigido
+
+- A release instalava o `@opentui/core` mais recente, e não o do lockfile,
+  para compilar os outros alvos; a 0.8.0 falhou quando saiu a 0.8.4. O
+  workflow passa a usar `bun install --frozen-lockfile --os="*" --cpu="*"`.
+- `specs/0005` registra a manutenção.
+
 ## [0.8.0] - 2026-11-10
 
 ### Adicionado
