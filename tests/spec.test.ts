@@ -1,4 +1,4 @@
-/** Contract tests for spec parsing, registry checks, credential scanning and public interfaces. */
+/** Contract tests for CLISPEC and spec parsing, registry checks, credential scanning and public interfaces. */
 import { describe, expect, test } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -9,122 +9,145 @@ import { AppError } from "../src/app/errors.ts";
 import { ExitCode } from "../src/app/exit-codes.ts";
 import { manifest } from "../src/app/manifest.ts";
 import { HOME_VARIABLE } from "../src/config/paths.ts";
-import { loadSpec } from "../src/spec/index.ts";
-import { parseSpec, type ParsedSpec } from "../src/spec/parse.ts";
+import { loadProject, loadSpec } from "../src/spec/index.ts";
+import { parseClispec, parseSpecFile, type ParsedClispec } from "../src/spec/parse.ts";
 import { checkSpec } from "../src/spec/check.ts";
 import { checkCredentialUsage } from "../scripts/check-spec.ts";
-import type { Spec } from "../src/spec/schema.ts";
+import type { Clispec, SpecFile } from "../src/spec/schema.ts";
 import { root } from "../src/cli/commands.ts";
 
-const base: Spec = {
-  schemaVersion: "1.0.0", bin: manifest.bin, title: manifest.title, description: manifest.description,
-  status: "in_progress", createdAt: "2026-11-10T12:00:00.000Z", updatedAt: "2026-11-10T12:00:00.000Z",
-  commands: [], screens: [], mcp: { tools: [], resources: [], prompts: [] }, settings: [], credentials: [],
+const projectRoot = join(import.meta.dir, "..");
+
+const base: Clispec = {
+  schemaVersion: "2.0.0", bin: manifest.bin, title: manifest.title, description: manifest.description,
+  createdAt: "2026-11-10T12:00:00.000Z", updatedAt: "2026-11-10T12:00:00.000Z",
+  commands: [], screens: [], mcp: { tools: [], resources: [], prompts: [] }, settings: [], credentials: [], storage: { tables: [] }, specs: [],
 };
 
-function document(frontmatter: unknown = base, checklist = "- [ ] Build `orders list` `#termfy-cli` {#a1b2}\n- [x] Add tests {#c3d4}"): string {
-  return `---\n${Bun.YAML.stringify(frontmatter)}\n---\nIgnored introduction.\n\n## Purpose\n\nExample purpose.\n\n## Audiences\n\nDevelopers.\n\n## Out of scope\n\nNetwork.\n\n## Checklist\n\n${checklist}\n\n## Notes\n`;
+const specBase: SpecFile = {
+  schemaVersion: "2.0.0", id: "0002", title: "Orders", status: "in_progress",
+  createdAt: "2026-11-10T12:00:00.000Z", updatedAt: "2026-11-10T12:00:00.000Z", changes: {},
+};
+
+function clispecDocument(frontmatter: unknown = base, extra = ""): string {
+  return `---\n${Bun.YAML.stringify(frontmatter)}\n---\nIgnored introduction.\n\n## Purpose\n\nExample purpose.\n\n## Audiences\n\nDevelopers.\n\n## Out of scope\n\nNetwork.\n${extra}\n## Notes\n`;
 }
 
-function expectConfig(raw: string): void {
+function specDocument(frontmatter: unknown = specBase, tasks = "- [ ] Build `orders list` `#termfy-cli` {#a1b2}", tests = "- [x] Lists orders {#c3d4}"): string {
+  return `---\n${Bun.YAML.stringify(frontmatter)}\n---\n\n## Goal\n\nExport orders.\n\n## Behavior\n\nWrites a CSV.\n\n## Design\n\nShared function.\n\n## Tasks\n\n${tasks}\n\n## Tests\n\n${tests}\n\n## Notes\n`;
+}
+
+function expectConfig(run: () => unknown): void {
   let caught: unknown;
-  try { parseSpec(raw); } catch (e) { caught = e; }
+  try { run(); } catch (e) { caught = e; }
   expect(caught).toBeInstanceOf(AppError);
   expect((caught as AppError).code).toBe(ExitCode.CONFIG);
 }
 
-describe("parseSpec", () => {
-  test("parses YAML, exact sections, optional skill tags and progress", () => {
-    const spec = parseSpec(document());
+describe("parseClispec", () => {
+  test("parses YAML and the four exact sections", () => {
+    const spec = parseClispec(clispecDocument());
     expect(spec.frontmatter).toEqual(base);
     expect(spec.sections.Purpose).toBe("Example purpose.");
     expect(spec.sections.Notes).toBe("");
-    expect(spec.checklist).toEqual([
-      { id: "a1b2", text: "Build `orders list`", done: false, skill: "termfy-cli" },
-      { id: "c3d4", text: "Add tests", done: true },
-    ]);
-    expect(spec.progress).toEqual({ done: 1, total: 2, percent: 50 });
+    expect(spec.legacy).toBeUndefined();
   });
 
-  test.each(["- [ ] Missing ID", "- [ ] Short ID {#abc}", "- [ ] Uppercase ID {#AB12}", "- [ ] Long ID {#abcde}"])("rejects invalid checklist item: %s", (item) => {
-    expectConfig(document(base, item));
-  });
-
-  test("rejects repeated IDs", () => {
-    expectConfig(document(base, "- [ ] First {#a1b2}\n- [x] Second {#a1b2}"));
-  });
-
-  test.each([
-    "* [ ] Pending {#a1b2}", "+ [ ] Pending", "1. [ ] Pending {#a1b2}",
-    "- [?] Unknown state {#a1b2}", "- [] Empty checkbox {#a1b2}",
-    "- [ ]   {#a1b2}", "- [ ] `#termfy-cli` {#a1b2}",
-  ])("rejects malformed tasks instead of hiding pending work: %s", (item) => {
-    expectConfig(document({ ...base, status: "done" }, item));
-  });
-
-  test("accepts checkbox whitespace and uppercase X", () => {
-    expect(parseSpec(document(base, "-\t[X]\tComplete\t{#a1b2}")).progress).toEqual({ done: 1, total: 1, percent: 100 });
-  });
-
-  test("rejects status done with a pending item", () => {
-    expectConfig(document({ ...base, status: "done" }));
-    expect(parseSpec(document({ ...base, status: "done" }, "- [x] Complete {#a1b2}")).progress.percent).toBe(100);
-  });
-
-  test("empty checklist has finite zero progress and preserves declared status", () => {
-    const spec = parseSpec(document({ ...base, status: "draft" }, ""));
-    expect(spec.progress).toEqual({ done: 0, total: 0, percent: 0 });
-    expect(spec.frontmatter.status).toBe("draft");
+  test("refuses a Checklist section: pending work lives in specs/", () => {
+    expectConfig(() => parseClispec(clispecDocument(base, "\n## Checklist\n\n- [ ] Old item {#a1b2}\n")));
   });
 
   test("ignores fenced examples and text outside fixed sections", () => {
-    const raw = document(base, "```markdown\n## Notes\n- [ ] Example without ID\n```\n- [x] Real item {#a1b2}")
-      .replace("## Audiences", "## Other\nOutside text.\n\n## Audiences");
-    const spec = parseSpec(raw.replace(/\n/g, "\r\n"));
-    expect(spec.progress.total).toBe(1);
-    expect(spec.sections.Checklist).toContain("Example without ID");
+    const raw = clispecDocument().replace("## Audiences", "```markdown\n## Notes\n```\n\n## Other\nOutside text.\n\n## Audiences");
+    const spec = parseClispec(raw.replace(/\n/g, "\r\n"));
+    expect(spec.sections.Purpose).toContain("## Notes");
     expect(spec.sections.Purpose).not.toContain("Outside text");
   });
 
   test("requires exact headings, order and uniqueness", () => {
-    expectConfig(document().replace("## Notes", "## notes"));
-    expectConfig(document().replace("## Purpose", "## Notes"));
-    expectConfig(`${document()}\n## Purpose\nRepeated.`);
+    expectConfig(() => parseClispec(clispecDocument().replace("## Notes", "## notes")));
+    expectConfig(() => parseClispec(clispecDocument().replace("## Purpose", "## Notes")));
+    expectConfig(() => parseClispec(`${clispecDocument()}\n## Purpose\nRepeated.`));
   });
 
   test("rejects missing front matter, malformed YAML and unknown fields", () => {
-    expectConfig("## Purpose\nNo YAML.");
-    expectConfig("---\nbin: example\n");
-    expectConfig("---\n---\n");
-    expectConfig("---\nunterminated: [\n---\n");
-    expectConfig(document({ ...base, extra: true }));
-    expectConfig(document({ ...base, commands: [{ path: "about", description: "About.", extra: true }] }));
-    expectConfig(document({ ...base, mcp: { tools: [{ name: "about", effect: "read", extra: true }], resources: [], prompts: [] } }));
+    expectConfig(() => parseClispec("## Purpose\nNo YAML."));
+    expectConfig(() => parseClispec("---\nbin: example\n"));
+    expectConfig(() => parseClispec("---\n---\n"));
+    expectConfig(() => parseClispec("---\nunterminated: [\n---\n"));
+    expectConfig(() => parseClispec(clispecDocument({ ...base, extra: true })));
+    expectConfig(() => parseClispec(clispecDocument({ ...base, status: "draft" })));
+    expectConfig(() => parseClispec(clispecDocument({ ...base, commands: [{ path: "about", description: "About.", extra: true }] })));
   });
 
   test.each([
-    { schemaVersion: "2.0.0" }, { status: "unknown" }, { createdAt: "yesterday" },
-    { title: "   " }, { bin: "\t" },
+    { schemaVersion: "3.0.0" }, { createdAt: "yesterday" }, { title: "   " }, { bin: "\t" },
     { commands: "about" }, { settings: [{ key: "x", type: "object", default: {} }] },
     { credentials: [{ name: "Invalid Name", usedBy: [] }] },
     { commands: [{ path: "about", description: "About.", exitCodes: [1.5] }] },
     { commands: [{ path: "about", description: "About.", options: [{ name: "short" }] }] },
+    { specs: [{ id: "2", title: "Short ID", status: "draft" }] },
+    { specs: [{ id: "0002", title: "A", status: "draft" }, { id: "0002", title: "B", status: "done" }] },
   ])("rejects invalid field types and values: %j", (override) => {
-    expectConfig(document({ ...base, ...override }));
+    expectConfig(() => parseClispec(clispecDocument({ ...base, ...override })));
+  });
+
+  test("reads a 1.0.0 document and keeps its checklist for migration", () => {
+    const { specs: _specs, schemaVersion: _version, ...rest } = base;
+    const raw = clispecDocument({ ...rest, schemaVersion: "1.0.0", status: "in_progress" }, "\n## Checklist\n\n- [x] Old item `#termfy-cli` {#a1b2}\n");
+    const spec = parseClispec(raw);
+    expect(spec.frontmatter.schemaVersion).toBe("2.0.0");
+    expect(spec.legacy).toEqual({ status: "in_progress", checklist: [{ id: "a1b2", text: "Old item", done: true, skill: "termfy-cli" }] });
+  });
+});
+
+describe("parseSpecFile", () => {
+  test("parses changes, tasks, tests and progress", () => {
+    const spec = parseSpecFile(specDocument());
+    expect(spec.frontmatter.changes).toEqual({});
+    expect(spec.sections.Goal).toBe("Export orders.");
+    expect(spec.tasks).toEqual([{ id: "a1b2", text: "Build `orders list`", done: false, skill: "termfy-cli" }]);
+    expect(spec.tests).toEqual([{ id: "c3d4", text: "Lists orders", done: true }]);
+    expect(spec.progress).toEqual({ done: 1, total: 2, percent: 50 });
+  });
+
+  test.each(["- [ ] Missing ID", "- [ ] Short ID {#abc}", "- [ ] Uppercase ID {#AB12}", "* [ ] Pending {#a1b2}", "- [?] Unknown {#a1b2}", "- [ ] `#termfy-cli` {#a1b2}"])("rejects malformed items: %s", (item) => {
+    expectConfig(() => parseSpecFile(specDocument(specBase, item)));
+  });
+
+  test("IDs are unique across tasks and tests", () => {
+    expectConfig(() => parseSpecFile(specDocument(specBase, "- [ ] Task {#a1b2}", "- [ ] Test {#a1b2}")));
+  });
+
+  test("done requires every item complete and closedAt", () => {
+    expectConfig(() => parseSpecFile(specDocument({ ...specBase, status: "done", closedAt: "2026-11-10T13:00:00.000Z" })));
+    expectConfig(() => parseSpecFile(specDocument({ ...specBase, status: "done" }, "- [x] Task {#a1b2}")));
+    expectConfig(() => parseSpecFile(specDocument({ ...specBase, closedAt: "2026-11-10T13:00:00.000Z" })));
+    expect(parseSpecFile(specDocument({ ...specBase, status: "done", closedAt: "2026-11-10T13:00:00.000Z" }, "- [x] Task {#a1b2}")).progress.percent).toBe(100);
   });
 
   test("requires reasons only for the matching lifecycle state", () => {
-    expectConfig(document({ ...base, status: "blocked" }));
-    expectConfig(document({ ...base, status: "archived" }));
-    expectConfig(document({ ...base, blockedReason: "Waiting." }));
-    expect(parseSpec(document({ ...base, status: "blocked", blockedReason: "Waiting for an API." })).frontmatter.status).toBe("blocked");
-    expect(parseSpec(document({ ...base, status: "archived", archivedReason: "Project closed." })).frontmatter.status).toBe("archived");
+    expectConfig(() => parseSpecFile(specDocument({ ...specBase, status: "blocked" })));
+    expectConfig(() => parseSpecFile(specDocument({ ...specBase, archivedReason: "Closed." })));
+    expect(parseSpecFile(specDocument({ ...specBase, status: "blocked", blockedReason: "Waiting for an API." })).frontmatter.status).toBe("blocked");
+  });
+
+  test("rejects unknown change blocks and invalid IDs", () => {
+    expectConfig(() => parseSpecFile(specDocument({ ...specBase, changes: { rename: {} } })));
+    expectConfig(() => parseSpecFile(specDocument({ ...specBase, changes: { remove: { commands: [{ path: "x" }] } } })));
+    expectConfig(() => parseSpecFile(specDocument({ ...specBase, id: "2" })));
   });
 });
 
 describe("checkSpec", () => {
-  test("the shipped spec covers every registry entry", () => {
-    expect(checkSpec(loadSpec(), { strict: true })).toEqual({ ok: true, errors: [], warnings: [] });
+  test("the shipped CLISPEC and specs match the code", () => {
+    const project = loadProject(join(projectRoot, "CLISPEC.md"))!;
+    const result = checkSpec(loadSpec(), { specs: project.specs });
+    expect(result.errors).toEqual([]);
+    // Without open specs the CLISPEC must equal the code; with one, its entries are pending.
+    if (!project.specs.some(({ spec }) => ["draft", "in_progress", "blocked"].includes(spec.frontmatter.status))) {
+      expect(checkSpec(loadSpec(), { strict: true, specs: project.specs })).toEqual({ ok: true, errors: [], warnings: [], pending: [] });
+    }
   });
 
   test("unknown command is an error", () => {
@@ -143,7 +166,7 @@ describe("checkSpec", () => {
     expect(checkSpec(spec, { strict: true }).ok).toBe(false);
   });
 
-  const cases: Array<[string, (spec: ParsedSpec) => void]> = [
+  const cases: Array<[string, (spec: ParsedClispec) => void]> = [
     ["identity", (s) => { s.frontmatter.bin = "other"; s.frontmatter.description = "Other description."; }],
     ["option", (s) => { s.frontmatter.commands.find((c) => c.path === "about")!.options = [{ name: "--unknown" }]; }],
     ["argument", (s) => { s.frontmatter.commands.find((c) => c.path === "about")!.arguments = [{ name: "unknown" }]; }],
@@ -155,7 +178,6 @@ describe("checkSpec", () => {
     ["setting", (s) => { s.frontmatter.settings.push({ key: "unknown", type: "string", default: "" }); }],
     ["setting type", (s) => { s.frontmatter.settings[0]!.type = "number"; }],
     ["credential consumer", (s) => { s.frontmatter.credentials.push({ name: "shop.token", usedBy: ["unknown"] }); }],
-    ["pending done item", (s) => { s.checklist[0]!.done = false; }],
   ];
   test.each(cases)("rejects a mismatched %s", (_, change) => {
     const spec = loadSpec();
@@ -205,33 +227,54 @@ test("credential scanner ignores comments and strings but checks literal calls",
       "getCredential('other.token');",
       'getCredential(name);',
     ].join("\n"));
-    const spec = { ...base, credentials: [{ name: "shop.token", usedBy: [] }] };
-    expect(await checkCredentialUsage(spec, dir)).toEqual(["example.ts:4: credential other.token is missing from the spec."]);
+    expect(await checkCredentialUsage({ credentials: [{ name: "shop.token", usedBy: [] }] }, dir)).toEqual(["example.ts:4: credential other.token is missing from the spec."]);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
+async function runCli(args: string[], cwd = projectRoot): Promise<{ stdout: string; stderr: string; code: number }> {
+  const home = mkdtempSync(join(tmpdir(), "termfy-spec-home-"));
+  try {
+    const proc = Bun.spawn([process.execPath, "run", join(projectRoot, "src/main.ts"), ...args], {
+      cwd, env: { ...process.env, [HOME_VARIABLE]: home, NO_COLOR: "1" }, stdin: "ignore", stdout: "pipe", stderr: "pipe",
+    });
+    const [stdout, stderr, code] = await Promise.all([new Response(proc.stdout).text(), new Response(proc.stderr).text(), proc.exited]);
+    return { stdout, stderr, code };
+  } finally { rmSync(home, { recursive: true, force: true }); }
+}
+
 describe("spec interfaces", () => {
   test("show uses a concise text summary and preserves complete JSON", async () => {
-    const dir = mkdtempSync(join(tmpdir(), "termfy-spec-show-"));
+    const text = await runCli(["spec", "show"]);
+    expect(text.code).toBe(ExitCode.SUCCESS);
+    for (const label of ["Commands", "Screens", "Tools", "Settings", "Credentials", "Specs", "Purpose", "Out of scope"]) expect(text.stdout).toContain(label);
+    expect(text.stdout).not.toContain("schemaVersion:");
+    expect(text.stdout.length).toBeLessThan(1600);
+    const { frontmatter, sections } = loadSpec();
+    expect(JSON.parse((await runCli(["spec", "show", "--json"])).stdout).data).toEqual({ frontmatter, sections });
+  });
+
+  test("show and progress read one spec by ID from the project", async () => {
+    const first = loadProject(join(projectRoot, "CLISPEC.md"))!.specs[0];
+    if (first) {
+      const { id, status } = first.spec.frontmatter;
+      const shown = JSON.parse((await runCli(["spec", "show", String(Number(id)), "--json"])).stdout).data;
+      expect(shown.frontmatter.id).toBe(id);
+      const progress = JSON.parse((await runCli(["spec", "progress", id, "--json"])).stdout).data;
+      expect(progress).toMatchObject({ id, status, done: first.spec.progress.done, total: first.spec.progress.total });
+    }
+    const missing = await runCli(["spec", "show", "9999"]);
+    expect(missing.code).toBe(ExitCode.CONFIG);
+  });
+
+  test("list uses the files in the project and the embedded index elsewhere", async () => {
+    const inside = JSON.parse((await runCli(["spec", "list", "--json"])).stdout).data;
+    expect(inside.source).toBe("files");
+    expect(inside.specs.map((entry: { id: string }) => entry.id)).toEqual(loadProject(join(projectRoot, "CLISPEC.md"))!.specs.map(({ spec }) => spec.frontmatter.id));
+    const outside = mkdtempSync(join(tmpdir(), "termfy-spec-outside-"));
     try {
-      const run = async (args: string[]) => {
-        const proc = Bun.spawn([process.execPath, "run", "src/main.ts", "spec", "show", ...args], {
-          cwd: join(import.meta.dir, ".."), env: { ...process.env, [HOME_VARIABLE]: dir, NO_COLOR: "1" },
-          stdin: "ignore", stdout: "pipe", stderr: "pipe",
-        });
-        const [stdout, stderr, code] = await Promise.all([new Response(proc.stdout).text(), new Response(proc.stderr).text(), proc.exited]);
-        expect(code).toBe(ExitCode.SUCCESS);
-        expect(stderr).toBe("");
-        return stdout;
-      };
-      const text = await run([]);
-      for (const label of ["Status", "Commands", "Screens", "Tools", "Settings", "Credentials", "Checklist", "Purpose", "Out of scope"]) expect(text).toContain(label);
-      expect(text).not.toContain("schemaVersion:");
-      expect(text).not.toContain("## Notes");
-      expect(text.length).toBeLessThan(1600);
-      const { frontmatter, sections, progress } = loadSpec();
-      expect(JSON.parse(await run(["--json"])).data).toEqual({ frontmatter, sections, progress });
-    } finally { rmSync(dir, { recursive: true, force: true }); }
+      const data = JSON.parse((await runCli(["spec", "list", "--json"], outside)).stdout).data;
+      expect(data).toEqual({ source: "index", specs: loadSpec().frontmatter.specs });
+    } finally { rmSync(outside, { recursive: true, force: true }); }
   });
 
   test.each([
@@ -249,7 +292,7 @@ describe("spec interfaces", () => {
         process.exit(await runCli(${JSON.stringify(["spec", "check", "--json", ...(strict ? ["--strict"] : [])])}));
       `;
       const proc = Bun.spawn([process.execPath, "-e", script], {
-        cwd: join(import.meta.dir, ".."), env: { ...process.env, [HOME_VARIABLE]: dir, NO_COLOR: "1" },
+        cwd: projectRoot, env: { ...process.env, [HOME_VARIABLE]: dir, NO_COLOR: "1" },
         stdin: "ignore", stdout: "pipe", stderr: "pipe",
       });
       const [stdout, stderr, actual] = await Promise.all([new Response(proc.stdout).text(), new Response(proc.stderr).text(), proc.exited]);
@@ -266,33 +309,36 @@ describe("spec interfaces", () => {
   });
 
   test("CLI spec check --json succeeds in a subprocess", async () => {
-    const dir = mkdtempSync(join(tmpdir(), "termfy-spec-cli-"));
-    try {
-      const proc = Bun.spawn([process.execPath, "run", "src/main.ts", "spec", "check", "--json"], {
-        cwd: join(import.meta.dir, ".."), env: { ...process.env, [HOME_VARIABLE]: dir, NO_COLOR: "1" },
-        stdin: "ignore", stdout: "pipe", stderr: "pipe",
-      });
-      const [stdout, stderr, code] = await Promise.all([new Response(proc.stdout).text(), new Response(proc.stderr).text(), proc.exited]);
-      expect(stderr).toBe("");
-      expect(code).toBe(ExitCode.SUCCESS);
-      expect(JSON.parse(stdout)).toEqual({ ok: true, command: `${manifest.bin} spec check`, data: { ok: true, errors: [], warnings: [] } });
-    } finally { rmSync(dir, { recursive: true, force: true }); }
+    const { stdout, stderr, code } = await runCli(["spec", "check", "--json"]);
+    expect(stderr).toBe("");
+    expect(code).toBe(ExitCode.SUCCESS);
+    const parsed = JSON.parse(stdout);
+    expect(parsed).toMatchObject({ ok: true, command: `${manifest.bin} spec check`, data: { ok: true, errors: [] } });
   });
 
-  test("MCP spec returns the same parsed data as the loader", async () => {
+  test("MCP spec and specs return the parsed contract", async () => {
     const dir = mkdtempSync(join(tmpdir(), "termfy-spec-mcp-"));
     const client = new Client({ name: "spec-test", version: "1.0.0" });
     const transport = new StdioClientTransport({
-      command: process.execPath, args: ["run", "src/main.ts", "mcp"], cwd: join(import.meta.dir, ".."),
+      command: process.execPath, args: ["run", "src/main.ts", "mcp"], cwd: projectRoot,
       env: { ...process.env, [HOME_VARIABLE]: dir } as Record<string, string>, stderr: "pipe",
     });
     try {
       await client.connect(transport);
-      const result = await client.callTool({ name: "spec", arguments: {} });
-      const { frontmatter, sections, progress } = loadSpec();
-      expect(result.isError).not.toBe(true);
-      expect(result.structuredContent).toEqual({ frontmatter, sections, progress });
-      expect(JSON.parse((result.content as Array<{ text: string }>)[0]!.text)).toEqual(result.structuredContent);
+      const spec = await client.callTool({ name: "spec", arguments: {} });
+      const { frontmatter, sections } = loadSpec();
+      expect(spec.isError).not.toBe(true);
+      expect(spec.structuredContent).toEqual({ frontmatter, sections });
+      expect(JSON.parse((spec.content as Array<{ text: string }>)[0]!.text)).toEqual(spec.structuredContent);
+      const listed = await client.callTool({ name: "specs", arguments: {} });
+      expect((listed.structuredContent as { source: string }).source).toBe("files");
+      const first = loadProject(join(projectRoot, "CLISPEC.md"))!.specs[0];
+      if (first) {
+        const one = await client.callTool({ name: "specs", arguments: { id: first.spec.frontmatter.id } });
+        expect((one.structuredContent as { frontmatter: SpecFile }).frontmatter.id).toBe(first.spec.frontmatter.id);
+      }
+      const missing = await client.callTool({ name: "specs", arguments: { id: "9999" } });
+      expect(missing.isError).toBe(true);
     } finally {
       await client.close();
       await transport.close();

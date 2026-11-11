@@ -59,12 +59,34 @@ os dois: o envelope para a mensagem, o code para a classe da falha.
 | `skill [topic]` | Mesmo efeito de `--skill`. |
 | `doctor` | Confere runtime, TTY, pasta, settings, chave e cofre. |
 | `completion <shell>` | Gera script para `bash`, `zsh` ou `fish`. |
-| `spec show\|check\|progress\|sync` | Lê a spec, confere o contrato com o código e mostra o progresso. `check --strict` também falha com avisos. |
+| `spec show\|list\|progress\|check\|new\|start\|block\|archive\|task add\|test add\|done\|close\|sync\|migrate` | Lê o `CLISPEC.md` e as specs de `specs/`, confere o contrato com o código e as migrations, cria, edita e fecha specs. `check --strict` também falha com avisos. |
 
-O command `spec` lê o `CLISPEC.md` embutido no binário. `show` apresenta o
-front matter, as seções e o progresso; `check` retorna exit code 3 quando a
-conferência falha; `progress` mostra a contagem da checklist. Os três aceitam
-`--json`. O formato do arquivo está em [docs/spec.md](spec.md).
+O command `spec` trabalha com dois documentos. O `CLISPEC.md`, embutido no
+binário, é a visão macro: identidade, superfície entregue e índice das specs.
+Cada arquivo de `specs/` descreve uma evolução, com mudanças de superfície,
+tarefas e testes.
+
+| Subcommand | Função |
+| --- | --- |
+| `spec show [id]` | sem ID, resume o `CLISPEC.md`; com ID, mostra uma spec e suas pendências |
+| `spec list` | specs com status, progresso e contagem de mudanças |
+| `spec progress [id]` | tarefas e testes concluídos de uma spec ou da soma das specs abertas |
+| `spec check [--strict]` | confere o `CLISPEC.md` com o código e as specs com o `CLISPEC.md`; exit code 3 na falha |
+| `spec new <slug> [--title <text>]` | cria `specs/NNNN-<slug>.md` como `draft` e o registra no índice |
+| `spec start <id>` | move uma spec `draft` ou `blocked` para `in_progress` |
+| `spec block <id> --reason <text>` | marca uma spec aberta como `blocked` |
+| `spec archive <id> --reason <text>` | arquiva uma spec aberta sem aplicar suas mudanças |
+| `spec task add <id> <text> [--tag <skill>]` | acrescenta uma tarefa com `{#id}` gerado |
+| `spec test add <id> <text>` | acrescenta um teste de aceite com `{#id}` gerado |
+| `spec done <id> <item> [--undo]` | marca ou desmarca uma tarefa ou teste |
+| `spec close <id>` | aplica as mudanças de uma spec concluída ao `CLISPEC.md`, a marca como `done` e registra a data em `## Notes` |
+| `spec sync [--write] [--spec <id>]` | acrescenta ao `CLISPEC.md`, ou ao `changes.add` de uma spec aberta, o que o código tem e nenhuma spec aberta planeja |
+| `spec migrate [--write]` | converte um `CLISPEC.md` 1.0.0 e move a checklist para `specs/` |
+
+Todos aceitam `--json`. Os subcommands que gravam aceitam `--file <path>`
+(padrão `CLISPEC.md`), e `specs/` fica ao lado desse arquivo. Fora da pasta
+do projeto, `spec list` usa o índice embutido. O formato dos arquivos está
+em [docs/spec.md](spec.md).
 
 ## Como adicionar um command
 

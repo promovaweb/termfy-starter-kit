@@ -25,6 +25,8 @@
 - [ ] Toda credencial consumida pelo binário tem nome e forma de obtenção.
 - [ ] Todo command com efeito externo (grava, chama rede) diz isso.
 - [ ] Nenhum segredo, token ou caminho pessoal real em exemplos.
+- [ ] Fluxos, saídas, erros e exit codes descritos no Behavior da spec
+      aberta aparecem na documentação como foram implementados.
 
 ## Forma
 

@@ -1,103 +1,95 @@
-# Entrevista do CLISPEC
+# Entrevista de uma spec
 
-Pergunte em blocos. Confirme cada bloco em uma frase antes do próximo. Quando
-houver escolha, ofereça até três caminhos com o recomendado primeiro e aceite
-uma resposta livre.
+Pergunte em blocos e confirme cada bloco em uma frase antes do próximo.
+Quando houver escolha, ofereça até três caminhos com o recomendado primeiro
+e aceite uma resposta livre. O `CLISPEC.md` já descreve o binário; aqui o
+assunto é uma evolução.
 
-## 1. Identidade
+## 1. Objetivo
 
-- Qual o nome do executável? (minúsculas, dígitos e hífen)
-- Qual o título legível e a frase de descrição, em inglês?
-- Quem assina: autor, repositório, site?
+- O que a pessoa quer conseguir fazer que hoje não consegue?
+- Quem usa: alguém no terminal, um script ou CI, um agente?
+- O que fica fora desta spec, mesmo que pareça próximo?
 
-Define: `bin`, `title`, `description` do front matter e os argumentos de
-`bun run init`.
+Preenche: `## Goal`. Se o pedido junta capacidades independentes, proponha
+specs separadas.
 
-## 2. Propósito e públicos
+## 2. Comportamento
 
-- Que problema o binário resolve e para quem?
-- Quem usa no terminal, quem chama por script e que agente vai operá-lo?
-- O que cada público precisa conseguir fazer na primeira versão?
+Peça um exemplo concreto de uso, do jeito que a pessoa digitaria ou
+pediria ao agente:
 
-Define: `## Purpose` e `## Audiences`. Se um público não existir, registre e
-remova o modo correspondente do escopo (uma TUI sem público pode ficar só
-com Overview e About).
+- Que comando ela roda, com quais valores? O que espera ver na tela?
+- Um script vai ler a saída? Quais campos ele precisa no `--json`?
+- O que pode dar errado (sem credencial, item inexistente, serviço fora do
+  ar, entrada inválida)? O que a pessoa deve ver em cada caso?
+- Precisa de confirmação ou de terminal? Qual a saída não interativa
+  (`--yes`, `--stdin`)?
+- Na TUI: o que aparece de relance, que teclas fazem o quê?
+- Para um agente: que pergunta ele responde ou que ação executa?
 
-## 3. Modos
+Preenche: `## Behavior`, em fluxos e exemplos com saída e exit code.
 
-- A TUI precisa de abas além de Overview e About? Quais?
-- O CLI vai ser chamado por scripts? Então todo command precisa de `data`
-  estável.
-- Agentes vão operar pelo MCP? Então cada ação relevante vira tool.
+## 3. Superfície
 
-Define: se `screens` e `mcp` do front matter ficam vazios ou não.
+Traduza o comportamento em entradas, com nomes em inglês:
 
-## 4. Commands
+- Commands: `path` (`orders export`), arguments, options com tipo, padrão
+  e valores aceitos, `data` do `--json`, `exitCodes`, `credentials`,
+  `interactive`, `example`. Recomende `recurso verbo` quando houver mais de
+  uma ação sobre o mesmo recurso.
+- Screens: `id`, `title`, painéis e teclas.
+- Tools MCP: nome em `snake_case`, o command que espelham, entrada, saída
+  e `effect`. Dados passivos viram resource com URI.
+- Settings e credenciais novas.
+- O que muda ou sai de entradas que o `CLISPEC.md` já tem (`update`,
+  `remove`).
 
-Para cada ação que a pessoa citou:
+Preenche: `changes.add`, `changes.update` e `changes.remove`. Mostre o
+YAML à pessoa.
 
-- Nome do command e, se houver família, do subcommand (`orders list`).
-- Arguments posicionais: quais, obrigatórios ou não, valores aceitos.
-- Options: nome, se recebe valor, tipo, padrão, valores aceitos.
-- O que volta em `data` no `--json`: campos e tipos.
-- O que pode dar errado e com qual exit code.
-- Um exemplo de uso.
-- Precisa de confirmação ou de terminal? Então `interactive` e uma saída não
-  interativa (`--yes`, `--stdin`).
+## 4. Dados e integrações
 
-Define: a lista `commands` do front matter. Recomende o padrão `recurso verbo`
-(`orders list`, `orders show`) quando houver mais de uma ação sobre o mesmo
-recurso.
+- Algum serviço externo novo? Endpoint, autenticação, limites de uso,
+  paginação.
+- Que credencial ele usa e como a pessoa a obtém?
+- A evolução precisa guardar dados entre execuções? Pergunte só quando o
+  comportamento sugerir (histórico, cache, fila, registro próprio). O
+  padrão é não guardar.
+- Se precisar: que dados, quais consultas, por quanto tempo. O banco fica
+  em `~/.<bin>/data.db` e muda só por migration embutida no binário.
 
-## 5. TUI
+Preenche: credenciais e settings em `changes`; com banco, as tabelas em
+`changes.add.storage.tables` (nome, colunas, tipo, `primaryKey`,
+`notNull`) e as notas de dados para o Design.
 
-Para cada aba nova:
+## 5. Desenho do código
 
-- O que a pessoa precisa ver de relance? (vira painéis)
-- O que ela faz ali? (vira teclas próprias)
-- Os dados vêm de onde? (reaproveita um command ou função de `config/`)
+Proponha o Design e peça a opinião da pessoa, com o recomendado primeiro:
 
-Define: a lista `screens`. Recomende poucas abas, cada uma com até quatro painéis.
+- Arquivos novos e alterados em `src/`, um por command, screen e grupo de
+  tools.
+- Funções compartilhadas: onde fica a lógica que CLI, MCP e TUI chamam.
+- Client HTTP (`termfy-api`) ou repositório SQLite (`termfy-database`),
+  quando houver.
+- Tabelas, colunas e a migration nova, quando houver banco.
+- Dependências novas e o motivo; prefira o que o Bun já oferece.
+- Tratamento de erro: que `AppError` e qual exit code em cada falha.
 
-## 6. MCP
+Preenche: `## Design`.
 
-Para cada ação que um agente vai executar:
-
-- Nome da tool em `snake_case` e o command que ela espelha.
-- Entrada: campos, tipos, opcionais.
-- Saída: forma de `structuredContent`.
-- Efeito: só leitura, grava em disco, chama rede.
-
-Para dados passivos (documentação, listas estáveis): resource com URI.
-Define: `mcp.tools`, `mcp.resources` e `mcp.prompts`. Lembre que nenhuma tool devolve valor de credencial.
-
-## 7. Configuração e credenciais
-
-- Que preferências a pessoa vai querer mudar sem editar código? (keys)
-- Que serviços externos o binário acessa? Cada um vira uma credencial
-  `service.purpose`.
-- Como a pessoa obtém cada credencial?
-
-Define: `settings` e `credentials`.
-
-## 8. Fora de escopo
-
-- O que fica para depois, mesmo que pareça óbvio?
-
-Define: `## Out of scope`. Uma lista curta evita que o agente amplie o
-trabalho.
-
-## 9. Checagens de aceite
+## 6. Aceite
 
 - Como a pessoa vai saber que está pronto? Que comando ela roda e o que
   espera ver?
+- Que caso de erro precisa estar coberto?
 
-Define: os itens de `## Checklist`, um por entrega, cada um com `{#id}` e a
-tag da skill responsável. Frases verificáveis: command, saída e exit code.
+Preenche: `## Tests`, um item por teste de aceite, com
+`spec test add <id> "<texto>"`, e `## Tasks`, um item por entrega, com
+`spec task add <id> "<texto>" --tag <skill>`. Cite pelo nome cada entrada
+de `changes` em ao menos um item.
 
 ## Fechamento
 
-Releia a spec com a pessoa, rode `bun run dev -- spec check --json`, registre
-as pendências em `## Notes` e indique a próxima skill. Diferencie erros
-de estrutura de referências futuras ainda não implementadas. As skills
-de implementação marcam a checklist somente após implementar e testar.
+Releia a spec com a pessoa, rode `bun run dev -- spec check --json`,
+registre as dúvidas em `## Notes` e indique a skill da primeira tarefa.

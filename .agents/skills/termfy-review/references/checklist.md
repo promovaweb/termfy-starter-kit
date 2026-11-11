@@ -5,30 +5,47 @@ cada comando. `rg` retorna 1 quando não encontra correspondências; isso não
 é uma falha da aplicação. As buscas abaixo localizam candidatos e não provam,
 sozinhas, que o comportamento esteja correto. Confirme cada achado no código.
 
-## Escopo e checklist da spec
+## Escopo e itens da spec
+
+Troque `0002` pelo ID da spec sob revisão.
 
 ```bash
 git status --short
 git diff --stat
 git diff
 git diff --cached
-rg -n '^status:|^updatedAt:|^- \[[xX ]\].*\{#[a-z0-9]{4}\}' CLISPEC.md
-bun run dev -- spec show --json
+rg -n '^status:|^updatedAt:|^- \[[xX ]\].*\{#[a-z0-9]{4}\}' specs/0002-*.md
+bun run dev -- spec show 0002 --json
+bun run dev -- spec progress 0002
+bun run dev -- spec list
 bun run dev -- spec check --strict
 bun run spec:check
 bun run typecheck
 bun test
 ```
 
-Para cada item `[x]`, localize um teste que exercite sua entrega e confira
-que passou nesta revisão. Procure testes ignorados ou limitados por `.only`:
+Para cada item `[x]` de Tasks e Tests, localize um teste que exercite sua
+entrega e confira que passou nesta revisão. Procure testes ignorados ou limitados por `.only`:
 
 ```bash
 rg -n '\b(test|it|describe)\.(skip|todo|only)|expect\(' tests
 ```
 
 Um item marcado sem teste pertinente é achado mesmo quando a suíte passa.
-Confira `{#id}` preservado, `updatedAt` e `status` contra `docs/spec.md`.
+Confira `{#id}` preservado, `updatedAt` e `status` da spec contra
+`docs/spec.md`. Itens marcados no `CLISPEC.md` em vez da spec, ou seção
+`## Checklist` no `CLISPEC.md`, também são achados.
+
+## Behavior, Design e fechamento
+
+Leia o Behavior e confronte cada fluxo, saída em texto e em `--json`,
+mensagem de erro, exit code, tecla e tool com o código e os testes. Leia o
+Design e confira os arquivos criados, a camada de cada função, as funções
+compartilhadas entre CLI, MCP e TUI e as dependências novas. Entradas em
+`pending` no `spec check` são esperadas enquanto a spec está aberta; erros
+não são. A spec pode ser fechada quando Goal, Behavior e Design têm texto,
+todos os itens estão `[x]` e `spec check` passa. Relate essa condição sem
+rodar `spec close`, que grava o `CLISPEC.md`.
 Leia também arquivos novos apontados por `git status`, pois `git diff` não
 mostra seu conteúdo. Não rode `bun run validate` nesta revisão, pois inclui
 build; execute suas verificações sem geração de artefatos separadamente.

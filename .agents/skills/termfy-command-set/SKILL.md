@@ -1,6 +1,6 @@
 ---
 name: termfy-command-set
-description: Implementa uma família de commands prevista no CLISPEC com funções compartilhadas, tools MCP correspondentes, screen de lista, testes nos três modos e checklist atualizada.
+description: Implementa uma família de commands prevista na spec aberta com funções compartilhadas, tools MCP correspondentes, screen de lista, testes nos três modos e itens da spec marcados.
 ---
 
 # Implementar uma família de commands
@@ -13,7 +13,8 @@ solicitados. Esses arquivos são novos; as pastas e os registros já existem.
 
 ## Leia antes
 
-- `CLISPEC.md`, `docs/spec.md` e `bun run dev -- spec show --json`.
+- A spec aberta (`bun run dev -- spec show <id> --json`), com `changes`,
+  Behavior, Design, Tasks e Tests; o `CLISPEC.md` e `docs/spec.md`.
 - `src/cli/registry.ts`, `src/cli/commands.ts`, `src/cli/format.ts` e
   `template/command/example.ts`.
 - `src/mcp/server.ts`, `src/mcp/tools/config.ts` e
@@ -29,10 +30,11 @@ solicitados. Esses arquivos são novos; as pastas e os registros já existem.
 
 ## Regras
 
-1. Gere somente o subconjunto combinado no `CLISPEC.md`. Leia commands,
-   arguments, options, exit codes, dados de saída, tools, screens, settings
-   e credenciais. Se tools ou screen faltarem na spec, revise com
-   `termfy-spec` antes de adicioná-las. Não acrescente verbos por simetria.
+1. Gere somente o subconjunto combinado em `changes` da spec aberta. Leia
+   commands, arguments, options, exit codes, dados de saída, tools,
+   screens, settings e credenciais, e siga o Behavior e o Design da spec.
+   Se tools ou screen faltarem na spec, revise com `termfy-spec` antes de
+   adicioná-las. Não acrescente verbos por simetria.
 2. Extraia funções de domínio tipadas que CLI, MCP e TUI possam chamar.
    Não faça a tool chamar `Command.run`, nem a screen executar a CLI em
    subprocesso. Formatação, confirmação e protocolo ficam nos adaptadores.
@@ -63,7 +65,7 @@ solicitados. Esses arquivos são novos; as pastas e os registros já existem.
 ## Passos
 
 1. Rode `git status --short`. Relacione cada verbo e cada modo aos itens
-   `{#id}` da checklist. Confira o contrato antes de gerar arquivos.
+   `{#id}` de Tasks e Tests da spec. Confira o contrato antes de gerar arquivos.
 2. Implemente as operações compartilhadas em módulo próprio sob `src/`,
    separado dos adaptadores. Se houver HTTP, crie o client com `termfy-api`
    e use o cofre e `SETTINGS_SCHEMA` conforme `termfy-config`.
@@ -94,18 +96,21 @@ solicitados. Esses arquivos são novos; as pastas e os registros já existem.
 9. Rode `bun run opencli`, `bun test`, `bun run typecheck`,
    `bun run spec:check` e `bun run docs:check`. Confira `--help`,
    `--skill reference`, `mcp --list` e os frames da screen.
-10. Marque os itens implementados e testados de `- [ ]` para `- [x]`,
-    preservando `{#id}`. Avance `updatedAt` e registre desvios em
-    `## Notes`. Mantenha `in_progress` enquanto houver entregas pendentes.
-    Só use `done` com a checklist concluída. Rode `bun run validate`
-    após a atualização final. Referências futuras ainda não implementadas
-    produzem erros em `spec check`; relate-as sem declarar aprovação.
+10. Marque os itens implementados e testados com
+    `bun run dev -- spec done <id> <item>`; não edite o checkbox à mão nem
+    marque nada no `CLISPEC.md`. Registre desvios em
+    `## Notes` dela. Mantenha `in_progress` enquanto houver entregas
+    pendentes. Rode `bun run validate` após a atualização final. A família
+    nova aparece em `pending` no `spec check` enquanto a spec está aberta;
+    com todos os itens marcados, a spec é fechada com
+    `bun run dev -- spec close <id>`.
 
 ## Marcos
 
 Contrato dos verbos conferido; operações compartilhadas prontas; commands,
 tools e screen registrados; testes dos três modos passando; OpenCLI e
-documentação atualizados; checklist marcada e validação completa aprovada.
+documentação atualizados; itens da spec marcados e validação completa
+aprovada.
 
 ## Saída
 
@@ -116,7 +121,7 @@ pendências sem marcar funcionalidades que ainda não foram testadas.
 
 ## Compatibilidade
 
-Starter kit 0.7.x. Referências existentes em `src/cli/registry.ts`,
+Starter kit 0.8.x. Referências existentes em `src/cli/registry.ts`,
 `src/cli/commands.ts`, `src/mcp/server.ts`, `src/tui/screen.ts`,
 `src/tui/components.ts`, `src/tui/screens/index.ts`,
 `src/config/settings.ts`, `src/cli/commands/tui.ts`,

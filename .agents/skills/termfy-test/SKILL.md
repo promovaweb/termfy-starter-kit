@@ -1,6 +1,6 @@
 ---
 name: termfy-test
-description: Escreve e mantém testes Bun para CLI, MCP, TUI e configuração do Termfy antes de concluir entregas da checklist.
+description: Escreve e mantém testes Bun para CLI, MCP, TUI e configuração do Termfy a partir dos itens de Tests da spec aberta, antes de concluir suas entregas.
 ---
 
 # Testar os modos do binário
@@ -12,9 +12,11 @@ projeto derivado, não no repositório do framework.
 ## Leia antes
 
 - `AGENTS.md`, `CLISPEC.md`, `docs/spec.md` e `docs/architecture.md`.
-- A entrada da spec e o `{#id}` da entrega; leia o código alterado antes de
-  escolher os casos. Uma funcionalidade fora da spec precisa passar por
-  `termfy-spec` antes de ser implementada.
+- A spec aberta (`bun run dev -- spec show <id> --json`): o Behavior diz o
+  que cada teste confere, e cada item de `## Tests` é um teste de aceite a
+  escrever. Leia o código alterado antes de escolher os casos. Uma
+  funcionalidade fora da spec precisa passar por `termfy-spec` antes de ser
+  implementada.
 - `tests/cli.test.ts`, `tests/mcp.test.ts`, `tests/tui.test.ts` ou
   `tests/config.test.ts`, conforme a área.
 - [patterns.md](references/patterns.md) para copiar o exemplo do modo usado.
@@ -47,35 +49,40 @@ projeto derivado, não no repositório do framework.
 
 ## Passos
 
-1. Rode `git status --short` e delimite a entrega pelo `{#id}` da spec.
-2. Relacione cada comportamento alterado aos casos de sucesso, falha e limite
-   aplicáveis em `references/coverage.md`.
+1. Rode `git status --short` e delimite a entrega pelo `{#id}` da tarefa
+   na spec.
+2. Relacione cada item de `## Tests` da spec a pelo menos um teste e cada
+   comportamento alterado aos casos de sucesso, falha e limite aplicáveis
+   em `references/coverage.md`.
 3. Escreva os testes na área correspondente usando `references/patterns.md`.
    Para uma correção, reproduza primeiro a falha com uma assertion observável.
 4. Rode os arquivos alterados, por exemplo `bun test tests/cli.test.ts`.
    Depois rode `bun run typecheck` e `bun test` para conferir a integração.
-5. Rode `bun run dev -- spec check --strict`. Distingua falha da entrega de
+5. Rode `bun run dev -- spec check --strict`. Entradas em `pending` são
+   esperadas enquanto a spec está aberta. Distingua falha da entrega de
    problemas já presentes; informe comandos que não puderam concluir.
-6. Se a entrega estiver concluída e seus testes passarem, marque somente seu
-   item como `[x]`, preserve `{#id}` e avance `updatedAt` no `CLISPEC.md`.
-   Use `done` somente com toda a checklist concluída. Um teste isolado verde
-   não conclui outros itens. Se o pedido for apenas testes, relate ao responsável
+6. Se a entrega estiver concluída e seus testes passarem, marque a tarefa
+   e os itens de `## Tests` cobertos com `bun run dev -- spec done <id> <item>`.
+   Não edite o checkbox à mão, não marque nada no `CLISPEC.md` nem mude o
+   status para `done`; isso é do `spec close`. Um teste
+   isolado verde não conclui outros itens. Se o pedido for apenas testes, relate ao responsável
    pela implementação o item apto a ser marcado.
 
 ## Marcos
 
-Casos da spec cobertos; dados temporários isolados; recursos fechados;
-testes e typecheck verdes; progresso da checklist compatível com a entrega.
+Itens de Tests da spec cobertos; dados temporários isolados; recursos
+fechados; testes e typecheck verdes; itens marcados na spec compatíveis com
+a entrega.
 
 ## Saída
 
 Liste arquivos alterados, comportamentos cobertos, comandos executados e
-quantidades de testes que passaram ou falharam. Cite o `{#id}` relacionado e
-as limitações restantes. Não imprima valores reais de credenciais.
+quantidades de testes que passaram ou falharam. Cite os `{#id}` de Tasks e Tests
+relacionados e as limitações restantes. Não imprima valores reais de credenciais.
 
 ## Compatibilidade
 
-Starter kit 0.7.x. Referências verificadas em 0.7.0. Caminhos usados incluem
+Starter kit 0.8.x. Caminhos usados incluem `specs/`,
 `src/main.ts`, `src/cli/registry.ts`, `src/app/exit-codes.ts`,
 `src/config/paths.ts`, `src/config/settings.ts`, `src/config/credentials.ts`,
 `src/mcp/server.ts`, `src/tui/index.ts`, `src/tui/components.ts` e `tests/`.

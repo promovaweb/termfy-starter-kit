@@ -2,12 +2,13 @@
 
 ## Contrato
 
-- [ ] A spec lista apenas os verbos pedidos e suas opções, dados e códigos.
+- [ ] `changes` da spec aberta lista apenas os verbos pedidos e suas opções,
+  dados e códigos; Behavior e Design descrevem a família.
 - [ ] Tools e screen estão declaradas nos modos combinados com a pessoa.
 - [ ] Credenciais têm nome e `usedBy`; settings têm key, tipo e padrão.
 - [ ] Cada entrega tem `{#id}` estável e responsável pela implementação.
-- [ ] Verificações de spec ainda ausentes no código foram relacionadas às
-  entregas futuras, sem chamar erros de avisos.
+- [ ] Erros, avisos e `pending` de `spec check` foram lidos separadamente;
+  o código à frente do `CLISPEC.md` aparece em `pending` e não é falha.
 
 ## CLI
 
@@ -55,9 +56,11 @@
 - [ ] `bun run opencli` regenerou `docs/opencli.json` e o diff foi revisado.
 - [ ] `bun test`, `bun run typecheck`, `bun run spec:check` e
   `bun run docs:check` passaram.
-- [ ] Os itens entregues foram marcados na spec pelo `{#id}` e `updatedAt`
-  foi atualizado. Itens não implementados continuam pendentes.
+- [ ] Os itens entregues foram marcados no arquivo da spec pelo `{#id}` e
+  `updatedAt` da spec foi atualizado. Itens não implementados continuam
+  pendentes.
 - [ ] `bun run validate` passou após todas as alterações, inclusive a spec.
 
-Ao aplicar esta checklist, marque os itens do `CLISPEC.md` do projeto.
-Não edite a cópia instalada desta referência para registrar progresso.
+Ao aplicar esta checklist, marque os itens de Tasks e Tests da spec aberta
+em `specs/`. Não edite a cópia instalada desta referência para registrar
+progresso.

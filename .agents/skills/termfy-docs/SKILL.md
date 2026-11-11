@@ -20,6 +20,9 @@ binário e sai por `--skill`, pela tool MCP `skill` e pela resource
   tem o binário leria.
 - `bun run dev -- --skill reference`: a referência gerada do registry, que
   é a verdade sobre commands, options e exit codes.
+- A spec aberta (`bun run dev -- spec show <id> --json`), quando houver:
+  o Behavior diz o que a documentação precisa explicar, e os itens
+  `#termfy-docs` de Tasks dizem o que esta skill entrega.
 - `references/checklist.md`: o que uma documentação embutida precisa ter.
 - `references/writing.md`: como escrever para pessoas e agentes ao mesmo
   tempo.
@@ -60,6 +63,10 @@ binário e sai por `--skill`, pela tool MCP `skill` e pela resource
 5. Rode `bun run opencli` se o registry mudou e `bun run docs:check`.
 6. Releia `bun run dev -- --skill <topic>` de cada topic alterado.
 7. Rode `bun run validate`.
+8. Marque os itens `#termfy-docs` da spec aberta com
+   `bun run dev -- spec done <id> <item>`. A spec é fechada depois, com
+   `bun run dev -- spec close <id>`, quando todos os itens estiverem
+   marcados.
 
 ## Marcos
 
@@ -73,7 +80,7 @@ reescritas e os comandos de validação executados.
 
 ## Compatibilidade
 
-Starter kit 0.7.x. Caminhos citados: `docs/README.md`, `docs/cli.md`,
+Starter kit 0.8.x. Caminhos citados: `docs/README.md`, `docs/cli.md`,
 `docs/tui.md`, `docs/mcp.md`, `docs/configuration.md`, `docs/exit-codes.md`,
 `docs/opencli.json`, `scripts/check-docs.ts` e os scripts `docs:check`,
 `opencli` e `opencli:check`.

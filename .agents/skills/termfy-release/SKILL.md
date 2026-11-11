@@ -11,6 +11,8 @@ Execute no repositório desse binário, não no framework de skills.
 ## Leia antes
 
 - `package.json`, `CHANGELOG.md` e `docs/release.md` do projeto derivado.
+- `bun run dev -- spec list`, para saber quais specs foram fechadas desde
+  a última versão e se alguma continua aberta.
 - `.github/workflows/release.yml` e `scripts/build.ts`, que definem o evento
   de publicação, os alvos e os nomes dos arquivos.
 - [references/versioning.md](references/versioning.md) para escolher a versão
@@ -25,13 +27,18 @@ Execute no repositório desse binário, não no framework de skills.
 2. Mantenha o changelog em português do Brasil no formato Keep a Changelog.
    Preserve versões anteriores e registre a data real da publicação.
 3. Publique apenas após `bun run validate` terminar com exit code 0.
-4. Preserve alterações de outras tarefas. Inclua no commit somente os
+4. A release vem depois do `spec close`. Uma versão reúne specs `done`;
+   uma spec aberta com código já no repositório indica entrega incompleta.
+   Feche-a com `bun run dev -- spec close <id>` antes de publicar. Se ela
+   não puder ser fechada, pergunte à pessoa se a versão sai com a entrega
+   parcial e registre isso no changelog.
+5. Preserve alterações de outras tarefas. Inclua no commit somente os
    arquivos pertencentes à versão revisada; não use `git add .` sem revisão.
-5. Nunca mova, apague ou recrie uma tag publicada. Não use force push.
+6. Nunca mova, apague ou recrie uma tag publicada. Não use force push.
    Uma correção posterior recebe outra versão, mesmo se o workflow falhou.
-6. O pedido de publicação autoriza o fluxo de commit, tag e push. Um pedido
+7. O pedido de publicação autoriza o fluxo de commit, tag e push. Um pedido
    apenas de preparação termina com os arquivos e verificações prontos.
-7. Considere a publicação concluída após conferir o workflow, os cinco
+8. Considere a publicação concluída após conferir o workflow, os cinco
    executáveis, os checksums e `--version` de um asset baixado.
 
 ## Passos
@@ -39,7 +46,9 @@ Execute no repositório desse binário, não no framework de skills.
 1. Confira `git status --short`, branch, remoto e autenticação do `gh`.
    Trabalhe na `main` atualizada. Não descarte mudanças locais nem inclua
    alterações de outra pessoa para obter uma árvore limpa.
-2. Leia o changelog e o diff desde a última versão. Escolha X.Y.Z conforme
+2. Leia o changelog, o diff desde a última versão e `spec list`. As
+   entradas do changelog podem citar os IDs das specs fechadas, como
+   `(spec 0002)`. Escolha X.Y.Z conforme
    a referência de versionamento; confira se a tag ainda não existe localmente
    nem no remoto. Leia o nome do executável em `package.json`, no bloco `termfy`.
 3. Atualize `version` em `package.json`. Transfira as mudanças prontas de
@@ -72,7 +81,7 @@ do checksum e de `--version`. Se algo falhar, informe a etapa e o log útil.
 
 ## Compatibilidade
 
-Starter kit 0.7.x, conferido na versão 0.7.0. Caminhos do projeto derivado
-citados nesta skill: `package.json`, `CHANGELOG.md`, `docs/release.md`,
+Starter kit 0.8.x. Caminhos do projeto derivado citados nesta skill:
+`package.json`, `CHANGELOG.md`, `docs/release.md`, `specs/`,
 `docs/opencli.json`, `.github/workflows/release.yml` e `scripts/build.ts`.
 Scripts usados: `bun run validate` e `bun run opencli`.

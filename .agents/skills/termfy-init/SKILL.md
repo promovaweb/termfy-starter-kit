@@ -1,13 +1,26 @@
 ---
 name: termfy-init
-description: Cria um binário novo a partir do starter kit do Termfy, renomeia o executável, atualiza as skills instaladas, confere os três modos (TUI, CLI, MCP) e prepara o primeiro commit.
+description: Prepara o starter kit do Termfy pelo agente e mantém suas skills instaladas, com conferência da identidade, dos três modos e da compatibilidade.
 ---
 
-# Iniciar um binário a partir do starter kit
+# Preparar o projeto e manter suas skills
 
-Use esta skill quando a pessoa pedir um CLI, uma TUI ou um servidor MCP novo
-em Bun e o repositório ainda estiver com a identidade `termfy`, recém-criado
-a partir do template `promovaweb/termfy-starter-kit`.
+Use esta skill para fazer o setup de um projeto derivado do Termfy ou para
+instalar, atualizar e reparar suas skills. Conduza o trabalho pelo agente.
+Execute os comandos necessários internamente; não transfira ao usuário uma
+sequência de comandos para realizar o setup ou a manutenção.
+
+## Escolha o modo
+
+- **Setup:** o repositório foi criado a partir do starter kit e ainda precisa
+  receber a identidade do produto. Siga os passos de setup.
+- **Manutenção das skills:** o projeto já existe e a solicitação trata de
+  instalar, atualizar ou reparar as skills. Siga somente a manutenção.
+  Preserve a identidade, o `CLISPEC.md`, as specs, o código e o histórico
+  de versões.
+
+Informe o modo escolhido e os arquivos que pretende conferir. Pergunte
+somente quando a solicitação não permitir distinguir os dois modos.
 
 ## Leia antes
 
@@ -15,14 +28,14 @@ a partir do template `promovaweb/termfy-starter-kit`.
 - `docs/customize-template.md` e `docs/architecture.md`.
 - `references/checklist.md` desta skill.
 
-## Entrada
+## Entrada do setup
 
 Pergunte, se não vier no pedido: nome do executável (minúsculas, números e
 hífen), título legível, descrição em uma frase, autor, URL do repositório e
 site. O nome do executável define a pasta `~/.<bin>/`, o prefixo das
 variáveis `<BIN>_HOME` e `<BIN>_MASTER_KEY` e o esquema das URIs MCP.
 
-## Passos
+## Passos do setup
 
 1. Rode `git status --short` e preserve mudanças locais.
 2. Rode `bun install`.
@@ -32,16 +45,20 @@ variáveis `<BIN>_HOME` e `<BIN>_MASTER_KEY` e o esquema das URIs MCP.
    bun run init -- --name <bin> --title "<Título>" --description "<frase>" --author "<Autor>" --repository <url> --site <url>
    ```
 
-4. Atualize as skills para a versão mais recente do framework:
+   O script também atualiza a identidade do `CLISPEC.md` e, ao partir do
+   template, limpa o índice `specs` e remove as specs do esqueleto. O
+   projeto novo começa sem specs, e a primeira criada pela
+   `termfy-clispec` recebe o ID 0001.
 
-   ```bash
-   bun run skills:update
-   bun run skills:check
-   ```
+4. Execute a manutenção das skills descrita abaixo e retome o setup depois
+   que a instalação e a compatibilidade forem conferidas.
 
 5. O bootstrap não atualiza `CLISPEC.md` nem regenera `docs/opencli.json`.
-   Rode `bun run opencli` e a skill `termfy-spec` para escrever o `CLISPEC.md` do produto no
-   lugar do exemplo do esqueleto. Sem spec, as demais skills não têm o que
+   Rode `bun run opencli` e passe para a skill `termfy-clispec`, que
+   entrevista a pessoa, escreve a visão macro do produto no lugar da do
+   esqueleto, alinha `bin` e `description` ao `package.json` e cria as
+   specs iniciais com `spec new`. A `termfy-spec` detalha depois a primeira
+   spec. Sem `CLISPEC.md` e spec, as demais skills não têm o que
    implementar.
 6. Confira a identidade nos três modos:
 
@@ -56,20 +73,42 @@ variáveis `<BIN>_HOME` e `<BIN>_MASTER_KEY` e o esquema das URIs MCP.
 
 7. Rode `bun run validate`. O comando encadeia typecheck, testes, conferência
    das skills instaladas, conferência de `docs/opencli.json`,
-   `spec:check` e build. Se a spec incluir funcionalidades futuras,
-   registre os erros de referências ainda ausentes e encaminhe as entregas
-   às skills responsáveis antes de preparar a release.
+   `spec:check` e build. Entradas planejadas em specs abertas não falham o
+   `spec check`; elas só entram no `CLISPEC.md` no `spec close`. Erros
+   restantes indicam divergência real entre o `CLISPEC.md` e o código.
 8. Reescreva a seção inicial de `README.md` com o propósito do produto e
    apague o trecho sobre o template. Mantenha as seções de instalação, modos,
    configuração e release.
-9. Registre a versão inicial em `CHANGELOG.md` e siga `docs/release.md` para
-   tag e GitHub Release.
+9. Relate o resultado do setup. Encaminhe publicação para `termfy-release`
+   somente quando houver solicitação explícita; setup não autoriza commit,
+   push, tag ou GitHub Release.
+
+## Manutenção das skills
+
+1. Confira o Git, a versão em `package.json`, `.agents/skills/` e
+   `skills-lock.json`. Preserve alterações locais nas skills e informe
+   qualquer arquivo que seria sobrescrito antes de prosseguir.
+2. Leia os scripts `skills:install`, `skills:update` e `skills:check`
+   do projeto. Confirme que a origem do Termfy é
+   `https://github.com/promovaweb/termfy` e que há acesso ao repositório.
+3. Antes da execução, confira se os scripts alcançam outras bibliotecas.
+   Nesse caso, restrinja a operação ao Termfy usando as opções documentadas
+   pela ferramenta instalada. Quando a instalação contiver somente Termfy,
+   use `bun run skills:update` para atualizar ou `bun run skills:install`
+   para instalar e reparar. Preserve as bibliotecas alheias à solicitação.
+4. Execute `bun run skills:check` e leia os avisos de compatibilidade.
+   Confira os links dos agentes, as origens no lock e o diff resultante.
+   Não declare compatibilidade se a faixa do starter kit divergir.
+5. Reabra os arquivos atualizados antes de continuar outra tarefa. Ao concluir
+   uma manutenção isolada, relate as skills alteradas e encerre. Não execute
+   o bootstrap, não renomeie o binário e não recrie o `CLISPEC.md` nem as
+   specs.
 
 ## Marcos de progresso
 
 Informe ao usuário quando: o bootstrap terminar, as skills estiverem
-atualizadas, `bun run validate` passar e o README
-estiver reescrito. Em cada
+atualizadas, a `termfy-clispec` gravar o `CLISPEC.md`, `bun run validate`
+passar e o README estiver reescrito. Em cada
 marco, liste os arquivos alterados.
 
 ## Saída
@@ -82,6 +121,6 @@ terminou, informe isso; não declare o produto validado com
 
 ## Compatibilidade
 
-Starter kit 0.7.x. Os caminhos citados (`scripts/init.ts`,
+Starter kit 0.8.x. Os caminhos citados (`scripts/init.ts`,
 `docs/customize-template.md`, `tests/tui.test.ts`)
 existem nessa faixa.

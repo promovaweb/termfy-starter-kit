@@ -5,14 +5,15 @@
  * `bun run skills:install` (which calls `npx skills add`) and recorded in
  * `skills-lock.json`. This script fails when a skill is missing or absent
  * from the lock, so `bun run validate` reminds you to reinstall. It also
- * reads the "Compatibilidade" line of each SKILL.md and warns when the
+ * flags termfy-* skills that the framework no longer ships, and reads the
+ * "Compatibilidade" line of each SKILL.md and warns when the
  * declared starter kit range does not match this package's major.minor.
  */
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const expected = [
-  "termfy-build", "termfy-init", "termfy-brand", "termfy-spec", "termfy-api-import", "termfy-config", "termfy-api",
+  "termfy", "termfy-init", "termfy-brand", "termfy-clispec", "termfy-spec", "termfy-api-import", "termfy-config", "termfy-api", "termfy-database",
   "termfy-cli", "termfy-command-set", "termfy-mcp", "termfy-tui", "termfy-test", "termfy-review", "termfy-docs",
   "termfy-release", "termfy-mcp-client",
 ];
@@ -42,6 +43,13 @@ for (const name of expected) {
       warnings.push(`${name} declares starter kit ${match[1]}.x; this project is ${pkg.version}. Run: bun run skills:update`);
     }
   }
+}
+
+// A renamed or removed framework skill stays behind after `npx skills add`; flag it.
+const installed = existsSync(join(".agents", "skills")) ? readdirSync(join(".agents", "skills")).filter((name) => name.startsWith("termfy")) : [];
+const recorded = Object.keys(lock.skills ?? {}).filter((name) => name.startsWith("termfy"));
+for (const name of new Set([...installed, ...recorded])) {
+  if (!expected.includes(name)) errors.push(`${name} is no longer a Termfy skill; remove .agents/skills/${name}, .claude/skills/${name} and its skills-lock.json entry`);
 }
 
 for (const w of warnings) console.warn(`! ${w}`);

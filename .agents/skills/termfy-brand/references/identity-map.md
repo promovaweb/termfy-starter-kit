@@ -24,9 +24,11 @@
 
 ## O que `bun run init` não toca e esta skill cuida
 
-Créditos, paleta, glifos, painel "Standards", `license`, `CLISPEC.md`
-(`bin`, `title`, `description`) e qualquer texto do `README.md` além das
-substituições literais do nome anterior.
+Créditos, paleta, glifos, painel "Standards", `license`, os campos de
+identidade do `CLISPEC.md` (`bin`, `title`, `description`) e qualquer texto
+do `README.md` além das substituições literais do nome anterior. A
+superfície, o índice `specs` e os arquivos de `specs/` não mudam com a
+identidade.
 
 ## Paleta: papéis e uso
 

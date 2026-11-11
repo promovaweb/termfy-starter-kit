@@ -10,10 +10,12 @@ argumentos e opções, ou para mudar o formato de saída e os códigos de saída
 
 ## Leia antes
 
-- `CLISPEC.md` na raiz do projeto e `bun run dev -- spec show --json`: a
-  entrada do front matter e o item da checklist que descrevem o que será
-  implementado. Se o arquivo não cobrir o pedido, rode a skill `termfy-spec`
-  antes de continuar.
+- A spec aberta, com `bun run dev -- spec show <id> --json`: a entrada de
+  `changes`, o Behavior (como o command funciona), o Design (como o código
+  deve ser feito) e os itens `#termfy-cli` de Tasks e Tests. O `CLISPEC.md`
+  (`bun run dev -- spec show --json`) mostra o que já foi entregue. Se
+  nenhuma spec aberta cobrir o pedido, rode a skill `termfy-spec` antes de
+  continuar.
 - `docs/cli.md` e `docs/exit-codes.md`.
 - `src/cli/registry.ts` (tipos) e `src/cli/commands/config.ts` (exemplo
   completo com subcomandos).
@@ -55,7 +57,8 @@ argumentos e opções, ou para mudar o formato de saída e os códigos de saída
 1. Rode `git status --short`.
 2. Copie `template/command/example.ts` para `src/cli/commands/<nome>.ts` e
    ajuste os imports para caminhos relativos ao novo local.
-3. Preencha a definição e implemente `run`.
+3. Preencha a definição com os nomes de `changes` e implemente `run`
+   seguindo o Behavior e o Design da spec.
 4. Registre em `src/cli/commands.ts`.
 5. Escreva ou ajuste testes em `tests/cli.test.ts` (subprocesso real) e, para
    lógica pura, em um arquivo próprio.
@@ -64,18 +67,20 @@ argumentos e opções, ou para mudar o formato de saída e os códigos de saída
 8. Atualize `docs/cli.md` quando o comando trouxer conceito novo. A pasta `docs/`
    é a documentação do próprio projeto e entra no binário pelo `--skill`.
 
-## Checklist da spec
+## Itens da spec
 
-Ao concluir e testar cada entrega, a skill de implementação marca o item
-correspondente em `## Checklist` do `CLISPEC.md` de `- [ ]` para `- [x]`
-pelo `{#id}`, preservando o id. Avance `updatedAt` e use `in_progress`
-enquanto houver trabalho. Só use `done` após concluir todos os itens.
-Se o escopo mudar, revise a entrada da spec e o texto do item com
-`termfy-spec`; registre a alteração em `## Notes`.
-Rode `bun run dev -- spec check --json`: referências declaradas ainda não
-implementadas são erros, mesmo em `draft`. Relate separadamente as
-pendências de outras entregas. Ao concluir o escopo inteiro, rode
-`bun run validate` e exija saída 0.
+Ao concluir e testar cada entrega, marque o item com
+`bun run dev -- spec done <id> <item>`, usando o `{#id}` sem `{#}`. Não edite
+o checkbox à mão nem marque nada no `CLISPEC.md`. Item novo entra por
+`spec task add` ou `spec test add`, que geram o id. Ao começar,
+rode `spec start <id>`; não mude o status para `done` à mão.
+Se o escopo mudar, revise `changes`, Behavior, Design e o texto do item com
+`termfy-spec`; registre a alteração em `## Notes` da spec.
+Rode `bun run dev -- spec check --json`: o command novo aparece em
+`pending` enquanto a spec está aberta, sem virar aviso. Relate
+separadamente as pendências de outras entregas. Ao concluir o escopo
+inteiro, rode `bun run validate` e exija saída 0; com todos os itens da
+spec marcados, ela é fechada com `bun run dev -- spec close <id>`.
 
 ## Marcos
 
@@ -89,6 +94,6 @@ resultado e exemplos de uso do comando novo em texto e `--json`.
 
 ## Compatibilidade
 
-Starter kit 0.7.x. Caminhos citados: `src/cli/registry.ts`,
+Starter kit 0.8.x. Caminhos citados: `src/cli/registry.ts`,
 `src/cli/commands.ts`, `src/cli/commands/*.ts`, `template/command/example.ts`,
 `tests/cli.test.ts`, `docs/cli.md` e `docs/opencli.json`.

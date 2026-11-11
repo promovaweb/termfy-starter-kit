@@ -3,10 +3,11 @@ import { describe, expect, test } from "bun:test";
 import { mkdtempSync, rmSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { parseSpec } from "../src/spec/parse.ts";
-import { computeSync, mergedFrontmatter, writeFrontmatter } from "../src/spec/sync.ts";
+import { parseClispec as parseSpec } from "../src/spec/parse.ts";
+import { computeSync, mergedFrontmatter } from "../src/spec/sync.ts";
+import { writeFrontmatter } from "../src/spec/files.ts";
 import { compact, emitYaml } from "../src/spec/yaml.ts";
-import { loadSpec } from "../src/spec/index.ts";
+import { loadProject, loadSpec } from "../src/spec/index.ts";
 import { checkSpec } from "../src/spec/check.ts";
 
 describe("yaml emitter", () => {
@@ -28,15 +29,18 @@ describe("yaml emitter", () => {
     const out = compact({ a: [], interactive: false, keep: true, mcp: { tools: [], resources: [], prompts: [] } }) as Record<string, unknown>;
     expect(out).toEqual({ keep: true, mcp: { tools: [], resources: [], prompts: [] } });
   });
+
+  test("compact drops empty objects, which block YAML would read back as null", () => {
+    expect(compact({ id: "0002", changes: {}, nested: { add: { mcp: { tools: [] } } } }) as Record<string, unknown>).toEqual({ id: "0002" });
+  });
 });
 
 describe("spec sync", () => {
   const minimal = `---
-schemaVersion: "1.0.0"
+schemaVersion: "2.0.0"
 bin: termfy
 title: Termfy
 description: "CLI, TUI and MCP stdio server skeleton in Bun, with the Termfy framework skills installed."
-status: draft
 createdAt: "2026-11-10T12:00:00.000Z"
 updatedAt: "2026-11-10T12:00:00.000Z"
 ---
@@ -53,10 +57,6 @@ Minimal.
 
 - nothing
 
-## Checklist
-
-- [ ] First item \`#termfy-cli\` {#a1b2}
-
 ## Notes
 
 - none
@@ -71,7 +71,7 @@ Minimal.
   test("computes every code entry as missing for a minimal spec", () => {
     const additions = computeSync(parseSpec(minimal));
     expect(additions.commands.map((c) => c.path)).toContain("spec sync");
-    expect(additions.screens.map((s) => s.id)).toEqual(["overview", "about"]);
+    expect(additions.screens.map((s) => s.id)).toEqual(expect.arrayContaining(["overview", "specs", "about"]));
     expect(additions.tools.map((t) => t.name)).toContain("about");
     expect(additions.settings.map((s) => s.key)).toContain("output.format");
     expect(additions.total).toBeGreaterThan(20);
@@ -85,7 +85,7 @@ Minimal.
     writeFrontmatter(file, mergedFrontmatter(spec, computeSync(spec)));
     const merged = parseSpec(readFileSync(file, "utf8"));
     expect(merged.sections.Purpose).toBe("Minimal.");
-    expect(merged.checklist[0]?.id).toBe("a1b2");
+    expect(merged.sections.Notes).toBe("- none");
     expect(computeSync(merged).total).toBe(0);
     const result = checkSpec(merged, { strict: true });
     expect(result.errors).toEqual([]);
@@ -93,7 +93,7 @@ Minimal.
     rmSync(dir, { recursive: true, force: true });
   });
 
-  test("the embedded spec has nothing to sync", () => {
-    expect(computeSync(loadSpec()).total).toBe(0);
+  test("the embedded spec has nothing to sync beyond open specs", () => {
+    expect(computeSync(loadSpec(), loadProject(join(import.meta.dir, "../CLISPEC.md"))!.specs).total).toBe(0);
   });
 });

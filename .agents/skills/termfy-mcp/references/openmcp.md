@@ -1,43 +1,34 @@
-# OpenMCP e economia de tokens
+# Descrições e economia de contexto
 
-OpenMCP (https://www.open-mcp.org) é um padrão para converter APIs web
-(OpenAPI, gRPC, OpenRPC, GraphQL, SOAP, PostgREST) em servidores MCP com
-descrições econômicas em tokens. O registro em `/servers` publica cada
-servidor como endpoint remoto Streamable HTTP e como pacote npm local.
+A referência externa [OpenMCP](https://www.open-mcp.org) pode orientar o
+estudo de ferramentas para APIs. Ela não define o protocolo MCP nem a API
+do SDK instalado no Termfy. Para implementar, use as
+[fontes oficiais e versões conferidas](sources-and-compatibility.md).
 
-O Termfy não gera servidores a partir de especificações. O que ele aproveita
-do OpenMCP é a disciplina de economia:
+## Descrever sem omitir o contrato
 
-1. Descrição curta e precisa por tool. O agente lê todas as descrições a cada
-   conversa; cada palavra a mais custa em todas as chamadas.
-2. Schemas enxutos. Campos opcionais com padrão na descrição, sem repetir o
-   óbvio.
-3. Respostas recortadas. Devolva campos úteis; ofereça `limit` e `cursor`
-   quando a lista cresce.
-4. Uma tool de descoberta (`skill`) em vez de dezenas de tools de
-   documentação.
-5. Resources para dados passivos (documentação, tabelas), tools para ação.
+Escreva uma descrição que permita identificar a tool aplicável e conhecer o
+retorno. Informe efeitos, pré-requisitos e limites quando existirem. Evite
+copiar a documentação completa em cada descrição; mantenha uma tool de
+descoberta e resources para consultas extensas.
 
-## Quando um projeto derivado consome uma API externa
+O custo de descrições depende de como o host apresenta ferramentas ao
+modelo, da descoberta e do cache. Não afirme que todo cliente envia todas
+as descrições a cada conversa. Meça o comportamento do cliente utilizado.
 
-Se a API tem OpenAPI, avalie gerar o servidor pelo OpenMCP e manter o
-Termfy focado no que a API não oferece (estado local, credenciais,
-orquestração). Se a API não tem especificação, escreva as tools à mão
-seguindo `tool-contract.md`.
+Na resposta, limite itens e tamanho de campos. A compatibilidade textual
+pode duplicar parte do objeto estruturado; preserve o contrato dos clientes
+atendidos e meça antes de retirar conteúdo. Use [paginação](pagination-and-results.md)
+e uma consulta de detalhe para informações extensas.
 
-## Configuração de cliente para servidores remotos OpenMCP
+## Converter uma API
 
-```json
-{
-  "mcpServers": {
-    "{server-id}": {
-      "transport": "streamableHttp",
-      "url": "https://mcp.open-mcp.org/api/server/{server-id}@latest/mcp"
-    }
-  }
-}
-```
+Não exponha automaticamente todos os endpoints como tools. Selecione as
+ações previstas na spec, compartilhe o client HTTP com CLI e TUI e mantenha
+a autenticação interna. Use `termfy-api-import` para interpretar a API e
+`termfy-api` para construir o serviço.
 
-Variáveis podem ser encaminhadas por cabeçalho ou query com o prefixo
-`FORWARD_VAR_`. O site desaconselha enviar tokens de autenticação por esse
-caminho.
+Configuração de cliente e transporte remoto variam por host e produto.
+Use `termfy-mcp-client`; não copie um campo de configuração HTTP para um
+servidor stdio. Confira descoberta e chamadas com a matriz de
+[testes](mcp-tests.md).

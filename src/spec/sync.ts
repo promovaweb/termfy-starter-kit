@@ -9,24 +9,29 @@
  * those entries appended. Existing entries and the Markdown body are kept
  * as they are. The result is a draft for the person to review: effects of
  * tools default to `read`, descriptions come from the registry.
+ *
+ * Entries that an open spec already plans to add are left out, so closing
+ * that spec does not find them twice. With the spec files at hand, the
+ * merged front matter also refreshes the spec index from the files.
  */
-import { readFileSync, writeFileSync } from "node:fs";
 import { manifest } from "../app/manifest.ts";
 import { root } from "../cli/commands.ts";
 import type { Command, OptionDefinition } from "../cli/registry.ts";
 import { SETTINGS_SCHEMA } from "../config/settings.ts";
 import { describeServer } from "../mcp/server.ts";
 import { screens } from "../tui/screens/index.ts";
-import type { ParsedSpec } from "./parse.ts";
-import type { Spec, SpecCommand, SpecScreen, SpecSetting } from "./schema.ts";
-import { compact, emitYaml } from "./yaml.ts";
+import { changeEntries } from "./delta.ts";
+import { indexOf, type LoadedSpec } from "./index.ts";
+import type { ParsedClispec } from "./parse.ts";
+import { error } from "../app/errors.ts";
+import { OPEN_STATUSES, type Clispec, type SpecCommand, type SpecFile, type SpecScreen, type SpecSetting } from "./schema.ts";
 
 export interface SpecSyncResult {
   commands: SpecCommand[];
   screens: SpecScreen[];
-  tools: Spec["mcp"]["tools"];
-  resources: Spec["mcp"]["resources"];
-  prompts: Spec["mcp"]["prompts"];
+  tools: Clispec["mcp"]["tools"];
+  resources: Clispec["mcp"]["resources"];
+  prompts: Clispec["mcp"]["prompts"];
   settings: SpecSetting[];
   total: number;
 }
@@ -48,14 +53,17 @@ function commandEntry(path: string, command: Command, options: readonly OptionDe
 }
 
 /** Computes the entries the code has and the spec lacks. */
-export function computeSync(spec: ParsedSpec): SpecSyncResult {
+export function computeSync(spec: ParsedClispec, specs: readonly LoadedSpec[] = []): SpecSyncResult {
+  const planned = new Set(specs.filter(({ spec: s }) => OPEN_STATUSES.includes(s.frontmatter.status))
+    .flatMap(({ spec: s }) => changeEntries(s.frontmatter.changes).map((entry) => `${entry.kind}:${entry.key}`)));
+  const known = (kind: string, key: string) => planned.has(`${kind}:${key}`);
   const declared = spec.frontmatter;
   const commands: SpecCommand[] = [];
   const visit = (command: Command, parent: string) => {
     for (const child of command.subcommands ?? []) {
       if (child.hidden) continue;
       const path = parent ? `${parent} ${child.name}` : child.name;
-      if (!declared.commands.some((entry) => entry.path === path)) {
+      if (!declared.commands.some((entry) => entry.path === path) && !known("command", path)) {
         commands.push(commandEntry(path, child, (child.options ?? []).filter((o) => !o.hidden)));
       }
       visit(child, path);
@@ -63,23 +71,51 @@ export function computeSync(spec: ParsedSpec): SpecSyncResult {
   };
   visit(root, "");
   const catalog = describeServer();
-  const missingScreens = screens.filter((s) => !declared.screens.some((entry) => entry.id === s.id)).map((s) => ({ id: s.id, title: s.title, description: s.description }));
-  const tools = catalog.tools.filter((t) => !declared.mcp.tools.some((entry) => entry.name === t.name)).map((t) => ({ name: t.name, description: t.description, effect: "read" as const }));
-  const resources = catalog.resources.filter((r) => !declared.mcp.resources.some((entry) => entry.uri === r.uri)).map((r) => ({ uri: r.uri, description: r.description }));
-  const prompts = catalog.prompts.filter((p) => !declared.mcp.prompts.some((entry) => entry.name === p.name)).map((p) => ({ name: p.name }));
-  const settings = SETTINGS_SCHEMA.filter((s) => !declared.settings.some((entry) => entry.key === s.key)).map((s) => ({ key: s.key, type: s.type, default: s.default, ...(s.values ? { values: [...s.values] } : {}), description: s.description }));
+  const missingScreens = screens.filter((s) => !declared.screens.some((entry) => entry.id === s.id) && !known("screen", s.id)).map((s) => ({ id: s.id, title: s.title, description: s.description }));
+  const tools = catalog.tools.filter((t) => !declared.mcp.tools.some((entry) => entry.name === t.name) && !known("tool", t.name)).map((t) => ({ name: t.name, description: t.description, effect: "read" as const }));
+  const resources = catalog.resources.filter((r) => !declared.mcp.resources.some((entry) => entry.uri === r.uri) && !known("resource", r.uri)).map((r) => ({ uri: r.uri, description: r.description }));
+  const prompts = catalog.prompts.filter((p) => !declared.mcp.prompts.some((entry) => entry.name === p.name) && !known("prompt", p.name)).map((p) => ({ name: p.name }));
+  const settings = SETTINGS_SCHEMA.filter((s) => !declared.settings.some((entry) => entry.key === s.key) && !known("setting", s.key)).map((s) => ({ key: s.key, type: s.type, default: s.default, ...(s.values ? { values: [...s.values] } : {}), description: s.description }));
   const total = commands.length + missingScreens.length + tools.length + resources.length + prompts.length + settings.length;
   return { commands, screens: missingScreens, tools, resources, prompts, settings, total };
 }
 
-/** Returns the merged front matter as a plain object, ready to emit. */
-export function mergedFrontmatter(spec: ParsedSpec, additions: SpecSyncResult, now = new Date()): Spec {
+/**
+ * Moves the missing entries into the `changes.add` of an open spec instead
+ * of the CLISPEC, so adopting existing code leaves a spec in the history.
+ * Returns the new spec front matter; `spec close` later applies it.
+ */
+export function addToSpec(target: LoadedSpec, additions: SpecSyncResult, now = new Date()): SpecFile {
+  const { frontmatter } = target.spec;
+  if (!OPEN_STATUSES.includes(frontmatter.status)) throw error.config(`Spec ${frontmatter.id} is ${frontmatter.status}; sync into an open spec.`);
+  const add = frontmatter.changes.add ?? {};
+  const mcp = add.mcp ?? {};
+  return {
+    ...frontmatter,
+    updatedAt: additions.total ? now.toISOString() : frontmatter.updatedAt,
+    changes: {
+      ...frontmatter.changes,
+      add: {
+        ...add,
+        commands: [...(add.commands ?? []), ...additions.commands],
+        screens: [...(add.screens ?? []), ...additions.screens],
+        mcp: { tools: [...(mcp.tools ?? []), ...additions.tools], resources: [...(mcp.resources ?? []), ...additions.resources], prompts: [...(mcp.prompts ?? []), ...additions.prompts] },
+        settings: [...(add.settings ?? []), ...additions.settings],
+      },
+    },
+  };
+}
+
+/** Returns the merged front matter as a plain object, ready to emit; `specs` refreshes the index. */
+export function mergedFrontmatter(spec: ParsedClispec, additions: SpecSyncResult, now = new Date(), specs?: readonly LoadedSpec[]): Clispec {
   const d = spec.frontmatter;
+  const index = specs ? indexOf(specs) : d.specs;
+  const changed = additions.total > 0 || JSON.stringify(index) !== JSON.stringify(d.specs);
   return {
     ...d,
     bin: manifest.bin,
     description: manifest.description,
-    updatedAt: additions.total ? now.toISOString() : d.updatedAt,
+    updatedAt: changed ? now.toISOString() : d.updatedAt,
     commands: [...d.commands, ...additions.commands],
     screens: [...d.screens, ...additions.screens],
     mcp: {
@@ -89,16 +125,7 @@ export function mergedFrontmatter(spec: ParsedSpec, additions: SpecSyncResult, n
     },
     settings: [...d.settings, ...additions.settings],
     credentials: d.credentials,
+    specs: index,
   };
 }
 
-/** Rewrites the front matter of a CLISPEC file, keeping the body intact. */
-export function writeFrontmatter(file: string, frontmatter: Spec): void {
-  const raw = readFileSync(file, "utf8").replace(/\r\n/g, "\n");
-  const lines = raw.split("\n");
-  const end = lines.indexOf("---", 1);
-  if (lines[0] !== "---" || end < 0) throw new Error(`${file} has no front matter to rewrite.`);
-  const body = lines.slice(end + 1).join("\n");
-  const yaml = emitYaml(compact(frontmatter)).join("\n");
-  writeFileSync(file, `---\n${yaml}\n---${body.startsWith("\n") ? "" : "\n"}${body}`);
-}

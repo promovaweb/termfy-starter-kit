@@ -9,6 +9,7 @@ encerra com exit code 8.
 | Aba | Conteúdo |
 | --- | --- |
 | Overview | Environment (binary, runtime, platform, terminal, data directory), estado de settings.json e do cofre, settings em vigor e next steps. |
+| Specs | Specs de `specs/` com status e progresso, a spec selecionada (objetivo e itens pendentes) e o resumo do `CLISPEC.md`. Fora da pasta do projeto, usa o índice embutido. `↑` `↓` ou `k` `j` trocam a spec. |
 | About | Binary, project, license, credits e standards seguidos. |
 
 A aba inicial vem de `tui.initialTab` em settings.json ou de `--tab`.

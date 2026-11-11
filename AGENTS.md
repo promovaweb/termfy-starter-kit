@@ -9,7 +9,9 @@ esta estrutura.
 As skills que ensinam a evoluir este projeto vêm do framework
 [`promovaweb/termfy`](https://github.com/promovaweb/termfy) e estão
 instaladas em `.agents/skills/termfy-*` (com links em `.claude/skills/`),
-registradas em `skills-lock.json`. Atualize com `bun run skills:update`.
+registradas em `skills-lock.json`. Para setup ou manutenção das skills, use
+`termfy-init` no modo correspondente. Execute os comandos internos pelo
+agente; não transfira esse trabalho ao usuário.
 
 ## Idioma
 
@@ -23,30 +25,40 @@ registradas em `skills-lock.json`. Atualize com `bun run skills:update`.
 
 ## Especificação
 
-`CLISPEC.md`, na raiz, descreve o que o binário faz no contrato de
-`docs/spec.md`: front matter validado por schema (`commands`, `screens`,
-`mcp`, `settings`, `credentials`), seções `Purpose`, `Audiences`,
-`Out of scope`, `Checklist` e `Notes`, e checklist com `{#id}` por entrega.
-A skill `termfy-spec` monta esse arquivo em entrevista com a pessoa. Antes de
-implementar qualquer command, screen ou tool, leia a entrada correspondente
-da spec (`bun run dev -- spec show --json`); se ela não cobrir o pedido,
-rode a skill `termfy-spec` primeiro. Ao concluir uma entrega, marque o item
-da checklist pelo `{#id}` e avance `updatedAt`. `bun run dev -- spec check`
-precisa passar antes de entregar; `bun run spec:check` entra em
-`bun run validate`.
+O contrato de `docs/spec.md` tem dois documentos:
+
+- `CLISPEC.md`, único, na raiz: a visão macro do binário (identidade,
+  propósito, públicos, fora de escopo, superfície entregue e índice das
+  specs). A skill `termfy-clispec` o escreve em entrevista com a pessoa.
+- `specs/NNNN-slug.md`, um por evolução: `changes` da superfície, como o
+  binário vai funcionar (`Behavior`), como o código deve ser feito
+  (`Design`), tarefas e testes. A skill `termfy-spec` escreve cada spec em
+  entrevista com a pessoa.
+
+Antes de implementar qualquer command, screen ou tool, leia a spec aberta
+que cobre o pedido (`bun run dev -- spec list` e
+`bun run dev -- spec show <id> --json`); se nenhuma cobrir, rode a skill
+`termfy-spec` primeiro. Siga o `Behavior` e o `Design` da spec. Edite a
+spec pelo binário, sem YAML à mão: `spec start <id>` ao começar,
+`spec task add` e `spec test add` para novos itens e, ao concluir uma
+entrega, `spec done <id> <item>`. Com tudo marcado, `bun run dev -- spec close <id>` incorpora a
+spec ao `CLISPEC.md`. `bun run dev -- spec check` precisa passar antes de
+entregar; `bun run spec:check` entra em `bun run validate`.
 
 ## Ordem de leitura
 
 1. Este arquivo.
-2. `CLISPEC.md`.
+2. `CLISPEC.md` e a spec aberta em `specs/`.
 3. `docs/architecture.md` para entender as camadas.
 4. A skill compatível com a tarefa em `.agents/skills/`. Quando a pessoa
    descrever a ferramenta em linguagem natural sem nomear uma skill, use
-   `termfy-build`, que orquestra as demais na ordem do guia do framework:
-   - `termfy-build`: porta de entrada; conduz o ciclo inteiro;
+   `termfy`, a porta de entrada, que orquestra as demais na ordem do guia:
+   - `termfy`: porta de entrada; conduz o ciclo inteiro;
    - `termfy-init`: personalizar este starter kit para um binário novo;
    - `termfy-brand`: nome, título, descrição, autor, links, créditos e paleta;
-   - `termfy-spec`: montar ou revisar o `CLISPEC.md`;
+   - `termfy-clispec`: descrever o binário e manter o `CLISPEC.md`;
+   - `termfy-spec`: escrever cada spec de evolução em `specs/`;
+   - `termfy-database`: banco SQLite, só quando a pessoa pede armazenamento;
    - `termfy-api-import`: converter a documentação de uma API em spec;
    - `termfy-config`: settings, credenciais e variáveis;
    - `termfy-api`: client HTTP de serviço externo;
@@ -84,7 +96,7 @@ precisa passar antes de entregar; `bun run spec:check` entra em
 - Documente código novo ou alterado com cabeçalho explicando o propósito do
   arquivo e JSDoc em funções exportadas, em inglês.
 - Não edite `.agents/skills/termfy-*`. Mudança de skill acontece no
-  framework; aqui ela chega por `bun run skills:update`.
+  framework; aqui ela chega pela manutenção conduzida por `termfy-init`.
 
 ## Validação antes de concluir
 

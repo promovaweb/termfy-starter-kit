@@ -44,18 +44,13 @@ commands, options, keys e campos do `--json`. A documentação é em português.
 ## Sobre o template
 
 Este repositório é um template do GitHub. Clique em **Use this template**,
-clone e personalize:
-
-```bash
-bun install
-bun run init -- --name mycli --title "My CLI" --description "What it does." --author "Your company" --repository https://github.com/org/mycli
-bun run dev -- --help
-```
+abra o clone no agente e peça: "Use termfy-init para fazer o setup deste
+projeto". Informe o nome do executável e o propósito da ferramenta. O agente
+conduz a configuração e as verificações pela skill.
 
 O guia completo está em [docs/customize-template.md](docs/customize-template.md).
-Agentes de IA leem [AGENTS.md](AGENTS.md), o [CLISPEC.md](CLISPEC.md) e as
-skills instaladas em `.agents/skills/termfy-*`. Atualize-as com
-`bun run skills:update`; o guia do método e o ebook ficam no
+Para atualizar ou reparar as skills, use `termfy-init` no modo de
+manutenção. O guia do método e o ebook ficam no
 [framework](https://github.com/promovaweb/termfy).
 
 ## Requisitos
@@ -149,7 +144,8 @@ template/   stubs de command, screen e tool
 .agents/    skills do framework instaladas via npx skills (skills-lock.json)
 scripts/    build, init e checks
 tests/      bun test
-CLISPEC.md  especificação do binário (contrato em docs/spec.md), montada com a skill termfy-spec
+CLISPEC.md  visão macro do binário (contrato em docs/spec.md), mantida com a skill termfy-clispec
+specs/      uma spec por evolução (NNNN-slug.md), escrita com a skill termfy-spec
 ```
 
 Arquitetura em [docs/architecture.md](docs/architecture.md).
@@ -158,7 +154,6 @@ Arquitetura em [docs/architecture.md](docs/architecture.md).
 
 ```bash
 bun run validate      # typecheck, testes, skills:check, opencli:check, spec:check, docs:check, build
-bun run skills:update # atualiza as skills do framework
 bun run build         # dist/termfy
 bun run build:all     # linux-x64, linux-arm64, darwin-x64, darwin-arm64, windows-x64
 ```

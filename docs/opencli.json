@@ -3,7 +3,7 @@
   "opencli": "0.1",
   "info": {
     "title": "Termfy",
-    "version": "0.7.0",
+    "version": "0.8.0",
     "summary": "CLI, TUI and MCP stdio server skeleton in Bun, with the Termfy framework skills installed.",
     "description": "CLI, TUI and MCP stdio server skeleton in Bun, with the Termfy framework skills installed. Without arguments it opens the TUI; \"termfy mcp\" starts the MCP server over stdio; any other command runs as a CLI with text or --json output.",
     "contact": {
@@ -95,6 +95,7 @@
                 },
                 "acceptedValues": [
                   "overview",
+                  "specs",
                   "about"
                 ]
               }
@@ -820,14 +821,80 @@
       },
       {
         "name": "spec",
-        "description": "Read, check and sync the embedded CLISPEC.md contract.",
+        "description": "Read and evolve the CLISPEC.md contract and its specs.",
         "commands": [
           {
             "name": "show",
-            "description": "Show the embedded spec front matter, sections and progress.",
+            "description": "Show CLISPEC.md, or one spec of specs/ when an ID is given.",
+            "arguments": [
+              {
+                "name": "id",
+                "description": "Spec ID, such as 2 or 0002. Without it, shows CLISPEC.md.",
+                "required": false
+              }
+            ],
             "examples": [
               "termfy spec show",
-              "termfy spec show --json"
+              "termfy spec show 0002 --json"
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCCESS: Operation completed."
+              },
+              {
+                "code": 1,
+                "description": "GENERIC_ERROR: Unexpected failure without a specific classification."
+              },
+              {
+                "code": 2,
+                "description": "USAGE: Invalid arguments, options or subcommand."
+              },
+              {
+                "code": 3,
+                "description": "CONFIG: settings.json missing, invalid or unknown key."
+              }
+            ]
+          },
+          {
+            "name": "list",
+            "description": "List the specs with status, progress and change counts.",
+            "examples": [
+              "termfy spec list",
+              "termfy spec list --json"
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCCESS: Operation completed."
+              },
+              {
+                "code": 1,
+                "description": "GENERIC_ERROR: Unexpected failure without a specific classification."
+              },
+              {
+                "code": 2,
+                "description": "USAGE: Invalid arguments, options or subcommand."
+              },
+              {
+                "code": 3,
+                "description": "CONFIG: settings.json missing, invalid or unknown key."
+              }
+            ]
+          },
+          {
+            "name": "progress",
+            "description": "Show completed tasks and tests of one spec, or of every open spec.",
+            "arguments": [
+              {
+                "name": "id",
+                "description": "Spec ID. Without it, sums the open specs.",
+                "required": false
+              }
+            ],
+            "examples": [
+              "termfy spec progress",
+              "termfy spec progress 0002 --json"
             ],
             "exitCodes": [
               {
@@ -850,7 +917,7 @@
           },
           {
             "name": "check",
-            "description": "Validate the embedded spec against the executable registries.",
+            "description": "Validate CLISPEC.md against the executable registries and the specs against CLISPEC.md.",
             "options": [
               {
                 "name": "--strict",
@@ -881,42 +948,33 @@
             ]
           },
           {
-            "name": "progress",
-            "description": "Show completed checklist items, total items and percentage.",
-            "examples": [
-              "termfy spec progress",
-              "termfy spec progress --json"
-            ],
-            "exitCodes": [
+            "name": "new",
+            "description": "Create specs/NNNN-<slug>.md as a draft and add it to the CLISPEC.md index.",
+            "arguments": [
               {
-                "code": 0,
-                "description": "SUCCESS: Operation completed."
-              },
-              {
-                "code": 1,
-                "description": "GENERIC_ERROR: Unexpected failure without a specific classification."
-              },
-              {
-                "code": 2,
-                "description": "USAGE: Invalid arguments, options or subcommand."
-              },
-              {
-                "code": 3,
-                "description": "CONFIG: settings.json missing, invalid or unknown key."
+                "name": "slug",
+                "description": "Kebab-case name of the change, such as orders-export.",
+                "required": true
               }
-            ]
-          },
-          {
-            "name": "sync",
-            "description": "List code entries missing from the spec and, with --write, append them to CLISPEC.md as a draft.",
+            ],
             "options": [
               {
-                "name": "--write",
-                "description": "Rewrite the front matter of the file with the missing entries appended."
+                "name": "--title",
+                "description": "Spec title. Defaults to the slug in words.",
+                "arguments": [
+                  {
+                    "name": "text",
+                    "required": true,
+                    "arity": {
+                      "minimum": 1,
+                      "maximum": 1
+                    }
+                  }
+                ]
               },
               {
                 "name": "--file",
-                "description": "Spec file to read and write.",
+                "description": "CLISPEC.md to read and write; specs/ sits next to it.",
                 "arguments": [
                   {
                     "name": "path",
@@ -936,9 +994,664 @@
               }
             ],
             "examples": [
-              " spec sync",
-              " spec sync --write",
-              " spec sync --json"
+              "termfy spec new orders-export --title \"Export orders to CSV\""
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCCESS: Operation completed."
+              },
+              {
+                "code": 1,
+                "description": "GENERIC_ERROR: Unexpected failure without a specific classification."
+              },
+              {
+                "code": 2,
+                "description": "USAGE: Invalid arguments, options or subcommand."
+              },
+              {
+                "code": 3,
+                "description": "CONFIG: settings.json missing, invalid or unknown key."
+              },
+              {
+                "code": 7,
+                "description": "PERMISSION: Permission denied on the file system."
+              }
+            ]
+          },
+          {
+            "name": "start",
+            "description": "Move a draft or blocked spec to in_progress.",
+            "arguments": [
+              {
+                "name": "id",
+                "description": "Spec ID, such as 2 or 0002.",
+                "required": true
+              }
+            ],
+            "options": [
+              {
+                "name": "--file",
+                "description": "CLISPEC.md to read and write; specs/ sits next to it.",
+                "arguments": [
+                  {
+                    "name": "path",
+                    "required": true,
+                    "arity": {
+                      "minimum": 1,
+                      "maximum": 1
+                    }
+                  }
+                ],
+                "metadata": [
+                  {
+                    "name": "x-default",
+                    "value": "CLISPEC.md"
+                  }
+                ]
+              }
+            ],
+            "examples": [
+              "termfy spec start 0002"
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCCESS: Operation completed."
+              },
+              {
+                "code": 1,
+                "description": "GENERIC_ERROR: Unexpected failure without a specific classification."
+              },
+              {
+                "code": 2,
+                "description": "USAGE: Invalid arguments, options or subcommand."
+              },
+              {
+                "code": 3,
+                "description": "CONFIG: settings.json missing, invalid or unknown key."
+              },
+              {
+                "code": 7,
+                "description": "PERMISSION: Permission denied on the file system."
+              }
+            ]
+          },
+          {
+            "name": "block",
+            "description": "Mark an open spec as blocked, with a reason.",
+            "arguments": [
+              {
+                "name": "id",
+                "description": "Spec ID, such as 2 or 0002.",
+                "required": true
+              }
+            ],
+            "options": [
+              {
+                "name": "--reason",
+                "description": "Why the spec is blocked; stored as blockedReason.",
+                "arguments": [
+                  {
+                    "name": "text",
+                    "required": true,
+                    "arity": {
+                      "minimum": 1,
+                      "maximum": 1
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "--file",
+                "description": "CLISPEC.md to read and write; specs/ sits next to it.",
+                "arguments": [
+                  {
+                    "name": "path",
+                    "required": true,
+                    "arity": {
+                      "minimum": 1,
+                      "maximum": 1
+                    }
+                  }
+                ],
+                "metadata": [
+                  {
+                    "name": "x-default",
+                    "value": "CLISPEC.md"
+                  }
+                ]
+              }
+            ],
+            "examples": [
+              "termfy spec block 0002 --reason \"Waiting for the API key\""
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCCESS: Operation completed."
+              },
+              {
+                "code": 1,
+                "description": "GENERIC_ERROR: Unexpected failure without a specific classification."
+              },
+              {
+                "code": 2,
+                "description": "USAGE: Invalid arguments, options or subcommand."
+              },
+              {
+                "code": 3,
+                "description": "CONFIG: settings.json missing, invalid or unknown key."
+              },
+              {
+                "code": 7,
+                "description": "PERMISSION: Permission denied on the file system."
+              }
+            ]
+          },
+          {
+            "name": "archive",
+            "description": "Archive an open spec without applying its changes, with a reason.",
+            "arguments": [
+              {
+                "name": "id",
+                "description": "Spec ID, such as 2 or 0002.",
+                "required": true
+              }
+            ],
+            "options": [
+              {
+                "name": "--reason",
+                "description": "Why the spec is archived; stored as archivedReason.",
+                "arguments": [
+                  {
+                    "name": "text",
+                    "required": true,
+                    "arity": {
+                      "minimum": 1,
+                      "maximum": 1
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "--file",
+                "description": "CLISPEC.md to read and write; specs/ sits next to it.",
+                "arguments": [
+                  {
+                    "name": "path",
+                    "required": true,
+                    "arity": {
+                      "minimum": 1,
+                      "maximum": 1
+                    }
+                  }
+                ],
+                "metadata": [
+                  {
+                    "name": "x-default",
+                    "value": "CLISPEC.md"
+                  }
+                ]
+              }
+            ],
+            "examples": [
+              "termfy spec archive 0002 --reason \"Waiting for the API key\""
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCCESS: Operation completed."
+              },
+              {
+                "code": 1,
+                "description": "GENERIC_ERROR: Unexpected failure without a specific classification."
+              },
+              {
+                "code": 2,
+                "description": "USAGE: Invalid arguments, options or subcommand."
+              },
+              {
+                "code": 3,
+                "description": "CONFIG: settings.json missing, invalid or unknown key."
+              },
+              {
+                "code": 7,
+                "description": "PERMISSION: Permission denied on the file system."
+              }
+            ]
+          },
+          {
+            "name": "task",
+            "description": "Manage the tasks of a spec.",
+            "commands": [
+              {
+                "name": "add",
+                "description": "Append a task to a spec with a generated {#id}.",
+                "arguments": [
+                  {
+                    "name": "id",
+                    "description": "Spec ID, such as 2 or 0002.",
+                    "required": true
+                  },
+                  {
+                    "name": "text",
+                    "description": "What to deliver, naming the command, tool, screen, setting or table.",
+                    "required": true,
+                    "arity": {
+                      "minimum": 1
+                    }
+                  }
+                ],
+                "options": [
+                  {
+                    "name": "--tag",
+                    "description": "Skill tag of the task: the skill responsible, such as termfy-cli.",
+                    "arguments": [
+                      {
+                        "name": "skill",
+                        "required": true,
+                        "arity": {
+                          "minimum": 1,
+                          "maximum": 1
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "name": "--file",
+                    "description": "CLISPEC.md to read and write; specs/ sits next to it.",
+                    "arguments": [
+                      {
+                        "name": "path",
+                        "required": true,
+                        "arity": {
+                          "minimum": 1,
+                          "maximum": 1
+                        }
+                      }
+                    ],
+                    "metadata": [
+                      {
+                        "name": "x-default",
+                        "value": "CLISPEC.md"
+                      }
+                    ]
+                  }
+                ],
+                "examples": [
+                  "termfy spec task add 0002 Implement orders export --tag termfy-cli"
+                ],
+                "exitCodes": [
+                  {
+                    "code": 0,
+                    "description": "SUCCESS: Operation completed."
+                  },
+                  {
+                    "code": 1,
+                    "description": "GENERIC_ERROR: Unexpected failure without a specific classification."
+                  },
+                  {
+                    "code": 2,
+                    "description": "USAGE: Invalid arguments, options or subcommand."
+                  },
+                  {
+                    "code": 3,
+                    "description": "CONFIG: settings.json missing, invalid or unknown key."
+                  },
+                  {
+                    "code": 7,
+                    "description": "PERMISSION: Permission denied on the file system."
+                  }
+                ]
+              }
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCCESS: Operation completed."
+              },
+              {
+                "code": 1,
+                "description": "GENERIC_ERROR: Unexpected failure without a specific classification."
+              },
+              {
+                "code": 2,
+                "description": "USAGE: Invalid arguments, options or subcommand."
+              },
+              {
+                "code": 3,
+                "description": "CONFIG: settings.json missing, invalid or unknown key."
+              },
+              {
+                "code": 7,
+                "description": "PERMISSION: Permission denied on the file system."
+              }
+            ]
+          },
+          {
+            "name": "test",
+            "description": "Manage the acceptance tests of a spec.",
+            "commands": [
+              {
+                "name": "add",
+                "description": "Append a test to a spec with a generated {#id}.",
+                "arguments": [
+                  {
+                    "name": "id",
+                    "description": "Spec ID, such as 2 or 0002.",
+                    "required": true
+                  },
+                  {
+                    "name": "text",
+                    "description": "Command to run and the expected result.",
+                    "required": true,
+                    "arity": {
+                      "minimum": 1
+                    }
+                  }
+                ],
+                "options": [
+                  {
+                    "name": "--file",
+                    "description": "CLISPEC.md to read and write; specs/ sits next to it.",
+                    "arguments": [
+                      {
+                        "name": "path",
+                        "required": true,
+                        "arity": {
+                          "minimum": 1,
+                          "maximum": 1
+                        }
+                      }
+                    ],
+                    "metadata": [
+                      {
+                        "name": "x-default",
+                        "value": "CLISPEC.md"
+                      }
+                    ]
+                  }
+                ],
+                "examples": [
+                  "termfy spec test add 0002 \"orders export --json returns { file, count }\""
+                ],
+                "exitCodes": [
+                  {
+                    "code": 0,
+                    "description": "SUCCESS: Operation completed."
+                  },
+                  {
+                    "code": 1,
+                    "description": "GENERIC_ERROR: Unexpected failure without a specific classification."
+                  },
+                  {
+                    "code": 2,
+                    "description": "USAGE: Invalid arguments, options or subcommand."
+                  },
+                  {
+                    "code": 3,
+                    "description": "CONFIG: settings.json missing, invalid or unknown key."
+                  },
+                  {
+                    "code": 7,
+                    "description": "PERMISSION: Permission denied on the file system."
+                  }
+                ]
+              }
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCCESS: Operation completed."
+              },
+              {
+                "code": 1,
+                "description": "GENERIC_ERROR: Unexpected failure without a specific classification."
+              },
+              {
+                "code": 2,
+                "description": "USAGE: Invalid arguments, options or subcommand."
+              },
+              {
+                "code": 3,
+                "description": "CONFIG: settings.json missing, invalid or unknown key."
+              },
+              {
+                "code": 7,
+                "description": "PERMISSION: Permission denied on the file system."
+              }
+            ]
+          },
+          {
+            "name": "done",
+            "description": "Mark a task or test of a spec as done by its {#id}.",
+            "arguments": [
+              {
+                "name": "id",
+                "description": "Spec ID, such as 2 or 0002.",
+                "required": true
+              },
+              {
+                "name": "item",
+                "description": "Four-character item ID, without {#}.",
+                "required": true
+              }
+            ],
+            "options": [
+              {
+                "name": "--undo",
+                "description": "Unmark the item instead."
+              },
+              {
+                "name": "--file",
+                "description": "CLISPEC.md to read and write; specs/ sits next to it.",
+                "arguments": [
+                  {
+                    "name": "path",
+                    "required": true,
+                    "arity": {
+                      "minimum": 1,
+                      "maximum": 1
+                    }
+                  }
+                ],
+                "metadata": [
+                  {
+                    "name": "x-default",
+                    "value": "CLISPEC.md"
+                  }
+                ]
+              }
+            ],
+            "examples": [
+              "termfy spec done 0002 a1b2",
+              "termfy spec done 0002 a1b2 --undo"
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCCESS: Operation completed."
+              },
+              {
+                "code": 1,
+                "description": "GENERIC_ERROR: Unexpected failure without a specific classification."
+              },
+              {
+                "code": 2,
+                "description": "USAGE: Invalid arguments, options or subcommand."
+              },
+              {
+                "code": 3,
+                "description": "CONFIG: settings.json missing, invalid or unknown key."
+              },
+              {
+                "code": 7,
+                "description": "PERMISSION: Permission denied on the file system."
+              }
+            ]
+          },
+          {
+            "name": "close",
+            "description": "Apply a finished spec to CLISPEC.md and mark it done.",
+            "arguments": [
+              {
+                "name": "id",
+                "description": "Spec ID, such as 2 or 0002.",
+                "required": true
+              }
+            ],
+            "options": [
+              {
+                "name": "--file",
+                "description": "CLISPEC.md to read and write; specs/ sits next to it.",
+                "arguments": [
+                  {
+                    "name": "path",
+                    "required": true,
+                    "arity": {
+                      "minimum": 1,
+                      "maximum": 1
+                    }
+                  }
+                ],
+                "metadata": [
+                  {
+                    "name": "x-default",
+                    "value": "CLISPEC.md"
+                  }
+                ]
+              }
+            ],
+            "examples": [
+              "termfy spec close 0002"
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCCESS: Operation completed."
+              },
+              {
+                "code": 1,
+                "description": "GENERIC_ERROR: Unexpected failure without a specific classification."
+              },
+              {
+                "code": 2,
+                "description": "USAGE: Invalid arguments, options or subcommand."
+              },
+              {
+                "code": 3,
+                "description": "CONFIG: settings.json missing, invalid or unknown key."
+              },
+              {
+                "code": 7,
+                "description": "PERMISSION: Permission denied on the file system."
+              }
+            ]
+          },
+          {
+            "name": "sync",
+            "description": "List code entries missing from CLISPEC.md and, with --write, append them as a draft.",
+            "options": [
+              {
+                "name": "--write",
+                "description": "Write the missing entries (to CLISPEC.md, or to the spec given by --spec)."
+              },
+              {
+                "name": "--spec",
+                "description": "Open spec that receives the entries in changes.add instead of CLISPEC.md.",
+                "arguments": [
+                  {
+                    "name": "id",
+                    "required": true,
+                    "arity": {
+                      "minimum": 1,
+                      "maximum": 1
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "--file",
+                "description": "CLISPEC.md to read and write; specs/ sits next to it.",
+                "arguments": [
+                  {
+                    "name": "path",
+                    "required": true,
+                    "arity": {
+                      "minimum": 1,
+                      "maximum": 1
+                    }
+                  }
+                ],
+                "metadata": [
+                  {
+                    "name": "x-default",
+                    "value": "CLISPEC.md"
+                  }
+                ]
+              }
+            ],
+            "examples": [
+              "termfy spec sync",
+              "termfy spec sync --write",
+              "termfy spec sync --write --spec 0004"
+            ],
+            "exitCodes": [
+              {
+                "code": 0,
+                "description": "SUCCESS: Operation completed."
+              },
+              {
+                "code": 1,
+                "description": "GENERIC_ERROR: Unexpected failure without a specific classification."
+              },
+              {
+                "code": 2,
+                "description": "USAGE: Invalid arguments, options or subcommand."
+              },
+              {
+                "code": 3,
+                "description": "CONFIG: settings.json missing, invalid or unknown key."
+              },
+              {
+                "code": 7,
+                "description": "PERMISSION: Permission denied on the file system."
+              }
+            ]
+          },
+          {
+            "name": "migrate",
+            "description": "Convert a schemaVersion 1.0.0 CLISPEC.md to 2.0.0, moving its checklist into specs/.",
+            "options": [
+              {
+                "name": "--write",
+                "description": "Write the converted files. Without it, only reports the plan."
+              },
+              {
+                "name": "--file",
+                "description": "CLISPEC.md to read and write; specs/ sits next to it.",
+                "arguments": [
+                  {
+                    "name": "path",
+                    "required": true,
+                    "arity": {
+                      "minimum": 1,
+                      "maximum": 1
+                    }
+                  }
+                ],
+                "metadata": [
+                  {
+                    "name": "x-default",
+                    "value": "CLISPEC.md"
+                  }
+                ]
+              }
+            ],
+            "examples": [
+              "termfy spec migrate",
+              "termfy spec migrate --write"
             ],
             "exitCodes": [
               {
@@ -980,6 +1693,10 @@
           {
             "code": 3,
             "description": "CONFIG: settings.json missing, invalid or unknown key."
+          },
+          {
+            "code": 7,
+            "description": "PERMISSION: Permission denied on the file system."
           }
         ]
       }

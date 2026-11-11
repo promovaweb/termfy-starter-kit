@@ -13,8 +13,10 @@ não arquivos já fornecidos pelo starter kit.
 
 ## Leia antes
 
-- `CLISPEC.md` e `bun run dev -- spec show --json`, incluindo commands,
-  settings, credentials e os itens da checklist relacionados ao serviço.
+- A spec aberta (`bun run dev -- spec show <id> --json`): `changes` com
+  commands, settings e credentials do serviço, Behavior, Design e os itens
+  `#termfy-api` de Tasks e Tests. O `CLISPEC.md`
+  (`bun run dev -- spec show --json`) mostra o que já foi entregue.
 - `docs/configuration.md`, `docs/cli.md` e `docs/spec.md`.
 - `src/config/credentials.ts`, `src/config/settings.ts`,
   `src/config/paths.ts`, `src/app/errors.ts` e `src/app/exit-codes.ts`.
@@ -26,8 +28,9 @@ não arquivos já fornecidos pelo starter kit.
 
 ## Regras
 
-1. Implemente somente as operações previstas na spec. Se faltar contrato,
-   revise-o com `termfy-spec` antes de implementar.
+1. Implemente somente as operações previstas na spec aberta, seguindo o
+   Behavior e o Design dela. Se faltar contrato, revise a spec com
+   `termfy-spec` antes de implementar.
 2. Centralize `fetch` no client. Exporte funções de domínio com parâmetros
    e resultados tipados, compartilhadas pelos três modos. Não importe o
    registry CLI, o servidor MCP nem componentes TUI no client.
@@ -59,8 +62,9 @@ não arquivos já fornecidos pelo starter kit.
    endpoints, limites, formato de resposta e itens da spec a implementar.
 2. Crie a pasta `api` sob `src/` e o módulo `<service>.ts`. Separe montagem
    da request, execução com timeout, retries, validação e normalização.
-3. Acrescente a key de URL em `src/config/settings.ts`. Registre a key,
-   credencial e seus consumidores em `CLISPEC.md`. Use `termfy-config` para
+3. Acrescente a key de URL em `src/config/settings.ts`. Confira que a key,
+   a credencial e seus consumidores estão em `changes` da spec aberta; o
+   `CLISPEC.md` recebe essas entradas no `spec close`. Use `termfy-config` para
    manter o mesmo contrato de armazenamento.
 4. Implemente a leitura do token e URL em tempo de chamada. Crie erros de
    transporte usando `src/app/errors.ts`; não encerre o processo no client.
@@ -75,17 +79,19 @@ não arquivos já fornecidos pelo starter kit.
    existentes que cobrem os consumidores. Rode `bun test`,
    `bun run typecheck` e `bun run spec:check`. Se a CLI mudar, rode
    `bun run opencli` antes de `bun run validate`.
-8. Marque somente os itens implementados e testados na checklist pelo
-   `{#id}` existente. Avance `updatedAt`; mantenha `in_progress` enquanto
-   houver entregas pendentes. Registre desvios em `## Notes` e revise a
-   spec. Referências futuras ainda não implementadas fazem `spec check`
-   falhar, mesmo em `draft`; não apresente essa saída como aprovação.
+8. Marque somente os itens implementados e testados com
+   `bun run dev -- spec done <id> <item>`; não edite o checkbox à mão nem
+   marque nada no `CLISPEC.md`. Mantenha `in_progress` enquanto
+   houver entregas pendentes. Registre desvios em `## Notes` da spec. Código
+   à frente do `CLISPEC.md` aparece como `pending` em `spec check` enquanto
+   a spec está aberta; com todos os itens marcados, a spec é fechada com
+   `bun run dev -- spec close <id>`.
 
 ## Marcos
 
 Contrato do serviço confirmado; client compartilhado pronto; credencial e
-URL declaradas; testes locais passando; consumidores conferidos; checklist
-atualizada e validação completa com saída 0 ao concluir o escopo inteiro.
+URL declaradas; testes locais passando; consumidores conferidos; itens da spec
+marcados e validação completa com saída 0 ao concluir o escopo inteiro.
 
 ## Saída
 
@@ -95,7 +101,7 @@ dos testes. Informe pendências sem imprimir valores de credenciais.
 
 ## Compatibilidade
 
-Starter kit 0.7.x. Referências existentes em `src/config/settings.ts`,
+Starter kit 0.8.x. Referências existentes em `src/config/settings.ts`,
 `src/config/credentials.ts`, `src/config/paths.ts`, `src/app/errors.ts`,
 `src/app/exit-codes.ts`, `tests/config.test.ts`, `docs/configuration.md`,
 `docs/cli.md` e `docs/spec.md`. A pasta `api` sob `src/` e o teste por

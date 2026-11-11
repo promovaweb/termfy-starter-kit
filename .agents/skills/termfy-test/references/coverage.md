@@ -1,7 +1,10 @@
 # Cobertura antes de concluir uma entrega
 
-Relacione o `{#id}` do `CLISPEC.md` aos testes que exercitam seu comportamento.
-Escolha os casos aplicáveis abaixo; explique os que não se aplicam. Percentual
+Cada item de `## Tests` da spec aberta é um teste de aceite: relacione seu
+`{#id}` a pelo menos um teste que confira o comando e o resultado esperado
+que o item descreve, e o `{#id}` da tarefa aos testes que exercitam seu
+comportamento. O Behavior da spec diz as saídas, erros e exit codes que as
+assertions conferem. Escolha os casos aplicáveis abaixo; explique os que não se aplicam. Percentual
 de linhas executadas não substitui assertions sobre a saída e os efeitos.
 
 ## Command
@@ -34,7 +37,7 @@ de linhas executadas não substitui assertions sobre a saída e os efeitos.
 
 ## Screen
 
-- Frame inicial com os dados da spec, sem segredo e com tema esperado.
+- Frame inicial com os dados descritos no Behavior da spec, sem segredo e com tema esperado.
 - Navegação até a screen, ação de tecla própria, help e encerramento.
 - Para `listPanel`, seleção por teclado, item ativado, rolagem e lista vazia.
   Consulte `tests/tui-list.test.ts` e `src/tui/components.ts`.
@@ -56,4 +59,6 @@ de linhas executadas não substitui assertions sobre a saída e os efeitos.
 Rode `bun run typecheck`, `bun test` e `bun run dev -- spec check --strict`.
 Associe o resultado ao estado atual dos arquivos. Se um caso essencial falhar
 ou não puder rodar, não marque o item como concluído. Uma suíte sem assertions
-sobre a entrega não autoriza marcar `[x]`.
+sobre a entrega não autoriza marcar `[x]`. Marque os itens no arquivo da
+spec, nunca no `CLISPEC.md`. Um item de `## Tests` sem teste correspondente
+fica `[ ]`, e o `spec close` recusa spec com item pendente.

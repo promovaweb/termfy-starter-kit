@@ -1,21 +1,21 @@
 ---
-schemaVersion: 1.0.0
+schemaVersion: 2.0.0
 bin: termfy
 title: Termfy
 description: CLI, TUI and MCP stdio server skeleton in Bun, with the Termfy framework skills installed.
-status: done
 createdAt: "2026-11-10T12:00:00.000Z"
-updatedAt: "2026-11-10T13:58:23.656Z"
+updatedAt: "2026-11-11T01:57:50.480Z"
 commands:
   - path: tui
-    description: Abre a interface de terminal com Overview e About. Exige TTY.
+    description: Open the terminal interface (Overview and About). Requires a TTY.
     options:
       - name: "--tab"
         argument: tab
         values:
           - overview
+          - specs
           - about
-        description: Define a aba inicial e substitui tui.initialTab de settings.json.
+        description: Initial tab. Overrides tui.initialTab from settings.json.
     data: "{ closed }"
     exitCodes:
       - 8
@@ -207,45 +207,227 @@ commands:
     data: "{ shell, script }"
     example: termfy completion --help
   - path: spec
-    description: Lê e confere o contrato CLISPEC.md embutido.
+    description: Read and evolve the CLISPEC.md contract and its specs.
     data: "{ help } com --help"
     exitCodes:
       - 3
-    example: termfy spec --help
+      - 7
   - path: spec show
-    description: Resume a spec em texto; com --json, mostra front matter, seções e progresso completos.
-    data: "{ frontmatter, sections, progress }"
+    description: Show CLISPEC.md, or one spec of specs/ when an ID is given.
+    arguments:
+      - name: id
+    data: "{ frontmatter, sections } sem id; { file, slug, frontmatter, sections, tasks, tests, progress } com id"
     exitCodes:
       - 3
     example: termfy spec show
   - path: spec check
-    description: Confere a spec embutida contra os registries do executável.
+    description: Validate CLISPEC.md against the executable registries and the specs against CLISPEC.md.
     options:
       - name: "--strict"
-        description: Faz avisos causarem falha, assim como erros. Desativada por padrão.
-    data: "{ ok, errors[], warnings[] }"
+        description: Fail on warnings as well as errors. Disabled by default.
+    data: "{ ok, errors[], warnings[], pending[] }"
     exitCodes:
       - 3
     example: termfy spec check
   - path: spec progress
-    description: Mostra itens concluídos, total e porcentagem da checklist.
-    data: "{ done, total, percent }"
+    description: Show completed tasks and tests of one spec, or of every open spec.
+    arguments:
+      - name: id
+    data: "{ open, done, total, percent, specs[] } sem id; { id, status, done, total, percent } com id"
     exitCodes:
       - 3
     example: termfy spec progress
   - path: spec sync
-    description: List code entries missing from the spec and, with --write, append them to CLISPEC.md as a draft.
+    description: List code entries missing from CLISPEC.md and, with --write, append them as a draft.
     options:
       - name: "--write"
-        description: Rewrite the front matter of the file with the missing entries appended.
+        description: Write the missing entries (to CLISPEC.md, or to the spec given by --spec).
+      - name: "--spec"
+        argument: id
+        description: Open spec that receives the entries in changes.add instead of CLISPEC.md.
       - name: "--file"
         argument: path
         default: CLISPEC.md
-        description: Spec file to read and write.
+        description: CLISPEC.md to read and write; specs/ sits next to it.
+    data: "{ file, written, commands[], screens[], tools[], resources[], prompts[], settings[], total }"
     exitCodes:
       - 3
       - 7
-    example: " spec sync"
+    example: termfy spec sync
+  - path: spec list
+    description: List the specs with status, progress and change counts.
+    data: "{ source, specs[] }"
+    exitCodes:
+      - 3
+    example: termfy spec list
+  - path: spec new
+    description: Create specs/NNNN-<slug>.md as a draft and add it to the CLISPEC.md index.
+    arguments:
+      - name: slug
+        required: true
+    options:
+      - name: "--title"
+        argument: text
+        description: Spec title. Defaults to the slug in words.
+      - name: "--file"
+        argument: path
+        default: CLISPEC.md
+        description: CLISPEC.md to read and write; specs/ sits next to it.
+    data: "{ id, file, title }"
+    exitCodes:
+      - 3
+      - 7
+    example: termfy spec new orders-export --title "Export orders to CSV"
+  - path: spec close
+    description: Apply a finished spec to CLISPEC.md and mark it done.
+    arguments:
+      - name: id
+        required: true
+    options:
+      - name: "--file"
+        argument: path
+        default: CLISPEC.md
+        description: CLISPEC.md to read and write; specs/ sits next to it.
+    data: "{ id, file, check }"
+    exitCodes:
+      - 3
+      - 7
+    example: termfy spec close 0002
+  - path: spec migrate
+    description: Convert a schemaVersion 1.0.0 CLISPEC.md to 2.0.0, moving its checklist into specs/.
+    options:
+      - name: "--write"
+        description: Write the converted files. Without it, only reports the plan.
+      - name: "--file"
+        argument: path
+        default: CLISPEC.md
+        description: CLISPEC.md to read and write; specs/ sits next to it.
+    data: "{ needed, migrated, file, spec? }"
+    exitCodes:
+      - 3
+      - 7
+    example: termfy spec migrate
+  - path: spec start
+    description: Move a draft or blocked spec to in_progress.
+    arguments:
+      - name: id
+        required: true
+    options:
+      - name: "--file"
+        argument: path
+        default: CLISPEC.md
+        description: CLISPEC.md to read and write; specs/ sits next to it.
+    data: "{ id, from, to }"
+    exitCodes:
+      - 3
+      - 7
+    example: termfy spec start 0002
+  - path: spec block
+    description: Mark an open spec as blocked, with a reason.
+    arguments:
+      - name: id
+        required: true
+    options:
+      - name: "--reason"
+        argument: text
+        description: Why the spec is blocked; stored as blockedReason.
+      - name: "--file"
+        argument: path
+        default: CLISPEC.md
+        description: CLISPEC.md to read and write; specs/ sits next to it.
+    data: "{ id, from, to }"
+    exitCodes:
+      - 3
+      - 7
+    example: termfy spec block 0002 --reason "Waiting for the API key"
+  - path: spec archive
+    description: Archive an open spec without applying its changes, with a reason.
+    arguments:
+      - name: id
+        required: true
+    options:
+      - name: "--reason"
+        argument: text
+        description: Why the spec is archived; stored as archivedReason.
+      - name: "--file"
+        argument: path
+        default: CLISPEC.md
+        description: CLISPEC.md to read and write; specs/ sits next to it.
+    data: "{ id, from, to }"
+    exitCodes:
+      - 3
+      - 7
+    example: termfy spec archive 0002 --reason "Waiting for the API key"
+  - path: spec task
+    description: Manage the tasks of a spec.
+    data: "{ help } com --help"
+    exitCodes:
+      - 3
+      - 7
+  - path: spec task add
+    description: Append a task to a spec with a generated {#id}.
+    arguments:
+      - name: id
+        required: true
+      - name: text
+        required: true
+        variadic: true
+    options:
+      - name: "--tag"
+        argument: skill
+        description: "Skill tag of the task: the skill responsible, such as termfy-cli."
+      - name: "--file"
+        argument: path
+        default: CLISPEC.md
+        description: CLISPEC.md to read and write; specs/ sits next to it.
+    data: "{ id, item, section }"
+    exitCodes:
+      - 3
+      - 7
+    example: termfy spec task add 0002 Implement orders export --tag termfy-cli
+  - path: spec test
+    description: Manage the acceptance tests of a spec.
+    data: "{ help } com --help"
+    exitCodes:
+      - 3
+      - 7
+  - path: spec test add
+    description: Append a test to a spec with a generated {#id}.
+    arguments:
+      - name: id
+        required: true
+      - name: text
+        required: true
+        variadic: true
+    options:
+      - name: "--file"
+        argument: path
+        default: CLISPEC.md
+        description: CLISPEC.md to read and write; specs/ sits next to it.
+    data: "{ id, item, section }"
+    exitCodes:
+      - 3
+      - 7
+    example: termfy spec test add 0002 "orders export --json returns { file, count }"
+  - path: spec done
+    description: Mark a task or test of a spec as done by its {#id}.
+    arguments:
+      - name: id
+        required: true
+      - name: item
+        required: true
+    options:
+      - name: "--undo"
+        description: Unmark the item instead.
+      - name: "--file"
+        argument: path
+        default: CLISPEC.md
+        description: CLISPEC.md to read and write; specs/ sits next to it.
+    data: "{ id, item, done }"
+    exitCodes:
+      - 3
+      - 7
+    example: termfy spec done 0002 a1b2
 screens:
   - id: overview
     title: Overview
@@ -253,6 +435,12 @@ screens:
   - id: about
     title: About
     description: Apresenta binário, versão, licença e créditos.
+  - id: specs
+    title: Specs
+    description: Specs that evolve the binary, with status and progress
+    keys:
+      - key: up/down
+        action: select spec
 mcp:
   tools:
     - name: about
@@ -291,9 +479,14 @@ mcp:
       output: "{ checks[], ok }"
       effect: read
     - name: spec
-      description: Lê o contrato antes de operar o binário ou propor mudanças; retorna front matter, seções e progresso sem gravar.
+      description: Read the binary contract (CLISPEC.md) before operating it or proposing changes. Returns identity, delivered surface, spec index and sections without writing.
       input: "{}"
-      output: "{ frontmatter, sections, progress }"
+      output: "{ frontmatter, sections }"
+      effect: read
+    - name: specs
+      description: List the specs that evolve the binary, or read one by id with its changes, tasks, tests and progress. Read only.
+      input: "{ id? }"
+      output: "{ source, specs[] } ou { file, slug, frontmatter, sections, tasks, tests, progress }"
       effect: read
   resources:
     - uri: termfy://about
@@ -325,6 +518,7 @@ settings:
     default: overview
     values:
       - overview
+      - specs
       - about
     description: Define a aba aberta ao iniciar a TUI.
   - key: tui.theme
@@ -338,6 +532,19 @@ settings:
     type: boolean
     default: false
     description: Reservada para projetos derivados; o esqueleto não envia dados.
+specs:
+  - id: "0001"
+    title: Baseline
+    status: done
+  - id: "0002"
+    title: Specs de evolução do binário
+    status: done
+  - id: "0003"
+    title: Stubs de banco SQLite opcional
+    status: done
+  - id: "0004"
+    title: Ferramentas de spec, storage e aba Specs
+    status: done
 ---
 ## Purpose
 
@@ -359,17 +566,9 @@ e permite consultar sua documentação e seu contrato sem acessar o repositório
 - Consumir credenciais de serviços: o esqueleto apenas administra o cofre.
 - Persistir dados fora de `~/.termfy/`, salvo a pasta definida por `TERMFY_HOME`.
 
-## Checklist
-
-- [x] Disponibilizar os commands do esqueleto com saída texto e JSON `#termfy-cli` {#c001}
-- [x] Exibir as screens Overview e About `#termfy-tui` {#t001}
-- [x] Expor tools, resources e o prompt operate `#termfy-mcp` {#m001}
-- [x] Gerenciar settings e credenciais cifradas `#termfy-config` {#s001}
-- [x] Ler e conferir o contrato com spec show, check e progress `#termfy-cli` {#c002}
-- [x] Expor a spec pela tool MCP spec `#termfy-mcp` {#m002}
-
 ## Notes
 
 - 2026-11-10: contrato convertido para front matter YAML e cinco seções fixas.
 - 2026-11-10: nenhuma credencial de serviço é consumida pelo esqueleto.
 - 2026-11-10: resumo textual da spec e conferência de checklist revisados.
+- 2026-11-10: spec 0004 (Ferramentas de spec, storage e aba Specs) closed.

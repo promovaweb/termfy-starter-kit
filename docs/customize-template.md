@@ -1,28 +1,19 @@
 # Personalizar o template
 
-Este repositório é um template do GitHub. Para iniciar um binário novo:
+Este repositório é um template do GitHub. Crie o repositório com
+**Use this template** e abra o clone no agente. Para fazer o setup, peça:
 
-1. No GitHub, clique em **Use this template** e crie o repositório.
-2. Clone, instale e renomeie:
+> Use termfy-init para preparar este projeto com o nome mycli e o título
+> My CLI. A ferramenta vai consultar pedidos da loja.
 
-   ```bash
-   bun install
-   bun run init -- --name mycli --title "My CLI" --description "What it does." --author "Your company" --repository https://github.com/org/mycli --site https://example.com
-   ```
+A skill confirma os campos que faltarem, instala as dependências, aplica a
+identidade, confere as skills e chama `termfy-clispec` para descrever o
+binário e `termfy-spec` para a primeira spec.
+O agente executa os comandos internos, regenera o OpenCLI e verifica os
+três modos do binário. A publicação fica com `termfy-release`, quando
+você solicitar.
 
-   O script reescreve `package.json` (`name`, `bin`, `description`, bloco
-   `termfy`), `.env.example` e as menções a `termfy` em `README.md`,
-   `AGENTS.md`, `CHANGELOG.md` e `.github/workflows/`. Os placeholders
-   `{{bin}}` em `docs/` são resolvidos em tempo de execução pelo manifest,
-   então `docs/` não precisa de edição.
-
-3. Escreva o `CLISPEC.md` com a skill `termfy-spec`: ela entrevista você e
-   registra propósito, commands, options, saídas, screens, tools e keys de
-   configuração. As demais skills leem esse arquivo antes de implementar.
-4. Confira: `bun run dev -- --version`, `bun run dev -- --help`, `bun run dev`.
-5. Rode `bun run validate`.
-6. Apague a seção "Sobre o template" do README e escreva a do produto.
-7. Faça o primeiro commit e a primeira release conforme [release.md](release.md).
+Para mudar a identidade depois do setup, use `termfy-brand`.
 
 ## O que mudar depois
 
@@ -44,10 +35,11 @@ Elas ensinam um agente a evoluir o projeto:
 
 | Skill | Uso |
 | --- | --- |
-| `termfy-build` | descrever a ferramenta em uma frase e deixar a skill conduzir o ciclo |
+| `termfy` | porta de entrada: descrever a ferramenta em uma frase e deixar a skill conduzir o ciclo |
 | `termfy-init` | criar o binário a partir do template e fazer o primeiro commit |
 | `termfy-brand` | ajustar nome, título, descrição, autor, links, créditos e paleta |
-| `termfy-spec` | entrevistar a pessoa e montar o `CLISPEC.md` |
+| `termfy-clispec` | descrever o binário no `CLISPEC.md` e manter a visão macro |
+| `termfy-spec` | escrever cada spec de evolução em `specs/` |
 | `termfy-api-import` | converter a documentação de uma API em entradas da spec |
 | `termfy-api` | client HTTP de serviço externo |
 | `termfy-command-set` | família `recurso verbo` com tools e screen |
@@ -55,13 +47,14 @@ Elas ensinam um agente a evoluir o projeto:
 | `termfy-tui` | screens, componentes, tema e o visual modern unix |
 | `termfy-mcp` | tools, resources, prompts e testes com o Inspector |
 | `termfy-config` | settings, credenciais, master key e variáveis |
+| `termfy-database` | banco SQLite com migrations, só quando a pessoa pede |
 | `termfy-test` | testes de CLI, MCP, TUI e config |
 | `termfy-review` | auditoria da entrega por gravidade |
 | `termfy-docs` | melhorar a documentação embutida e passar no `docs:check` |
 | `termfy-release` | versão, changelog, tag e release |
 | `termfy-mcp-client` | configuração nos clientes de agente |
 
-Atualize para a versão mais recente do framework com `bun run skills:update`.
-Se a pasta sumir, reinstale com `bun run skills:install`. Não edite as skills
-aqui: mudanças acontecem no framework. Dentro deste repositório, os agentes
-leem `AGENTS.md`, que aponta para elas.
+Para atualizar ou reparar as skills, use `termfy-init` no modo de
+manutenção. O agente executa os comandos internos e confere a instalação,
+os links dos agentes e a compatibilidade. As instruções são alteradas no
+framework e distribuídas para os projetos derivados.

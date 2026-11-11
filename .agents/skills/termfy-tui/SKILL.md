@@ -1,94 +1,119 @@
 ---
 name: termfy-tui
-description: Cria e altera telas da TUI Termfy sobre o OpenTUI, com abas modulares, componentes compartilhados, tema modern unix e testes por captura de frame.
+description: Implementa telas Termfy com OpenTUI Core, layout em células, foco, listas, formulários, estado assíncrono, cleanup e testes de interação e frames.
 ---
 
-# Construir e evoluir a TUI
+# Construir interfaces de terminal com OpenTUI
 
-Use esta skill para criar abas, mudar o layout, ajustar o tema ou corrigir a
-interação por teclado da interface de terminal.
+Use esta skill para criar ou revisar telas, componentes, navegação por teclado,
+foco, rolagem e carregamento de informações na TUI do Termfy. O agente conduz
+as alterações e as verificações; o usuário descreve a interface desejada.
 
 ## Leia antes
 
-- `CLISPEC.md` na raiz do projeto e `bun run dev -- spec show --json`: a
-  entrada do front matter e o item da checklist que descrevem o que será
-  implementado. Se o arquivo não cobrir o pedido, rode a skill `termfy-spec`
-  antes de continuar.
-- `docs/tui.md`.
-- `src/tui/index.ts` (montagem), `src/tui/screen.ts` (contrato),
-  `src/tui/components.ts` e `src/tui/theme.ts`.
-- `references/modern-unix-design.md`: o padrão visual que toda tela segue.
-- `references/opentui/README.md`: índice da documentação oficial do OpenTUI
-  copiada nesta skill; abra as páginas indicadas para o componente em uso.
-- `references/screen-tests.md` para escrever o teste da tela.
+1. Leia `AGENTS.md`, `CLISPEC.md` e `docs/tui.md` do projeto. Abra a spec
+   aberta com `bun run dev -- spec show <id> --json` e localize a screen em
+   `changes`, o Behavior (teclas, estados, o que a tela mostra), o Design e
+   os itens `#termfy-tui` de Tasks e Tests. Se faltar a descrição do
+   comportamento, use `termfy-spec`.
+2. Confira a versão instalada de `@opentui/core`, o lock e o runtime.
+   Leia [fontes e compatibilidade](references/opentui-sources.md).
+3. Abra `src/tui/index.ts`, `src/tui/screen.ts`, `src/tui/components.ts`,
+   `src/tui/theme.ts` e `src/tui/screens/index.ts`. O código do projeto define
+   quais recursos do OpenTUI já estão integrados.
+4. Leia [o contrato de tela](references/screen-contract.md),
+   [design modern unix](references/modern-unix-design.md) e
+   [testes](references/screen-tests.md). Depois selecione os temas abaixo.
 
-## Regras
+## Referências por tarefa
 
-1. Uma aba por arquivo em `src/tui/screens/`, registrada em
-   `src/tui/screens/index.ts`. A ordem da lista é a ordem das abas.
-2. Nenhuma cor literal nas telas. Use `ctx.theme.*`. Cor nova entra em
-   `src/tui/theme.ts`, nas duas paletas, com nome de papel.
-3. Use os componentes de `src/tui/components.ts`: `panel`, `keyValueTable`,
-   `list`, `heading`, `dim` e `listPanel` (lista com rolagem e seleção por
-   teclado). `listPanel` devolve `{ box, select, selected, move }`: monte
-   `box`, chame `move(delta)` para navegar e `select(index)` para ativar
-   `onSelect`. `selected()` devolve o índice, ou -1 na lista vazia.
-   Encaminhe as teclas em `onKey`; o componente não registra esse handler
-   na screen. `spacer(renderer, height)` não recebe tema. Se precisar de um novo,
-   crie lá, com tema como parâmetro, e documente no cabeçalho do arquivo.
-4. Painéis vizinhos não têm gap. Padding interno de uma célula. Bordas
-   `rounded` com título na borda. Acento só no painel em foco.
-5. Teclas da tela vão em `keys` (para a barra inferior) e em `onKey`.
-   Preserve `q`, `Esc`, `Ctrl+C`, `Tab`, `?`, `left`, `right`, `[` e `]`,
-   além dos dígitos de 1 a 9. `onKey` é chamado antes do handler global;
-   devolva `false` para as teclas que a screen não tratar.
-6. Timers e assinaturas começam em `onEnter` e terminam em `onLeave`.
-7. A TUI nunca escreve em stdout com `console.log`. Use `renderer.console`
-   do OpenTUI quando precisar depurar.
-8. `renderer.destroy()` fica a cargo de `mountTui`. A tela chama
-   `ctx.quit()` quando precisar encerrar.
+| Tarefa | Referência Termfy | Documentação OpenTUI copiada |
+| --- | --- | --- |
+| Montar e registrar uma aba | [Contrato de tela](references/screen-contract.md) | [Renderables](references/opentui/core-concepts/renderables.mdx) |
+| Redimensionar, alinhar e rolar | [Layout e conteúdo](references/layout-and-content.md) | [Layout](references/opentui/core-concepts/layout.mdx), [ScrollBox](references/opentui/components/scrollbox.mdx) |
+| Selecionar, editar e mudar o foco | [Teclado e formulários](references/keyboard-and-forms.md) | [Keyboard](references/opentui/core-concepts/keyboard.mdx), [Input](references/opentui/components/input.mdx) |
+| Consultar API e atualizar a tela | [Estado e cleanup](references/async-and-lifecycle.md) | [Lifecycle](references/opentui/core-concepts/lifecycle.mdx) |
+| Criar gráficos de linhas e barras | [Bibliotecas e gráficos](references/charts.md) | [FrameBuffer](references/opentui/components/frame-buffer.mdx) |
+| Diagnosticar comportamento | [Diagnóstico](references/troubleshooting.md) | [Troubleshooting](references/opentui/test-and-debug/troubleshooting.mdx) |
+| Adaptar um exemplo completo | [Exemplos](references/examples/README.md) | [Testing](references/opentui/core-concepts/testing.mdx) |
 
-## Passos
+## Entrada e plano
 
-1. Rode `git status --short`.
-2. Copie `template/screen/example.ts` para `src/tui/screens/<id>.ts` e ajuste os
-   imports.
-3. Monte o conteúdo com `panel`, `keyValueTable`, `list`, `heading` e
-   `dim`. Dados vêm de funções de `src/config/` ou de coletores já usados
-   pelo CLI (como `aboutData`), nunca de chamadas duplicadas.
-4. Registre a tela. Se ela puder ser aba inicial, acrescente o `id` em
-   `tui.initialTab` (`src/config/settings.ts`) e em `--tab`
-   (`src/cli/commands/tui.ts`).
-5. Escreva o teste em `tests/tui.test.ts` ou em arquivo próprio com
-   `createTestRenderer` e `captureCharFrame`.
-6. Rode `bun run validate`.
-7. Atualize `docs/tui.md` com a aba nova e suas teclas.
+Confirme a ação principal da tela, a origem das informações, o volume esperado,
+os estados de carregamento e erro, as teclas e o menor terminal atendido.
+Reaproveite o que o Behavior e o Design da spec já informam. Mostre um plano curto com arquivos,
+comportamentos, exemplos escolhidos e verificações antes de editar.
 
-## Checklist da spec
+## Contratos de implementação
 
-Ao concluir e testar cada entrega, a skill de implementação marca o item
-correspondente em `## Checklist` do `CLISPEC.md` de `- [ ]` para `- [x]`
-pelo `{#id}`, preservando o id. Avance `updatedAt` e use `in_progress`
-enquanto houver trabalho. Só use `done` após concluir todos os itens.
-Se o escopo mudar, revise a entrada da spec e o texto do item com
-`termfy-spec`; registre a alteração em `## Notes`.
-Rode `bun run dev -- spec check --json`: referências declaradas ainda não
-implementadas são erros, mesmo em `draft`. Relate separadamente as
-pendências de outras entregas. Ao concluir o escopo inteiro, rode
-`bun run validate` e exija saída 0.
+1. Use a API imperativa de `@opentui/core`. Não adicione React, Solid ou
+   outro gerenciador de estado para construir uma aba.
+2. Crie uma tela por arquivo em `src/tui/screens/`. Use uma factory quando
+   houver estado mutável; cada montagem de aplicação recebe suas instâncias.
+3. Reutilize `panel`, `keyValueTable`, `list`, `heading`, `dim`, `spacer` e
+   `listPanel`. Confira assinaturas no arquivo real, sem deduzi-las pelo nome.
+   `spacer(renderer, height)` não recebe tema.
+4. Use `ctx.theme` para cores. Mantenha as duas paletas e o contrato visual
+   existente. Componentes compartilhados recebem tema como parâmetro.
+5. Use `mount` para criar nós. Inicie trabalho ativo em `onEnter` e interrompa
+   em `onLeave`. Trate também `renderer` emitindo `destroy`: a versão atual
+   de `mountTui` não chama `onLeave` ao encerrar a aplicação.
+6. A aplicação é dona do renderer. Uma tela usa `ctx.quit()`; não chama
+   `process.exit()`, não cria outro renderer e não escreve em stdout.
+7. Retorne `true` de `onKey` apenas para uma tecla consumida pela tela.
+   Preserve as teclas globais durante navegação. Leia a referência de foco
+   antes de incluir qualquer campo editável.
+8. Não reconstrua a árvore inteira para atualizar um texto. Preserve seleção
+   e posição de leitura, limite logs em memória e cancele consultas antigas.
+9. Compartilhe serviços com CLI e MCP. A tela apresenta resultados; não
+   duplica autenticação, persistência ou chamadas HTTP já existentes.
+10. Não apresente um exemplo como integrado sem registrar a tela, declarar
+    as teclas, marcar os itens da spec e conferir o comportamento no host
+    Termfy.
 
-## Marcos
+## Procedimento
 
-Tela registrada e visível no frame de teste; teclas da tela na barra; testes
-verdes; documentação ajustada.
+1. Confira o Git e a spec aberta. Liste o que já funciona e o que a tela acrescenta.
+2. Escolha um exemplo em `references/examples/README.md`. Copie apenas o
+   necessário e adapte imports, domínio, identidade e fonte das informações.
+3. Monte a árvore com limites de largura e altura. Dê texto próprio aos
+   estados vazio, carregando, erro e pronto, além de ação para tentar novamente.
+4. Registre a tela em `src/tui/screens/index.ts`. Para permitir abertura direta,
+   atualize também `tui.initialTab` em `src/config/settings.ts` e `--tab` em
+   `src/cli/commands/tui.ts`.
+5. Integre teclas e foco. Se precisar mudar o contrato `Screen.onKey`, altere
+   host, tipos, testes e documentação juntos. Não simule modificadores com
+   nomes de teclas que o contrato atual não recebe.
+6. Teste a lógica isolada, depois a tela com `createTestRenderer` e finalmente
+   a navegação pelo `mountTui`. Inclua saída durante uma requisição pendente.
+7. Confira `night` e `day` em 80×24, 110×30 e 160×40. Acrescente 40×12 para
+   verificar a mensagem de terminal pequeno ou a composição compacta.
+8. Atualize `docs/tui.md` e os exemplos de uso. Se a tela mudou em relação
+   à spec, revise `changes` e o Behavior com `termfy-spec`.
+   Execute a validação do projeto e relate falhas alheias ao escopo.
 
-## Saída
+## Itens da spec
 
-Liste arquivos, cole o frame capturado da tela nova (texto) e informe os
-comandos de validação executados.
+Depois de implementar e testar, marque o item com
+`bun run dev -- spec done <id> <item>`, sem editar o checkbox à mão. Não marque nada no `CLISPEC.md`. Mantenha
+`in_progress` enquanto houver entregas por fazer. Use `termfy-spec` se o
+comportamento combinado mudar. No starter kit 0.8.x, execute
+`bun run dev -- spec check --json` e `bun run validate`. A screen nova
+aparece em `pending` enquanto a spec está aberta. Com todos os
+itens marcados, a spec é fechada com `bun run dev -- spec close <id>`. Uma verificação reprovada não equivale a entrega validada.
+
+## Marcos e saída
+
+Informe quando a tela estiver montada, quando teclado e cleanup estiverem
+conferidos e quando os testes e a documentação terminarem. Entregue os
+arquivos alterados, versões verificadas, teclas, estados cobertos, dimensões
+ensaiadas e um frame real capturado. Identifique separadamente testes
+executados, exemplos apenas compilados e comportamentos ainda não exercitados.
 
 ## Compatibilidade
 
-Starter kit 0.7.x. Caminhos citados: `src/tui/index.ts`, `src/tui/screen.ts`,
-`src/tui/components.ts`, `src/tui/theme.ts`, `src/tui/screens/`,
-`template/screen/example.ts`, `tests/tui.test.ts` e `docs/tui.md`.
+Starter kit 0.8.x e OpenTUI Core 0.8.3, conferidos no checkout. A faixa
+`^0.8.3` não prova qual versão está instalada. Não atualize dependências
+somente porque a documentação online apresenta uma versão posterior.
+As referências originais em `references/opentui/` permanecem com licença e
+marcador `.terceiros`; os guias e exemplos Termfy ficam fora dessa pasta.

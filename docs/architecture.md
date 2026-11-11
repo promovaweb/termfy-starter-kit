@@ -35,8 +35,18 @@ src/
     screens/              uma aba por arquivo
   skill/
     index.ts              docs/ embutida + referência gerada do registry
+  spec/
+    schema.ts             schemas do CLISPEC.md e das specs
+    parse.ts              leitura dos dois documentos
+    delta.ts              aplicação de changes à superfície
+    index.ts              CLISPEC.md embutido e specs/ do disco
+    check.ts              cruzamento com o código
+    files.ts              spec new, close e migrate
+    sync.ts               spec sync
+CLISPEC.md                visão macro do binário; entra no build
+specs/                    uma spec por evolução (NNNN-slug.md)
 docs/                     documentação do binário; entra no --skill
-template/                 stubs de command, screen e tool
+template/                 stubs de command, screen, tool e banco SQLite opcional
 .agents/skills/           skills do framework Termfy, instaladas via npx skills
 scripts/                  build, init e checks
 tests/                    bun test

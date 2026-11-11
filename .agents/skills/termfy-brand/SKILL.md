@@ -18,8 +18,8 @@ cuida do rename inicial; esta skill cuida de tudo que vem depois e do que o
   consome.
 - `src/app/manifest.ts`, o bloco `termfy` do `package.json`,
   `src/tui/theme.ts` e `src/tui/screens/about.ts`.
-- `CLISPEC.md`, seção `Identidade` do front matter (`bin`, `title`,
-  `description`).
+- `CLISPEC.md`, campos de identidade do front matter (`bin`, `title`,
+  `description`). As specs de `specs/` não guardam identidade.
 
 ## Regras
 
@@ -32,7 +32,8 @@ cuida do rename inicial; esta skill cuida de tudo que vem depois e do que o
    MCP SDK enquanto o binário os usar.
 3. Mudar `bin` é um rename: use `bun run init -- --name <bin>`, que
    reescreve `package.json`, `.env.example`, `README.md`, `AGENTS.md`,
-   `CHANGELOG.md` e workflows. Depois ajuste `CLISPEC.md` (`bin`) e rode
+   `CHANGELOG.md` e workflows. Depois ajuste `bin` e `updatedAt` no
+   `CLISPEC.md`, sem tocar na superfície nem no índice `specs`, e rode
    `bun run spec:check`. A pasta `~/.<bin>/`, o prefixo `<BIN>_` e o esquema
    `<bin>://` mudam junto; avise a pessoa que dados antigos ficam na pasta
    antiga.
@@ -82,7 +83,7 @@ quando `bin` mudou.
 
 ## Compatibilidade
 
-Starter kit 0.7.x. Caminhos citados: `package.json`, `src/app/manifest.ts`,
+Starter kit 0.8.x. Caminhos citados: `package.json`, `src/app/manifest.ts`,
 `src/tui/theme.ts`, `src/tui/screens/about.ts`, `src/cli/commands/about.ts`,
 `scripts/init.ts`, `CLISPEC.md` e os scripts `init`, `opencli`, `spec:check`
 e `validate`.

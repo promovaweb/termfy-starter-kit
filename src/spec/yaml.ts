@@ -78,16 +78,23 @@ export function emitYaml(value: unknown, indent = 0): string[] {
   return [`${pad}${scalar(value)}`];
 }
 
-/** Removes empty arrays and `false` flags so the emitted spec stays compact. */
-export function compact<T>(value: T): T {
-  if (Array.isArray(value)) return value.map((item) => compact(item)) as T;
+/**
+ * Removes empty arrays, empty objects and `false` flags so the emitted spec
+ * stays compact. The `mcp` lists of the CLISPEC are kept even when empty;
+ * an empty object (such as `changes: {}`) is dropped because block YAML
+ * would read it back as `null`.
+ */
+export function compact<T>(value: T, depth = 0): T {
+  if (Array.isArray(value)) return value.map((item) => compact(item, depth + 1)) as T;
   if (isObject(value)) {
     const out: Record<string, unknown> = {};
     for (const [key, item] of Object.entries(value)) {
-      if (Array.isArray(item) && item.length === 0 && !["tools", "resources", "prompts"].includes(key)) continue;
+      if (Array.isArray(item) && item.length === 0 && !(depth === 1 && ["tools", "resources", "prompts"].includes(key))) continue;
       if (item === false && key === "interactive") continue;
       if (item === undefined) continue;
-      out[key] = compact(item);
+      const inner = compact(item, depth + 1);
+      if (isObject(inner) && Object.keys(inner).length === 0) continue;
+      out[key] = inner;
     }
     return out as T;
   }

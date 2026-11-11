@@ -2,6 +2,62 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.8.0] - 2026-11-10
+
+### Adicionado
+
+- Contrato CLISPEC 2.0.0 com dois documentos: `CLISPEC.md`, único, com a
+  visão macro (identidade, superfície entregue e índice `specs`), e
+  `specs/NNNN-slug.md`, uma spec por evolução, com `changes`
+  (`add`, `update`, `remove`) e as seções Goal, Behavior, Design, Tasks,
+  Tests e Notes.
+- `spec list`, `spec new <slug>`, `spec close <id>` e `spec migrate`;
+  `spec show` e `spec progress` aceitam o ID de uma spec.
+- `spec close` incorpora as mudanças ao `CLISPEC.md` e recusa, sem gravar,
+  spec sem Behavior ou Design, com item pendente, com conflito de `changes`
+  ou que deixe o `CLISPEC.md` divergente do código.
+- `spec check` cruza as specs com o `CLISPEC.md` e relata em `pending` o
+  que uma spec aberta já explica.
+- Tool MCP `specs`, para listar e ler as specs.
+- Edição de specs pelo binário: `spec start`, `spec block --reason`,
+  `spec archive --reason`, `spec task add [--tag <skill>]`, `spec test add` e
+  `spec done [--undo]`, com `{#id}` gerado e índice mantido.
+- `storage.tables` no `CLISPEC.md` e em `changes`: tabelas e colunas do
+  banco SQLite opcional, conferidas por `spec check` contra o schema que as
+  migrations de `src/db/migrations/` criam.
+- Rastreabilidade: `spec check` avisa entrada de `changes` de uma spec em
+  andamento que nenhuma tarefa ou teste cita.
+- `spec close` registra a data do fechamento em `## Notes` do `CLISPEC.md`.
+- `spec sync --write --spec <id>` adota código existente pelo `changes.add`
+  de uma spec aberta.
+- Aba Specs na TUI (tecla 2), com lista, detalhe e resumo do `CLISPEC.md`;
+  `tui --tab specs` e `tui.initialTab: specs`.
+- Stubs opcionais de SQLite em `template/db/`: banco em `~/.<bin>/data.db`,
+  uma migration por arquivo embutida no binário, backup em
+  `data.db.v<versão>.bak` antes de migrar, repositório, command
+  `db status|migrate` e teste com banco em memória. O esqueleto continua sem
+  banco.
+- `specs/0001` a `specs/0004` registram o esqueleto, esta mudança de
+  contrato, os stubs de banco e as ferramentas de spec.
+- `skills:check` exige as dezoito skills do framework 0.8.0 e recusa skills
+  `termfy-*` que ele não tem mais. Novas:
+  `termfy` (porta de entrada, antes `termfy-build`), `termfy-clispec` e
+  `termfy-database`.
+
+### Alterado
+
+- `CLISPEC.md` do esqueleto migrado para 2.0.0; a checklist foi para
+  `specs/0001-baseline.md`.
+- A tool `spec` devolve `{ frontmatter, sections }`, sem progresso.
+- `bun run init` atualiza identidade e URIs de resources no `CLISPEC.md` e,
+  ao partir do template, limpa o índice e remove as specs do esqueleto.
+- Exemplos de `spec sync` no `--help` passam a citar o nome do binário.
+
+### Migração
+
+- Projetos derivados rodam `bun run dev -- spec migrate` para ver o plano e
+  `--write` para converter. Até lá, o binário lê o 1.0.0 com aviso.
+
 ## [0.7.0] - 2026-11-10
 
 ### Adicionado
