@@ -13,6 +13,13 @@ O agente executa os comandos internos, regenera o OpenCLI e verifica os
 três modos do binário. A publicação fica com `termfy-release`, quando
 você solicitar.
 
+O setup troca a identidade do binário em `package.json`, `README.md`,
+`AGENTS.md`, `.env.example` e nos workflows. As referências ao framework
+continuam com o nome Termfy: as skills `termfy-*`, os repositórios
+`promovaweb/termfy*` e as frases que citam o starter kit. O projeto novo
+começa na versão `0.1.0`, com um `CHANGELOG.md` próprio, e não herda a URL
+do repositório do template quando ela não é informada.
+
 Para mudar a identidade depois do setup, use `termfy-brand`.
 
 ## O que mudar depois
@@ -36,7 +43,7 @@ Elas ensinam um agente a evoluir o projeto:
 | Skill | Uso |
 | --- | --- |
 | `termfy` | porta de entrada: descrever a ferramenta em uma frase e deixar a skill conduzir o ciclo |
-| `termfy-init` | criar o binário a partir do template e fazer o primeiro commit |
+| `termfy-init` | criar o binário a partir do template; o primeiro commit fica com você |
 | `termfy-brand` | ajustar nome, título, descrição, autor, links, créditos e paleta |
 | `termfy-clispec` | descrever o binário no `CLISPEC.md` e manter a visão macro |
 | `termfy-spec` | escrever cada spec de evolução em `specs/` |

@@ -51,6 +51,8 @@ Princípios do visual, no estilo modern unix:
 3. Se a screen precisar de atualização periódica, inicie o timer em
    `onEnter` e limpe em `onLeave`.
 4. Registre em `src/tui/screens/index.ts`. A ordem da lista é a ordem das abas.
+   O stub exporta a factory `createExampleScreen()`: registre o `Screen` que
+   ela devolve, para que seleção e renderables fiquem por instância.
 5. Se o `id` for uma opção válida de aba inicial, acrescente-o em
    `tui.initialTab` (`src/config/settings.ts`) e em `--tab`
    (`src/cli/commands/tui.ts`).

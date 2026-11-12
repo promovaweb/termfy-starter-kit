@@ -53,7 +53,7 @@
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-database/SKILL.md",
-      "computedHash": "02b064e9816a3cba0710161888f03f370d4b16c58f31eaf09a5c9ef1ed0ab9d1"
+      "computedHash": "150971a91d6254932e174904e0cda5d379d65d91d9e3bd73a2448604af8b20f3"
     },
     "termfy-docs": {
       "source": "promovaweb/termfy",
@@ -77,13 +77,13 @@
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-mcp-client/SKILL.md",
-      "computedHash": "94c6f5a5db13e4b644895a440cb57aa851698a73a3cf81f66ae41ef6ffa4fd59"
+      "computedHash": "18a32cbf1d3a2bc3b5c063866e68ec34c8373255587b639272341d62304bba3b"
     },
     "termfy-release": {
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-release/SKILL.md",
-      "computedHash": "cd32ad40d614b6171c431cd45b42b275579d007fe78f390098a16e430e278584"
+      "computedHash": "dece20bde6607585e1e74479bbf6168ac3144426ed28f8d7a42d0c997eb6db28"
     },
     "termfy-review": {
       "source": "promovaweb/termfy",
@@ -107,7 +107,7 @@
       "source": "promovaweb/termfy",
       "sourceType": "github",
       "skillPath": "skills/termfy-tui/SKILL.md",
-      "computedHash": "65548f9a3b7c5713c05211e5723bf9b83fa877d135177a90400a08ea58b6333d"
+      "computedHash": "cae9fc8263d35dd05790e8501c2111d47cb3cd2c5659f82413a3c54863da9b5f"
     }
   }
 }

@@ -17,7 +17,7 @@ import { createNotes } from "./0001-create-notes.ts";
 export interface Migration {
   /** Sequential version, equal to the file number. */
   version: number;
-  /** snake_case summary, equal to the file name after the number. */
+  /** snake_case summary: the file name after the number, with underscores. */
   name: string;
   /** SQL that moves the schema from version - 1 to version. */
   up: string;

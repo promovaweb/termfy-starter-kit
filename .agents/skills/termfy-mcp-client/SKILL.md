@@ -74,7 +74,7 @@ chamada. Distinga teste executado de instrução pendente por falta do cliente.
 
 ## Compatibilidade
 
-Starter kit 0.8.x. Caminhos do binário citados:
+Starter kit a partir da v0.9.0. Caminhos do binário citados:
 `package.json`, `docs/mcp.md`, `docs/configuration.md`, `docs/cli.md`,
 `src/main.ts` e `src/mcp/server.ts`. Os arquivos de clientes na referência
 pertencem às instalações dos clientes e são criados durante a configuração;

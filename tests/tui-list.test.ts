@@ -42,7 +42,8 @@ test("empty lists do not activate or move", async () => {
 });
 
 test("example screen handles j/k once and leaves global tab and quit keys working", async () => {
-  const { exampleScreen } = await import("../template/screen/example.ts");
+  const { createExampleScreen } = await import("../template/screen/example.ts");
+  const exampleScreen = createExampleScreen();
   const { screens } = await import("../src/tui/screens/index.ts");
   const { mountTui } = await import("../src/tui/index.ts");
   const setup = await createTestRenderer({ width: 100, height: 24 });

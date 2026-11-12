@@ -16,6 +16,7 @@ import { paths, exists, ensureBaseDir, MASTER_KEY_VARIABLE } from "./paths.ts";
 import { encrypt, decrypt, isEnvelope, getMasterKey, masterKeySource, keyFromEnv, type MasterKeySource } from "./crypto.ts";
 import { classifyFsError, error } from "../app/errors.ts";
 import { ExitCode } from "../app/exit-codes.ts";
+import { manifest } from "../app/manifest.ts";
 
 export type Vault = Record<string, string>;
 
@@ -98,7 +99,7 @@ export function getCredential(name: string): string {
   const vault = readVault();
   const value = vault[key];
   if (value === undefined) {
-    throw error.credentials(`Credential "${key}" not found. Save it with: credentials set ${key}`, { name: key });
+    throw error.credentials(`Credential "${key}" not found. Save it with: ${manifest.bin} credentials set ${key}`, { name: key });
   }
   return value;
 }

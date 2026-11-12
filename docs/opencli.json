@@ -3,7 +3,7 @@
   "opencli": "0.1",
   "info": {
     "title": "Termfy",
-    "version": "0.9.1",
+    "version": "0.9.2",
     "summary": "CLI, TUI and MCP stdio server skeleton in Bun, with the Termfy framework skills installed.",
     "description": "CLI, TUI and MCP stdio server skeleton in Bun, with the Termfy framework skills installed. Without arguments it opens the TUI; \"termfy mcp\" starts the MCP server over stdio; any other command runs as a CLI with text or --json output.",
     "contact": {
@@ -149,7 +149,7 @@
       },
       {
         "name": "config",
-        "description": "Read and write preferences in ~/.<bin>/settings.json.",
+        "description": "Read and write preferences in ~/.termfy/settings.json.",
         "commands": [
           {
             "name": "list",
@@ -389,7 +389,7 @@
       },
       {
         "name": "credentials",
-        "description": "Store encrypted secrets (AES-256-GCM) in ~/.<bin>/credentials.json.",
+        "description": "Store encrypted secrets (AES-256-GCM) in ~/.termfy/credentials.json.",
         "aliases": [
           "cred"
         ],

@@ -50,8 +50,9 @@ export const migrations: readonly Migration[] = checkMigrations([createOrders, a
 
 - Versão igual ao número do arquivo, começando em 1, sem lacunas.
   `checkMigrations()` recusa versão fora de sequência e SQL vazio.
-- Nome do arquivo e `name` em snake_case, em inglês, descrevendo a
-  mudança: `create_orders`, `add_orders_status`.
+- Arquivo em kebab-case depois do número e `name` com as mesmas palavras
+  em snake_case, em inglês, descrevendo a mudança:
+  `0002-add-orders-status.ts` com `name: "add_orders_status"`.
 - Tabelas `STRICT`, ids `INTEGER PRIMARY KEY`, datas em `TEXT` ISO 8601,
   dinheiro em inteiro de centavos, booleanos em `INTEGER` 0 ou 1.
 - Migration publicada em release não muda. Para alterar uma tabela,

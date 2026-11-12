@@ -14,9 +14,8 @@ mudar qualquer chamada de API.
 | [Documentação oficial](https://opentui.com/docs/) | Consultar orientações e acompanhar mudanças da biblioteca |
 | [Repositório oficial](https://github.com/anomalyco/opentui) | Investigar implementação, exemplos e histórico da versão |
 
-Na consulta de 10/11/2026, o pacote instalado no starter kit é 0.8.3 e o site
-oficial apresenta 0.8.4. Não trate o site atual como documentação congelada
-para 0.8.3. Confira cada símbolo no pacote instalado e teste o comportamento.
+Na consulta de 12/11/2026, o pacote instalado no starter kit é 0.8.4, a mesma
+versão do site oficial. O snapshot em `opentui/` foi copiado na 0.8.3. Confira cada símbolo no pacote instalado e teste o comportamento.
 A descrição do snapshot como 0.8.3 também não substitui essa conferência.
 
 ## Percurso por assunto

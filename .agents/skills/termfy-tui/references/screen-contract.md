@@ -6,7 +6,7 @@ além de testar seus componentes isoladamente.
 
 ## O que cada campo faz
 
-| Campo | Contrato no starter kit 0.7.x |
+| Campo | Contrato no starter kit a partir da v0.9.0 |
 | --- | --- |
 | `id` | Identificador estável, usado na lista de abas e na abertura direta |
 | `title` | Rótulo curto mostrado no seletor de abas |

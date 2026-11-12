@@ -19,7 +19,8 @@ beforeAll(async () => {
     args: ["run", "src/main.ts", "mcp"],
     cwd: join(import.meta.dir, ".."),
     env: { ...(process.env as Record<string, string>), [HOME_VARIABLE]: dir },
-    stderr: "ignore",
+    // Piped, not ignored: a failing start leaves its message on transport.stderr.
+    stderr: "pipe",
   });
   await client.connect(transport);
 });

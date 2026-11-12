@@ -43,8 +43,9 @@ compatibilidade; teste o uso anterior antes de classificá-lo como preservado.
 
 ## Keep a Changelog
 
-Mantenha `Unreleased` para trabalho futuro. Use categorias Added, Changed,
-Deprecated, Removed, Fixed e Security quando houver conteúdo. Escreva as
+Mantenha `Unreleased` para trabalho futuro. Use as categorias Adicionado,
+Alterado, Obsoleto, Removido, Corrigido e Segurança quando houver
+conteúdo, como no `CHANGELOG.md` do starter kit. Escreva as
 notas em português, com o nome exato de commands, options e keys.
 
 Exemplo de formato, com versão e data a substituir pelos valores reais:
@@ -54,7 +55,7 @@ Exemplo de formato, com versão e data a substituir pelos valores reais:
 
 ## [0.6.2] - 2026-11-10
 
-### Fixed
+### Corrigido
 
 - Corrige a leitura de settings existentes durante a inicialização.
 ```

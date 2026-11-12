@@ -7,7 +7,8 @@ Toda alteração publicada sai com versão, changelog, tag e GitHub Release.
 3. Rode `bun run validate`.
 4. Commit: `release: <bin> vX.Y.Z`.
 5. Tag: `git tag vX.Y.Z`.
-6. Push: `git push origin main --tags`.
+6. Push da `main` e só desta tag: `git push origin main vX.Y.Z`. Tags de
+   outras entregas ficam fora.
 7. O workflow `release.yml` compila os binários para linux-x64, linux-arm64,
    darwin-x64, darwin-arm64 e windows-x64, gera `SHA256SUMS` e publica a
    GitHub Release com as notas do changelog.

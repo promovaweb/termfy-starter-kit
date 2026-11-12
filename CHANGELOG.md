@@ -2,6 +2,40 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.9.2] - 2026-11-12
+
+### Corrigido
+
+- `init` num projeto novo: começa na versão 0.1.0, com `CHANGELOG.md`
+  próprio, sem herdar a URL do repositório do template. As referências ao
+  framework (skills `termfy-*`, `promovaweb/termfy*`, frases sobre o
+  starter kit) deixam de ser renomeadas para o nome do binário.
+- `init` num rename sem `--title` mantém o título atual.
+- `skills:check` passa a ler a compatibilidade no formato que as skills
+  usam ("Starter kit a partir da vX.Y.Z") e compara com a versão do kit
+  de origem, gravada pelo `init` em `termfy.starterKit`.
+- A ajuda de `config` e `credentials` mostra a pasta real
+  (`~/.<bin>/`), sem o marcador literal.
+- A mensagem de credencial ausente traz o comando completo, com o nome do
+  binário.
+- `docs/release.md` envia só a tag da versão, sem `--tags`.
+- `docs/customize-template.md`: o primeiro commit fica com a pessoa.
+
+### Alterado
+
+- `template/screen/example.ts` exporta a factory `createExampleScreen()`,
+  com estado por instância.
+- A ajuda do command `mcp` remete a `mcp --list` em vez de listar as
+  tools à mão.
+- Testes de config restauram as variáveis de ambiente; o teste MCP usa
+  `stderr: "pipe"`.
+- Skills do Termfy 0.10.0.
+
+### Adicionado
+
+- `tests/init.test.ts`: identidade nova, versão 0.1.0, referências ao
+  framework preservadas e rename sem `--title`.
+
 ## [0.9.1] - 2026-11-11
 
 ### Removido

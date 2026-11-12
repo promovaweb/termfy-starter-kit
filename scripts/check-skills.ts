@@ -6,8 +6,9 @@
  * `skills-lock.json`. This script fails when a skill is missing or absent
  * from the lock, so `bun run validate` reminds you to reinstall. It also
  * flags termfy-* skills that the framework no longer ships, and reads the
- * "Compatibilidade" line of each SKILL.md and warns when the
- * declared starter kit range does not match this package's major.minor.
+ * "Compatibilidade" line of each SKILL.md and warns when a skill needs a
+ * newer starter kit than the one the project came from (`termfy.starterKit`
+ * in package.json, recorded by scripts/init.ts).
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -27,9 +28,11 @@ try {
   errors.push("skills-lock.json missing or invalid. Run: bun run skills:install");
 }
 
-const pkg = JSON.parse(readFileSync("package.json", "utf8")) as { version: string };
-const [major, minor] = pkg.version.split(".");
-const current = `${major}.${minor}`;
+const pkg = JSON.parse(readFileSync("package.json", "utf8")) as { version: string; termfy?: { bin?: string; starterKit?: string } };
+// The template compares with its own version; a derived project with the
+// starter kit version recorded by scripts/init.ts.
+const kitVersion = pkg.termfy?.bin === "termfy" ? pkg.version : pkg.termfy?.starterKit;
+const toNumber = (v: string) => v.split(".").map(Number).reduce((total, part) => total * 1000 + part, 0);
 
 for (const name of expected) {
   const dir = join(".agents", "skills", name);
@@ -38,9 +41,10 @@ for (const name of expected) {
   if (!existsSync(join(dir, "references"))) errors.push(`${dir}/references missing`);
   if (!lock.skills?.[name]) errors.push(`${name} not recorded in skills-lock.json`);
   if (existsSync(skillFile)) {
-    const match = /Starter kit (\d+\.\d+)\.x/.exec(readFileSync(skillFile, "utf8"));
-    if (match && match[1] !== current) {
-      warnings.push(`${name} declares starter kit ${match[1]}.x; this project is ${pkg.version}. Run: bun run skills:update`);
+    // Skills declare "Starter kit a partir da vX.Y.Z" in their Compatibility section.
+    const match = /Starter kit a partir da v(\d+\.\d+\.\d+)/.exec(readFileSync(skillFile, "utf8"));
+    if (match && kitVersion && toNumber(match[1]!) > toNumber(kitVersion)) {
+      warnings.push(`${name} needs starter kit ${match[1]} or later; this project came from ${kitVersion}. Compare src/ with the starter kit before relying on the skill.`);
     }
   }
 }

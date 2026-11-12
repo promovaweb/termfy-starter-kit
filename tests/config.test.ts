@@ -12,6 +12,11 @@ import { ExitCode } from "../src/app/exit-codes.ts";
 
 let dir: string;
 
+// The previous values are restored after each test, so the suite leaves the
+// environment as it found it.
+const previousHome = process.env[HOME_VARIABLE];
+const previousKey = process.env[MASTER_KEY_VARIABLE];
+
 beforeEach(() => {
   dir = mkdtempSync(join(tmpdir(), "termfy-test-"));
   process.env[HOME_VARIABLE] = dir;
@@ -20,7 +25,8 @@ beforeEach(() => {
 
 afterEach(() => {
   rmSync(dir, { recursive: true, force: true });
-  delete process.env[HOME_VARIABLE];
+  if (previousHome === undefined) delete process.env[HOME_VARIABLE]; else process.env[HOME_VARIABLE] = previousHome;
+  if (previousKey === undefined) delete process.env[MASTER_KEY_VARIABLE]; else process.env[MASTER_KEY_VARIABLE] = previousKey;
 });
 
 describe("settings", () => {

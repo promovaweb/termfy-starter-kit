@@ -118,9 +118,9 @@ executados, exemplos apenas compilados e comportamentos ainda não exercitados.
 ## Compatibilidade
 
 Starter kit a partir da v0.9.0 (specs em Markdown puro, sem command
-`spec`; `tui.initialTab` aceita `overview` e `about`) e OpenTUI Core 0.8.3,
+`spec`; `tui.initialTab` aceita `overview` e `about`) e OpenTUI Core 0.8.4,
 conferidos no checkout. A faixa
-`^0.8.3` não prova qual versão está instalada. Não atualize dependências
+`^0.8.4` não prova qual versão está instalada. Não atualize dependências
 somente porque a documentação online apresenta uma versão posterior.
 As referências originais em `references/opentui/` permanecem com licença e
 marcador `.terceiros`; os guias e exemplos Termfy ficam fora dessa pasta.
