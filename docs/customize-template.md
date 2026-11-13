@@ -22,6 +22,12 @@ do repositório do template quando ela não é informada.
 
 Para mudar a identidade depois do setup, use `termfy-brand`.
 
+A pasta `brand/` e o cabeçalho do `README.md` (logo e a linha "Um projeto
+da Promovaweb") são a marca do Termfy Starter Kit no GitHub, não do seu
+binário. O setup não mexe neles: troque os dois pela marca do seu projeto ou
+remova-os. Nada no binário nem nos scripts depende de `brand/`, e a paleta
+da TUI continua em `src/tui/theme.ts`.
+
 ## O que mudar depois
 
 | Quer | Onde |

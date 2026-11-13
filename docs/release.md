@@ -29,4 +29,3 @@ bun install --frozen-lockfile --os="*" --cpu="*" --libc="*"  # pacotes nativos d
 bun run build:all      # dist/<bin>-<platform> para todas
 ./dist/<bin> --version
 ```
-

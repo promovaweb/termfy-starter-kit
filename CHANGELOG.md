@@ -2,6 +2,25 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.9.3] - 2026-11-13
+
+### Adicionado
+
+- Nova identidade visual do Termfy Starter Kit, submarca do Termfy: ícone,
+  logotipo e kit de marca em `brand/` (logos, favicons, paleta com acento
+  lima, tokens, CSS, tema Tailwind, tipografia, relatório de contraste e
+  guia visual).
+- Logo no cabeçalho do `README.md` e a linha "Um projeto da Promovaweb".
+- `.markdownlint.json` com o HTML do cabeçalho do README liberado.
+
+### Alterado
+
+- `README.md` e `docs/customize-template.md` explicam que `brand/` é a
+  marca do template no GitHub e que o projeto derivado troca ou remove a
+  pasta e o cabeçalho do README. A identidade do binário e a paleta da TUI
+  não mudam.
+- `docs/release.md` sem a linha em branco extra no fim.
+
 ## [0.9.2] - 2026-11-12
 
 ### Corrigido

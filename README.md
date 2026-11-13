@@ -1,5 +1,14 @@
 # Termfy Starter Kit
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="brand/logo/logo-dark.png">
+    <img alt="Termfy Starter Kit" src="brand/logo/logo-light.png" width="360">
+  </picture>
+</p>
+
+<p align="center">Um projeto da <a href="https://promovaweb.com">Promovaweb</a></p>
+
 Esqueleto de binário em [Bun](https://bun.sh) para construir ferramentas de
 terminal com três modos no mesmo executável. É o template do GitHub do
 framework [Termfy](https://github.com/promovaweb/termfy), e já vem com as
@@ -21,12 +30,12 @@ Todo o código é em inglês: arquivos, identificadores, comentários, mensagens
 commands, options, keys e campos do `--json`. A documentação é em português.
 
 ```text
- ▌ Termfy v0.9.2  │  CLI, TUI and MCP stdio server skeleton in Bun, with the  linux-x64 • Bun 1.4.4
+ ▌ Termfy v0.9.3  │  CLI, TUI and MCP stdio server skeleton in Bun, with the  linux-x64 • Bun 1.4.4
  ──────────────────────────────────────────────────────────────────────────────────────────────────
  Overview      About
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬
  ╭─ Environment ────────────────────────────────────╮╭─ State ────────────────────────────────────╮
- │ Binary    termfy v0.9.2                          ││ settings.json     • defaults               │
+ │ Binary    termfy v0.9.3                          ││ settings.json     • defaults               │
  │ Runtime   Bun 1.4.4                              ││ credentials.json  • empty                  │
  │ Platform  linux-x64                              ││ master key        not created              │
  │ Terminal  100×24  xterm-256color                 ││ MCP               termfy mcp               │
@@ -53,6 +62,10 @@ Este repositório é um template do GitHub. Clique em **Use this template**,
 abra o clone no agente e peça: "Use termfy-init para fazer o setup deste
 projeto". Informe o nome do executável e o propósito da ferramenta. O agente
 conduz a configuração e as verificações pela skill.
+
+A pasta [brand/](brand/README.md) é a marca deste template no GitHub. Num
+projeto criado a partir dele, troque `brand/` e o cabeçalho deste README pela
+sua marca ou remova os dois.
 
 O guia completo está em [docs/customize-template.md](docs/customize-template.md).
 Para atualizar ou reparar as skills, use `termfy-init` no modo de
@@ -150,6 +163,7 @@ template/   stubs de command, screen e tool
 .agents/    skills do framework instaladas via npx skills (skills-lock.json)
 scripts/    build, init e checks
 tests/      bun test
+brand/      marca do template no GitHub (troque ou remova no projeto derivado)
 ```
 
 Arquitetura em [docs/architecture.md](docs/architecture.md).

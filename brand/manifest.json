@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-13T23:51:43.511Z",
+  "assets": [
+    {
+      "path": "logo/icon-16w.png",
+      "format": "png",
+      "width": 16,
+      "height": 16,
+      "role": "favicon",
+      "function": "favicon e ícone de aplicativo de 16 px",
+      "sha256": "dd209dbabbd232eef5c8e2177601b321ebecd15ea0891ac545b1319ffe82ff2e"
+    },
+    {
+      "path": "logo/icon-180w.png",
+      "format": "png",
+      "width": 180,
+      "height": 180,
+      "role": "favicon",
+      "function": "favicon e ícone de aplicativo de 180 px",
+      "sha256": "8ee9e9ea143b83ec72bb6c750a32aba1155c4eadeddb5c4044931fedfb86f7eb"
+    },
+    {
+      "path": "logo/icon-192w.png",
+      "format": "png",
+      "width": 192,
+      "height": 192,
+      "role": "favicon",
+      "function": "favicon e ícone de aplicativo de 192 px",
+      "sha256": "4781b242bfcb96828626a139823611376771f3a675985eff9cb8e7d3011e5b8b"
+    },
+    {
+      "path": "logo/icon-32w.png",
+      "format": "png",
+      "width": 32,
+      "height": 32,
+      "role": "favicon",
+      "function": "favicon e ícone de aplicativo de 32 px",
+      "sha256": "4886f69cccc531872299b345bd4d6572398c39de00444fc18ff0758364983901"
+    },
+    {
+      "path": "logo/icon-48w.png",
+      "format": "png",
+      "width": 48,
+      "height": 48,
+      "role": "favicon",
+      "function": "favicon e ícone de aplicativo de 48 px",
+      "sha256": "5d1785f2fb06fbffb28a7fb697f2414d710b93eaae3bb3eff31d856bfa37ad66"
+    },
+    {
+      "path": "logo/icon-512w.png",
+      "format": "png",
+      "width": 512,
+      "height": 512,
+      "role": "favicon",
+      "function": "favicon e ícone de aplicativo de 512 px",
+      "sha256": "c4e853757b93d07c81562fe4ac6fe31515c396d38ba52db784dfeb350d156df7"
+    },
+    {
+      "path": "logo/icon-dark.png",
+      "format": "png",
+      "width": 512,
+      "height": 512,
+      "role": "icon-dark",
+      "function": "símbolo transparente para fundo escuro",
+      "sha256": "6e586f4eb47240878e822a544482b0635ee810c6cb9c2a8aebc275bd065856ab"
+    },
+    {
+      "path": "logo/icon-dark.svg",
+      "format": "svg",
+      "width": 512,
+      "height": 512,
+      "role": "icon-dark",
+      "function": "símbolo transparente para fundo escuro",
+      "sha256": "f71aac44c25095ceb26cf370193ada2cac02074c43f8f4d2d8e169652c7f08ef"
+    },
+    {
+      "path": "logo/icon-light.png",
+      "format": "png",
+      "width": 512,
+      "height": 512,
+      "role": "icon-light",
+      "function": "símbolo transparente para fundo claro",
+      "sha256": "c3fb575696af8df221f3acbedd99953a58c238e3a96ea87bf15d707d1b5c0433"
+    },
+    {
+      "path": "logo/icon-light.svg",
+      "format": "svg",
+      "width": 512,
+      "height": 512,
+      "role": "icon-light",
+      "function": "símbolo transparente para fundo claro",
+      "sha256": "094576cb3033851d17c2eb712cbbe2205151e1cf60279db497a7132203b25e9d"
+    },
+    {
+      "path": "logo/icon.png",
+      "format": "png",
+      "width": 512,
+      "height": 512,
+      "role": "icon",
+      "function": "ícone principal com placa petróleo",
+      "sha256": "c4e853757b93d07c81562fe4ac6fe31515c396d38ba52db784dfeb350d156df7"
+    },
+    {
+      "path": "logo/icon.svg",
+      "format": "svg",
+      "width": 512,
+      "height": 512,
+      "role": "icon",
+      "function": "ícone principal com placa petróleo",
+      "sha256": "7a69d9d862ffc35b6d2e7e6bfc08068d96c6301a2d88fa300a06e5a76580d861"
+    },
+    {
+      "path": "logo/logo-dark.png",
+      "format": "png",
+      "width": 1300,
+      "height": 272,
+      "role": "logo-dark",
+      "function": "assinatura horizontal para fundo escuro",
+      "sha256": "134f546aa21b6579ad50f3dc58194ad40e8809f722f873db4f4ad90eb8103f5b"
+    },
+    {
+      "path": "logo/logo-dark.svg",
+      "format": "svg",
+      "width": 1531,
+      "height": 320,
+      "role": "logo-dark",
+      "function": "assinatura horizontal para fundo escuro",
+      "sha256": "2f72b3298f2e4c3b6a25ef8605d0a4859c7efcf579939e5486e9e63bff3294b6"
+    },
+    {
+      "path": "logo/logo-light.png",
+      "format": "png",
+      "width": 1300,
+      "height": 272,
+      "role": "logo-light",
+      "function": "assinatura horizontal para fundo claro",
+      "sha256": "094f8c484516ba79ae8ec1d5ebf4f856a99b4502748aac9e87655aa53fff893e"
+    },
+    {
+      "path": "logo/logo-light.svg",
+      "format": "svg",
+      "width": 1531,
+      "height": 320,
+      "role": "logo-light",
+      "function": "assinatura horizontal para fundo claro",
+      "sha256": "6ee9904bf9eda49939289e5493d88f3e75e7705b26b6f7ea56f89f97bc2cd64b"
+    }
+  ]
+}
