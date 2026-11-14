@@ -2,6 +2,13 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.9.4] - 2026-11-13
+
+### Corrigido
+
+- Workflows do CI e da release usam `actions/checkout@v5`, que roda no
+  Node.js 24 e remove o aviso de Node.js 20 descontinuado.
+
 ## [0.9.3] - 2026-11-13
 
 ### Adicionado
