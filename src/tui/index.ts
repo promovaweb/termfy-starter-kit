@@ -1,21 +1,29 @@
 /**
- * TUI assembly.
+ * TUI shell.
  *
  * Screen layout:
  *
- *   ┌ header: title, version and description ────────────────────────────┐
- *   │ tabs: " 1 ⌂ Overview "  " 2 ℹ About "  (click or press the number)  │
- *   │ active tab content (flexGrow)                                      │
- *   └ key bar: screen actions, help, quit (click runs) · status message ─┘
+ *   ▌ Title v1.0  │ description                         platform
+ *    1 ⌂ Overview   2 ⚙ Settings   3 ◈ Credentials   …   (click or number)
+ *   ────────────────────────────────────────────────────────────────────
+ *   active screen (or "terminal too small" below 60×16)
+ *   status text │ screen actions, help, quit (click runs)   ^K commands
  *
- * Every command has a key and a mouse path. Keys: Left/Right, [ ], Tab and
- * Shift+Tab switch tabs; 1..9 jump to the numbered tab; ? toggles the help
- * box; q, Esc or Ctrl+C quit (Esc closes the help first). Mouse: a click on
- * a tab opens it, the wheel over the tab bar moves between tabs, a click on
- * a key bar item or on a help row runs that command. Screen actions come
- * from `Screen.actions` and use the same dispatch for both paths.
- * The renderer is destroyed on every exit path to hand the terminal back.
+ * Every command has a key, a mouse path and a palette entry. Keys: ←/→,
+ * [ ] and 1..9 switch tabs; Tab / Shift+Tab move the focus between the
+ * focusable panels of the screen; Ctrl+K or : opens the command palette;
+ * ? opens the help; q, Esc or Ctrl+C quit (Esc closes a modal first). Mouse:
+ * click a tab, a bar item, a palette or help row, a button or a list row;
+ * the wheel over the tabs switches tabs. Modals (palette, help, dialogs)
+ * and toasts live in `overlays.ts`.
+ *
+ * The shell recomposes the active screen when the width class changes
+ * (`ctx.layout()`), refreshes screens whose `watch()` files change on disk,
+ * pauses screens while the terminal window is in the background, sets the
+ * window title and hands the terminal back on every exit path.
  */
+import { watch as watchFile, existsSync, type FSWatcher } from "node:fs";
+import { basename, dirname } from "node:path";
 import {
   BoxRenderable,
   TextRenderable,
@@ -23,47 +31,81 @@ import {
   createCliRenderer,
   type CliRenderer,
   type KeyEvent,
-  type MouseEvent,
+  type PasteEvent,
   type Renderable,
 } from "@opentui/core";
 import { manifest } from "../app/manifest.ts";
 import { readSettings, getPath } from "../config/settings.ts";
 import { glyphs, currentTheme, resolveTheme, type Theme } from "./theme.ts";
 import { currentIcons, withIcon, type IconSet } from "./icons.ts";
+import { clickable } from "./pointer.ts";
+import { Overlays, type HelpSection, type PaletteEntry } from "./overlays.ts";
 import { screens } from "./screens/index.ts";
-import type { NotifyTone, ScreenAction, ScreenContext, Screen } from "./screen.ts";
+import type { Layout, ScreenAction, ScreenContext, Screen } from "./screen.ts";
 
 export interface TuiOptions {
   initialTab?: string;
   /** Icon set; defaults to `tui.icons` and terminal detection. */
   icons?: IconSet;
+  /** Short animations; defaults to `tui.motion`. */
+  motion?: boolean;
 }
 
-/** Milliseconds a `notify` message stays in the key bar. */
-const NOTIFY_MS = 4000;
+/** Smallest terminal the shell lays screens out in. */
+export const MIN_WIDTH = 60;
+export const MIN_HEIGHT = 16;
+
+/** Width class for a terminal width. */
+export function layoutFor(width: number): Layout {
+  if (width >= 120) return "wide";
+  if (width >= 80) return "medium";
+  return "compact";
+}
+
+function setting(key: string): unknown {
+  try {
+    return getPath(readSettings(), key);
+  } catch {
+    return undefined;
+  }
+}
 
 function defaultInitialTab(): string {
-  try {
-    const value = getPath(readSettings(), "tui.initialTab");
-    if (typeof value === "string") return value;
-  } catch {
-    // Without settings, use the first tab.
-  }
-  return screens[0]?.id ?? "overview";
+  const value = setting("tui.initialTab");
+  return typeof value === "string" ? value : (screens[0]?.id ?? "overview");
 }
 
 /** Reads `tui.mouse`. Any failure keeps the mouse on. */
 export function mouseEnabled(): boolean {
-  try {
-    return getPath(readSettings(), "tui.mouse") !== false;
-  } catch {
-    return true;
-  }
+  return setting("tui.mouse") !== false;
+}
+
+/** Reads `tui.motion`. Any failure keeps animations on. */
+export function motionEnabled(): boolean {
+  return setting("tui.motion") !== false;
 }
 
 /** Label of an action key: explicit label or the first key name. */
 function keyLabel(action: ScreenAction): string {
   return action.label ?? action.keys[0] ?? "";
+}
+
+/** True when the focused renderable edits text and must receive letters. */
+function editsText(node: Renderable | null): boolean {
+  const name = node?.constructor?.name ?? "";
+  return name === "InputRenderable" || name === "TextareaRenderable";
+}
+
+/** Focusable descendants of `root`, in tree order. */
+function focusables(root: Renderable): Renderable[] {
+  const found: Renderable[] = [];
+  const visit = (node: Renderable) => {
+    if (!node.visible) return;
+    if (node.focusable) found.push(node);
+    for (const child of node.getChildren()) visit(child);
+  };
+  visit(root);
+  return found;
 }
 
 /**
@@ -77,6 +119,7 @@ export async function startTui(options: TuiOptions = {}): Promise<void> {
     backgroundColor: currentTheme().background,
     targetFps: 30,
     useMouse: mouseEnabled(),
+    useKittyKeyboard: {},
   });
   const theme = await resolveTheme(renderer);
   await mountTui(renderer, options, theme);
@@ -89,6 +132,8 @@ export async function startTui(options: TuiOptions = {}): Promise<void> {
  */
 export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, theme: Theme = currentTheme()): Promise<void> {
   const icons = options.icons ?? currentIcons();
+  const motion = options.motion ?? motionEnabled();
+  const overlays = new Overlays(renderer, theme, icons, motion);
   const closed = new Promise<void>((resolve) => renderer.once("destroy", () => resolve()));
   const quit = () => {
     if (!renderer.isDestroyed) renderer.destroy();
@@ -101,14 +146,8 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
     backgroundColor: theme.background,
   });
 
-  // Header: brand, description, platform.
-  const header = new BoxRenderable(renderer, {
-    height: 1,
-    flexDirection: "row",
-    paddingLeft: 1,
-    paddingRight: 1,
-    gap: 2,
-  });
+  // Header: brand, description, platform (the platform hides in compact).
+  const header = new BoxRenderable(renderer, { height: 1, flexDirection: "row", paddingLeft: 1, paddingRight: 1, gap: 2 });
   const brand = new BoxRenderable(renderer, { flexDirection: "row", flexShrink: 0 });
   brand.add(new TextRenderable(renderer, { content: `${glyphs.block} `, fg: theme.accent, selectable: false }));
   brand.add(new TextRenderable(renderer, { content: manifest.title, fg: theme.textStrong, attributes: TextAttributes.BOLD }));
@@ -125,14 +164,13 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
       height: 1,
     }),
   );
-  header.add(
-    new TextRenderable(renderer, {
-      content: `${process.platform}-${process.arch} ${glyphs.bullet} Bun ${Bun.version}`,
-      fg: theme.textDim,
-      flexShrink: 0,
-      wrapMode: "none",
-    }),
-  );
+  const platform = new TextRenderable(renderer, {
+    content: `${process.platform}-${process.arch} ${glyphs.bullet} Bun ${Bun.version}`,
+    fg: theme.textDim,
+    flexShrink: 0,
+    wrapMode: "none",
+  });
+  header.add(platform);
   app.add(header);
 
   // Tab bar: one clickable item per screen, numbered for the 1..9 keys.
@@ -141,39 +179,26 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
     flexDirection: "row",
     paddingLeft: 1,
     gap: 1,
-    onMouseScroll: (event: MouseEvent) => {
+    onMouseScroll: (event) => {
       const direction = event.scroll?.direction;
       if (direction === "up" || direction === "left") step(-1);
       else if (direction === "down" || direction === "right") step(1);
     },
   });
+  let hovered = -1;
   const tabItems = screens.map((screen, index) => {
-    const number = index < 9 ? `${index + 1} ` : "";
-    const label = new TextRenderable(renderer, {
-      content: ` ${number}${withIcon(icons, screen.icon ?? "list", screen.title)} `,
-      fg: theme.textDim,
-      wrapMode: "none",
-      selectable: false,
-    });
-    const item = new BoxRenderable(renderer, {
-      flexShrink: 0,
-      onMouseDown: (event: MouseEvent) => {
-        if (event.button !== 0) return;
-        event.stopPropagation();
-        show(index);
-      },
-      onMouseOver: () => {
-        hovered = index;
-        paintTabs();
-      },
-      onMouseOut: () => {
-        if (hovered === index) hovered = -1;
-        paintTabs();
-      },
-    });
+    const label = new TextRenderable(renderer, { content: "", fg: theme.textDim, wrapMode: "none", selectable: false });
+    const item = new BoxRenderable(renderer, { flexShrink: 0 });
     item.add(label);
+    clickable(renderer, item, {
+      onClick: () => show(index),
+      onHover: (inside) => {
+        hovered = inside ? index : hovered === index ? -1 : hovered;
+        paintTabs();
+      },
+    });
     tabBar.add(item);
-    return { item, label };
+    return { item, label, screen, index };
   });
   app.add(tabBar);
 
@@ -181,120 +206,184 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
   rule.add(new TextRenderable(renderer, { content: "─".repeat(400), fg: theme.border, wrapMode: "none", height: 1, selectable: false }));
   app.add(rule);
 
-  const content = new BoxRenderable(renderer, { flexGrow: 1, flexDirection: "column", paddingLeft: 1, paddingRight: 1 });
+  const content = new BoxRenderable(renderer, { flexGrow: 1, flexDirection: "column", paddingLeft: 1, paddingRight: 1, minHeight: 0 });
   app.add(content);
+  const tooSmall = new BoxRenderable(renderer, { flexGrow: 1, alignItems: "center", justifyContent: "center", flexDirection: "column" });
+  const tooSmallText = new TextRenderable(renderer, { content: "", fg: theme.warn, selectable: false });
+  tooSmall.add(tooSmallText);
+  tooSmall.add(new TextRenderable(renderer, { content: "Enlarge the window or press q to quit.", fg: theme.textDim, selectable: false }));
 
-  // Key bar: clickable actions on the left, status message on the right.
-  const bar = new BoxRenderable(renderer, {
-    height: 1,
-    flexDirection: "row",
-    backgroundColor: theme.barBackground,
-    paddingLeft: 1,
-    paddingRight: 1,
+  // Status bar: screen status, clickable actions, palette hint.
+  const bar = new BoxRenderable(renderer, { height: 1, flexDirection: "row", backgroundColor: theme.barBackground, paddingLeft: 1, paddingRight: 1, gap: 2 });
+  const statusText = new TextRenderable(renderer, { content: "", fg: theme.textDim, wrapMode: "none", flexShrink: 1, minWidth: 0, selectable: false });
+  let barItems = new BoxRenderable(renderer, { flexDirection: "row", gap: 2, flexGrow: 1, flexShrink: 1, minWidth: 0 });
+  const paletteHint = new BoxRenderable(renderer, { flexDirection: "row", flexShrink: 0 });
+  paletteHint.add(new TextRenderable(renderer, { content: " ^K ", fg: theme.keyText, bg: theme.keyBackground, selectable: false }));
+  const paletteLabel = new TextRenderable(renderer, { content: " commands", fg: theme.barText, selectable: false });
+  paletteHint.add(paletteLabel);
+  clickable(renderer, paletteHint, {
+    onClick: () => openPalette(),
+    onHover: (inside) => { paletteLabel.fg = inside ? theme.text : theme.barText; },
   });
-  let barItems = new BoxRenderable(renderer, { flexDirection: "row", gap: 2, flexGrow: 1 });
-  const status = new TextRenderable(renderer, { content: "", fg: theme.textDim, wrapMode: "none", flexShrink: 0, selectable: false });
+  statusText.visible = false;
+  bar.add(statusText);
+  /** Status text as the screen set it; the bar shows it whole or cut with an ellipsis. */
+  let fullStatus = "";
+  /** Fits the status into 40% of the width, ending with "…" when it is cut. */
+  const fitStatus = () => {
+    const max = Math.max(8, Math.floor(renderer.width * 0.4));
+    let shown = fullStatus;
+    if (Bun.stringWidth(shown) > max) {
+      const chars = Array.from(shown);
+      while (chars.length && Bun.stringWidth(chars.join("")) > max - 1) chars.pop();
+      shown = `${chars.join("").trimEnd()}…`;
+    }
+    statusText.content = shown;
+    statusText.visible = shown.length > 0;
+  };
   bar.add(barItems);
-  bar.add(status);
+  bar.add(paletteHint);
   app.add(bar);
   renderer.root.add(app);
 
   const mounted = new Map<string, Renderable>();
+  const stale = new Set<string>();
+  const screenStatuses = new Map<string, string>();
   let activeIndex = -1;
-  let hovered = -1;
-  let helpBox: BoxRenderable | undefined;
-  let notifyTimer: ReturnType<typeof setTimeout> | undefined;
-
+  let currentLayout: Layout = layoutFor(renderer.width);
+  let small = false;
   const active = (): Screen | undefined => screens[activeIndex];
-
-  const toneColor = (tone: NotifyTone) =>
-    tone === "ok" ? theme.ok : tone === "warn" ? theme.warn : tone === "error" ? theme.error : theme.text;
 
   const context: ScreenContext = {
     renderer,
     theme,
     icons,
+    motion,
+    layout: () => currentLayout,
     goTo: (id) => {
       const index = screens.findIndex((s) => s.id === id);
       if (index >= 0) show(index);
     },
-    refresh: () => {
-      const screen = active();
-      if (!screen) return;
-      const previous = mounted.get(screen.id);
-      screen.onLeave?.(context);
-      if (previous) previous.destroyRecursively();
-      const node = screen.mount(context);
-      mounted.set(screen.id, node);
-      content.add(node);
-      screen.onEnter?.(context);
+    refresh: () => remount(),
+    notify: (message, tone = "info") => overlays.toast(message, tone),
+    status: (text) => {
+      if (active()) screenStatuses.set(active()!.id, text);
+      fullStatus = text;
+      fitStatus();
+      if (activeIndex >= 0) refreshBar();
     },
-    notify: (message, tone = "info") => {
-      const icon = tone === "ok" ? icons.ok : tone === "warn" ? icons.warn : tone === "error" ? icons.error : "";
-      status.content = icon ? `${icon} ${message}` : message;
-      status.fg = toneColor(tone);
-      clearTimeout(notifyTimer);
-      notifyTimer = setTimeout(() => {
-        if (!renderer.isDestroyed) status.content = "";
-      }, NOTIFY_MS);
-    },
+    confirm: (opts) => overlays.confirm(opts),
+    prompt: (opts) => overlays.prompt(opts),
+    choose: (opts) => overlays.choose(opts),
     quit,
+  };
+
+  /** Runs an action, reporting a thrown or rejected error as a toast. */
+  const runAction = (action: ScreenAction) => {
+    try {
+      const result = action.run(context);
+      if (result instanceof Promise) result.catch((error) => context.notify(error instanceof Error ? error.message : String(error), "error"));
+    } catch (error) {
+      context.notify(error instanceof Error ? error.message : String(error), "error");
+    }
   };
 
   /** Global commands, shown after the screen actions. */
   const globalActions: ScreenAction[] = [
-    { keys: ["right", "]", "tab"], label: "←/→", description: "tab", icon: "tabs", run: () => step(1) },
-    { keys: ["?"], description: "help", icon: "help", run: () => toggleHelp() },
+    { keys: ["?"], description: "help", icon: "help", run: () => openHelp() },
     { keys: ["q", "escape"], description: "quit", icon: "quit", run: () => quit() },
   ];
 
-  /** Every action of the active screen, legacy key hints included as display-only entries. */
+  /** Actions of the active screen, legacy key hints included as display-only entries. */
   const screenActions = (): ScreenAction[] => {
     const screen = active();
     if (!screen) return [];
-    const hints: ScreenAction[] = (screen.keys ?? []).map((hint) => ({
-      keys: [],
-      label: hint.key,
-      description: hint.action,
-      run: () => undefined,
-    }));
+    const hints: ScreenAction[] = (screen.keys ?? []).map((hint) => ({ keys: [], label: hint.key, description: hint.action, run: () => undefined }));
     return [...(screen.actions ?? []), ...hints];
   };
 
+  const setTitle = () => {
+    try {
+      renderer.setTerminalTitle(`${manifest.title}${active() ? ` · ${active()!.title}` : ""}`);
+    } catch {
+      // Window titles are optional.
+    }
+  };
+
   const paintTabs = () => {
-    tabItems.forEach(({ item, label }, index) => {
+    for (const { item, label, screen, index } of tabItems) {
       const selected = index === activeIndex;
+      const number = index < 9 ? `${index + 1} ` : "";
+      // Compact terminals show the title only on the active tab.
+      const title = currentLayout === "compact" && !selected ? (icons[screen.icon ?? "list"] || screen.title.slice(0, 3)) : withIcon(icons, screen.icon ?? "list", screen.title);
+      label.content = ` ${number}${title} `;
       label.fg = selected ? theme.accent : index === hovered ? theme.text : theme.textDim;
       label.attributes = selected ? TextAttributes.BOLD | TextAttributes.UNDERLINE : TextAttributes.NONE;
       item.backgroundColor = selected ? theme.surfaceHigh : theme.background;
-    });
+    }
   };
 
   const barItem = (action: ScreenAction) => {
-    const item = new BoxRenderable(renderer, {
-      flexDirection: "row",
-      flexShrink: 0,
-      onMouseDown: (event: MouseEvent) => {
-        if (event.button !== 0) return;
-        event.stopPropagation();
-        action.run(context);
-      },
-    });
+    const item = new BoxRenderable(renderer, { flexDirection: "row", flexShrink: 0 });
     const text = new TextRenderable(renderer, { content: ` ${action.description}`, fg: theme.barText, selectable: false });
     item.add(new TextRenderable(renderer, { content: ` ${keyLabel(action)} `, fg: theme.keyText, bg: theme.keyBackground, selectable: false }));
     item.add(text);
-    item.onMouseOver = () => { text.fg = theme.text; };
-    item.onMouseOut = () => { text.fg = theme.barText; };
+    clickable(renderer, item, {
+      onClick: () => runAction(action),
+      onHover: (inside) => { text.fg = inside ? theme.text : theme.barText; },
+    });
     return item;
   };
 
   const refreshBar = () => {
     barItems.destroyRecursively();
-    bar.remove(status);
+    bar.remove(paletteHint);
     barItems = new BoxRenderable(renderer, { flexDirection: "row", gap: 2, flexGrow: 1, flexShrink: 1, minWidth: 0 });
-    for (const action of [...screenActions(), ...globalActions]) barItems.add(barItem(action));
+    // Compact terminals keep only the global commands; the palette lists the rest.
+    const own = currentLayout === "compact" ? [] : screenActions().filter((action) => !action.hidden);
+    const actionWidth = (action: ScreenAction) => Bun.stringWidth(keyLabel(action)) + Bun.stringWidth(action.description) + 5;
+    const statusWidth = statusText.visible ? Bun.stringWidth(String(statusText.content)) + 2 : 0;
+    let budget = renderer.width - 2 - 15 - 4 - statusWidth - globalActions.reduce((sum, action) => sum + actionWidth(action), 0);
+    for (const action of own) {
+      const width = actionWidth(action);
+      if (width > budget) continue;
+      barItems.add(barItem(action));
+      budget -= width;
+    }
+    for (const action of globalActions) barItems.add(barItem(action));
     bar.add(barItems);
-    bar.add(status);
+    bar.add(paletteHint);
+    platform.visible = currentLayout !== "compact";
+  };
+
+  /** Detaches the content of the active screen, blurring a focused child. */
+  const detach = (node: Renderable) => {
+    const focused = renderer.currentFocusedRenderable;
+    for (let parent: Renderable | null = focused; parent; parent = parent.parent) {
+      if (parent === node) {
+        focused?.blur();
+        break;
+      }
+    }
+    content.remove(node);
+  };
+
+  /** Rebuilds the active screen (onLeave, mount, onEnter). */
+  const remount = () => {
+    const screen = active();
+    if (!screen) return;
+    screen.onLeave?.(context);
+    const previous = mounted.get(screen.id);
+    if (previous) {
+      detach(previous);
+      previous.destroyRecursively();
+    }
+    stale.delete(screen.id);
+    const node = screen.mount(context);
+    mounted.set(screen.id, node);
+    if (!small) content.add(node);
+    screen.onEnter?.(context);
+    refreshBar();
   };
 
   const show = (index: number) => {
@@ -304,29 +393,26 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
     if (previous) {
       previous.onLeave?.(context);
       const node = mounted.get(previous.id);
-      if (node) {
-        // Detached cached content must not keep receiving keyboard input.
-        const focused = renderer.currentFocusedRenderable;
-        for (let parent: Renderable | null = focused; parent; parent = parent.parent) {
-          if (parent === node) { focused?.blur(); break; }
-        }
-        content.remove(node);
-      }
+      if (node && !small) detach(node);
     }
     activeIndex = index;
+    context.status(screenStatuses.get(screen.id) ?? "");
     let node = mounted.get(screen.id);
+    if (node && stale.has(screen.id)) {
+      node.destroyRecursively();
+      node = undefined;
+      stale.delete(screen.id);
+    }
     if (!node) {
       node = screen.mount(context);
       mounted.set(screen.id, node);
     }
-    content.add(node);
+    if (!small) content.add(node);
     screen.onEnter?.(context);
     paintTabs();
     refreshBar();
-    if (helpBox) {
-      closeHelp();
-      openHelp();
-    }
+    setTitle();
+    restartWatchers();
   };
 
   const step = (delta: number) => {
@@ -334,111 +420,233 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
     show((activeIndex + delta + screens.length) % screens.length);
   };
 
-  const closeHelp = () => {
-    if (!helpBox) return;
-    helpBox.destroyRecursively();
-    helpBox = undefined;
+  /** Moves the focus to the next (or previous) focusable panel of the screen. */
+  const cycleFocus = (delta: number) => {
+    const node = active() && mounted.get(active()!.id);
+    if (!node || small) return;
+    const list = focusables(node);
+    if (!list.length) return;
+    const current = list.findIndex((item) => item === renderer.currentFocusedRenderable);
+    const nextIndex = current < 0 ? (delta > 0 ? 0 : list.length - 1) : (current + delta + list.length) % list.length;
+    list[nextIndex]!.focus();
+  };
+
+  const openPalette = () => {
+    const entries: PaletteEntry[] = [];
+    const screen = active();
+    if (screen) {
+      for (const action of screenActions().filter((a) => a.keys.length)) {
+        entries.push({ label: `${screen.title}: ${action.description}`, hint: keyLabel(action), icon: action.icon, run: () => runAction(action) });
+      }
+    }
+    screens.forEach((target, index) => {
+      if (index !== activeIndex) entries.push({ label: `Go to ${target.title}`, hint: index < 9 ? String(index + 1) : undefined, icon: target.icon, run: () => show(index) });
+    });
+    screens.forEach((target, index) => {
+      if (index === activeIndex) return;
+      for (const action of target.actions ?? []) {
+        entries.push({
+          label: `${target.title}: ${action.description}`,
+          icon: action.icon,
+          run: () => {
+            show(index);
+            runAction(action);
+          },
+        });
+      }
+    });
+    entries.push({ label: "Reload this screen", icon: "refresh", run: () => remount() });
+    entries.push({ label: "Help: keys and mouse", hint: "?", icon: "help", run: () => openHelp() });
+    entries.push({ label: "Quit", hint: "q", icon: "quit", run: () => quit() });
+    overlays.palette(entries);
   };
 
   const openHelp = () => {
     const screen = active();
-    helpBox = new BoxRenderable(renderer, {
-      position: "absolute",
-      right: 2,
-      top: 3,
-      width: 56,
-      flexDirection: "column",
-      borderStyle: "rounded",
-      borderColor: theme.borderActive,
-      backgroundColor: theme.surfaceHigh,
-      title: ` ${withIcon(icons, "keyboard", "Keys")} `,
-      titleColor: theme.accent,
-      paddingLeft: 1,
-      paddingRight: 1,
-      zIndex: 10,
-    });
-    const box = helpBox;
-    const row = (key: string, description: string, run?: () => void, iconName?: ScreenAction["icon"]) => {
-      const line = new BoxRenderable(renderer, {
-        flexDirection: "row",
-        height: 1,
-        onMouseDown: run
-          ? (event: MouseEvent) => {
-              if (event.button !== 0) return;
-              event.stopPropagation();
-              closeHelp();
-              run();
-            }
-          : undefined,
-      });
-      line.add(new TextRenderable(renderer, { content: key.padEnd(16), fg: theme.accent, selectable: false }));
-      line.add(new TextRenderable(renderer, { content: iconName ? withIcon(icons, iconName, description) : description, fg: theme.text, selectable: false }));
-      box.add(line);
-    };
-    const section = (title: string) =>
-      box.add(new TextRenderable(renderer, { content: title, fg: theme.textDim, attributes: TextAttributes.BOLD, selectable: false }));
-
+    const sections: HelpSection[] = [];
     const own = screenActions();
     if (screen && own.length) {
-      section(withIcon(icons, screen.icon ?? "list", screen.title));
-      for (const action of own) row(keyLabel(action), action.description, action.keys.length ? () => action.run(context) : undefined, action.icon);
+      sections.push({
+        title: withIcon(icons, screen.icon ?? "list", screen.title),
+        rows: own.map((action) => ({ key: keyLabel(action), description: action.description, icon: action.icon, run: action.keys.length ? () => runAction(action) : undefined })),
+      });
     }
-    section("Global");
-    row("←  →  [  ]", "previous / next tab", () => step(1), "tabs");
-    row("Tab  Shift+Tab", "next / previous tab");
-    row(`1 … ${Math.min(9, screens.length)}`, "go to the tab with that number");
-    row("?", "show or hide this help");
-    row("Esc", "close this help", undefined, "close");
-    row("q  Ctrl+C", "quit", () => quit(), "quit");
-    section("Mouse");
-    row("click", "open a tab, run a key or a row");
-    row("wheel", "scroll a list or switch tabs");
-    renderer.root.add(box);
+    sections.push({
+      title: "Global",
+      rows: [
+        { key: "Ctrl+K  :", description: "command palette", icon: "keyboard", run: () => openPalette() },
+        { key: "←  →  [  ]", description: "previous / next tab", icon: "tabs", run: () => step(1) },
+        { key: `1 … ${Math.min(9, screens.length)}`, description: "go to the tab with that number" },
+        { key: "Tab  Shift+Tab", description: "next / previous panel" },
+        { key: "Esc", description: "close a dialog; quit when none is open", icon: "close" },
+        { key: "q  Ctrl+C", description: "quit", icon: "quit", run: () => quit() },
+      ],
+    });
+    sections.push({
+      title: "Mouse",
+      rows: [
+        { key: "click", description: "tab, bar item, button, row, dialog button" },
+        { key: "wheel", description: "scroll a list; over the tabs, switch tab" },
+        { key: "Shift+drag", description: "select text in most terminals" },
+      ],
+    });
+    overlays.help(sections);
   };
 
-  const toggleHelp = () => {
-    if (helpBox) closeHelp();
-    else openHelp();
+  // Layout: recompose on width class change; replace the screen when too small.
+  const applySize = () => {
+    const wasSmall = small;
+    const nextSmall = renderer.width < MIN_WIDTH || renderer.height < MIN_HEIGHT;
+    const nextLayout = layoutFor(renderer.width);
+    const node = active() && mounted.get(active()!.id);
+    if (nextSmall !== small) {
+      small = nextSmall;
+      if (small) {
+        if (node) detach(node);
+        content.add(tooSmall);
+      } else {
+        content.remove(tooSmall);
+        if (node) content.add(node);
+      }
+    }
+    tooSmallText.content = withIcon(icons, "warn", `Terminal too small: ${renderer.width}×${renderer.height}, needs ${MIN_WIDTH}×${MIN_HEIGHT}.`);
+    if (nextLayout !== currentLayout) {
+      currentLayout = nextLayout;
+      for (const screen of screens) if (screen !== active() && mounted.has(screen.id)) stale.add(screen.id);
+      if (small && active()) stale.add(active()!.id);
+      else remount();
+      paintTabs();
+      refreshBar();
+    } else if (wasSmall && !small && active() && stale.has(active()!.id)) {
+      remount();
+    }
+    fitStatus();
+    refreshBar();
   };
+  const onResize = () => applySize();
+  renderer.on("resize", onResize);
+
+  // Files watched by the active screen: refresh on change (debounced).
+  let watchers: FSWatcher[] = [];
+  let watchTimer: ReturnType<typeof setTimeout> | undefined;
+  const stopWatchers = () => {
+    for (const watcher of watchers) watcher.close();
+    watchers = [];
+    clearTimeout(watchTimer);
+  };
+  const restartWatchers = () => {
+    stopWatchers();
+    const files = active()?.watch?.() ?? [];
+    const byDir = new Map<string, Set<string>>();
+    for (const file of files) {
+      let target = file;
+      let dir = dirname(target);
+      while (!existsSync(dir) && dirname(dir) !== dir) {
+        target = dir;
+        dir = dirname(dir);
+      }
+      if (!byDir.has(dir)) byDir.set(dir, new Set());
+      byDir.get(dir)!.add(basename(target));
+    }
+    for (const [dir, names] of byDir) {
+      try {
+        watchers.push(
+          watchFile(dir, (_event, name) => {
+            if (name && !names.has(String(name))) return;
+            clearTimeout(watchTimer);
+            const update = () => {
+              if (renderer.isDestroyed) return;
+              if (overlays.isOpen) {
+                watchTimer = setTimeout(update, 100);
+                return;
+              }
+              restartWatchers();
+              remount();
+              context.notify("Updated from disk", "info");
+            };
+            watchTimer = setTimeout(update, 250);
+          }),
+        );
+      } catch {
+        // An ancestor can disappear between resolving its path and watching it.
+      }
+    }
+  };
+
+  // Terminal window focus: pause and resume the active screen.
+  const onBlur = () => active()?.onPause?.(context);
+  const onFocus = () => active()?.onResume?.(context);
+  renderer.on("blur", onBlur);
+  renderer.on("focus", onFocus);
 
   const onKey = (key: KeyEvent) => {
     const name = key.name;
-    // Modified letters must not invoke unmodified screen actions.
-    if (key.ctrl && name === "c") { key.preventDefault(); return quit(); }
+    if (key.ctrl && name === "c") {
+      key.preventDefault();
+      return quit();
+    }
+    if (overlays.handleKey(key)) return;
+    if (key.ctrl && name === "k") {
+      key.preventDefault();
+      return openPalette();
+    }
+    // A text field keeps letters, digits and arrows; Esc leaves it, Tab moves on.
+    if (editsText(renderer.currentFocusedRenderable)) {
+      if (name === "escape") {
+        key.preventDefault();
+        renderer.currentFocusedRenderable?.blur();
+      } else if (name === "tab") {
+        key.preventDefault();
+        cycleFocus(key.shift ? -1 : 1);
+      }
+      return;
+    }
     if (key.ctrl || key.meta) return;
-    if (helpBox && (name === "escape" || name === "?")) {
-      key.preventDefault();
-      closeHelp();
+    if (small) {
+      if (name === "q" || name === "escape") quit();
       return;
     }
-    if (active()?.onKey?.(name, context)) { key.preventDefault(); return; }
+    const consume = (run: () => void) => {
+      key.preventDefault();
+      run();
+    };
+    if (name === ":") return consume(openPalette);
+    if (active()?.onKey?.(name, context)) return consume(() => undefined);
     const own = active()?.actions?.find((action) => action.keys.includes(name));
-    if (own) {
-      key.preventDefault();
-      own.run(context);
-      return;
-    }
-    if (name === "tab" && key.shift) { key.preventDefault(); return step(-1); }
-    if (name === "left" || name === "[") { key.preventDefault(); return step(-1); }
+    if (own) return consume(() => runAction(own));
+    if (name === "tab") return consume(() => cycleFocus(key.shift ? -1 : 1));
+    if (name === "left" || name === "[") return consume(() => step(-1));
+    if (name === "right" || name === "]") return consume(() => step(1));
     if (/^[1-9]$/.test(name)) {
-      key.preventDefault();
       const index = Number(name) - 1;
-      if (index < screens.length) show(index);
-      return;
+      return consume(() => {
+        if (index < screens.length) show(index);
+      });
     }
     const global = globalActions.find((action) => action.keys.includes(name));
-    if (global) { key.preventDefault(); global.run(context); }
+    if (global) consume(() => runAction(global));
+  };
+  const onPaste = (event: PasteEvent) => {
+    overlays.handlePaste(event);
   };
   renderer.keyInput.on("keypress", onKey);
+  renderer.keyInput.on("paste", onPaste);
   renderer.once("destroy", () => {
     renderer.keyInput.off("keypress", onKey);
-    clearTimeout(notifyTimer);
+    renderer.keyInput.off("paste", onPaste);
+    renderer.off("resize", onResize);
+    renderer.off("blur", onBlur);
+    renderer.off("focus", onFocus);
+    stopWatchers();
+    overlays.destroy();
     active()?.onLeave?.(context);
     // Hidden tabs are detached from the root, so the renderer cannot own their cleanup.
     for (const node of mounted.values()) node.destroyRecursively();
     mounted.clear();
+    tooSmall.destroyRecursively();
   });
 
+  applySize();
   const initial = options.initialTab ?? defaultInitialTab();
   show(Math.max(0, screens.findIndex((s) => s.id === initial)));
 

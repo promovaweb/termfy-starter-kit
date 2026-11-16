@@ -2,6 +2,53 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.12.0] - 2026-11-16
+
+### Adicionado
+
+- Paleta de comandos (`Ctrl+K` ou `:`) com busca por nome nas ações de
+  todas as abas, nas trocas de aba e nos comandos globais, por teclado e
+  mouse.
+- Diálogos modais `ctx.confirm` (com `danger`), `ctx.prompt` (com
+  `secret`, `validate` e colar) e `ctx.choose`. Clique fora cancela.
+- Toasts empilhados no canto inferior direito (`ctx.notify`) e texto de
+  contexto da aba na barra de status (`ctx.status`).
+- Layout responsivo: `ctx.layout()` devolve `wide`, `medium` ou `compact`.
+  A tela é remontada quando a faixa muda. Abaixo de 60×16 aparece
+  "Terminal too small".
+- Foco entre painéis com `Tab` e `Shift+Tab`. Campos de texto recebem
+  letras e números sem disparar ações.
+- `Screen.watch()`: a aba recarrega quando outro processo altera um
+  arquivo vigiado. `onPause` e `onResume` quando a janela do terminal perde
+  ou ganha foco.
+- Título da janela com a aba ativa, ponteiro de mão sobre o que é
+  clicável (`src/tui/pointer.ts`), teclado Kitty e a setting `tui.motion`
+  para as animações curtas.
+- Abas novas: Settings (edita cada key do schema com o controle certo),
+  Credentials (nomes do cofre, adicionar com valor secreto, trocar e
+  remover com confirmação, sem mostrar valores) e Docs (documentação
+  embutida em Markdown com índice clicável).
+- Componentes `table` (ordena pelo cabeçalho, linhas clicáveis),
+  `stateView`, `spinner`, `progressBar` e `link` (hyperlink OSC 8).
+- About com logotipo em ASCII art no layout largo e links clicáveis.
+- `src/tui/overlays.ts` com diálogos, paleta, help e toasts.
+- Testes do shell, dos diálogos, da paleta, dos componentes e das abas
+  novas, com 131 testes no total.
+
+### Alterado
+
+- `Tab` passa o foco entre painéis. A troca de aba fica com `←` `→`,
+  `[` `]`, os números, o clique e a roda sobre as abas.
+- O help virou modal, com linhas clicáveis.
+- A barra mostra o status da aba, as ações que cabem, `? help`, `q quit` e
+  `^K commands`. No layout compacto ficam só os comandos globais.
+- `tui.initialTab` aceita `overview`, `settings`, `credentials`, `docs` e
+  `about`.
+- `template/screen/example.ts` segue o padrão lista e detalhe.
+- `docs/tui.md`, `docs/configuration.md`, `docs/architecture.md` e o
+  frame do `README.md` descrevem a interface nova.
+- Skills do Termfy atualizadas para a 0.14.0.
+
 ## [0.11.0] - 2026-11-16
 
 ### Adicionado

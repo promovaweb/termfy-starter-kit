@@ -1,6 +1,6 @@
 # OpenCLI no Termfy
 
-A OpenCLI Specification (https://opencli.org) descreve a interface de um CLI
+A OpenCLI Specification (<https://opencli.org>) descreve a interface de um CLI
 em JSON para que pessoas e máquinas saibam invocá-lo sem ler o código. O
 Termfy gera esse documento a partir do registro de comandos
 (`src/cli/opencli.ts`) e o expõe de três formas:

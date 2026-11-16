@@ -5,11 +5,34 @@
  * an icon. `keyValueRow` builds "label  value" with a dimmed label. `list`
  * stacks items with a marker. `button` and `listPanel` are clickable and
  * show hover; each one runs the same function as its keyboard shortcut.
+ * Components inherit the screen's layout constraints in wide, medium and
+ * compact mode; they do not choose breakpoints or watch files themselves.
+ * Lists handle Up/k, Down/j and Enter. Tables also handle Home/End and
+ * PageUp/PageDown; header clicks sort, row clicks select and a second click
+ * activates. Buttons display their screen action key, and links copy on click.
  * Everything receives the theme so screens never hard-code colors.
  */
-import { ScrollBoxRenderable, BoxRenderable, TextRenderable, TextAttributes, type CliRenderer, type ColorInput, type MouseEvent } from "@opentui/core";
+import {
+  ScrollBoxRenderable,
+  BoxRenderable,
+  TextRenderable,
+  TextAttributes,
+  type CliRenderer,
+  type ColorInput,
+  type KeyEvent,
+  LinearScrollAccel,
+  StyledText,
+  link as styledLink,
+} from "@opentui/core";
+import { clickable } from "./pointer.ts";
 import { glyphs, type Theme } from "./theme.ts";
-import { withIcon, type IconName, type IconSet } from "./icons.ts";
+import {
+  withIcon,
+  currentIcons,
+  iconSets,
+  type IconName,
+  type IconSet,
+} from "./icons.ts";
 
 /** Optional icon for a panel title: the set and the role. */
 export interface TitleIcon {
@@ -21,9 +44,18 @@ export interface TitleIcon {
 export function panel(
   renderer: CliRenderer,
   theme: Theme,
-  options: { title: string; icon?: TitleIcon; flexGrow?: number; width?: number | "auto" | `${number}%`; height?: number | "auto" | `${number}%`; active?: boolean },
+  options: {
+    title: string;
+    icon?: TitleIcon;
+    flexGrow?: number;
+    width?: number | "auto" | `${number}%`;
+    height?: number | "auto" | `${number}%`;
+    active?: boolean;
+  },
 ): BoxRenderable {
-  const title = options.icon ? withIcon(options.icon.icons, options.icon.name, options.title) : options.title;
+  const title = options.icon
+    ? withIcon(options.icon.icons, options.icon.name, options.title)
+    : options.title;
   return new BoxRenderable(renderer, {
     flexGrow: options.flexGrow,
     width: options.width,
@@ -49,14 +81,33 @@ export function keyValueRow(
   valueColor?: ColorInput,
 ): BoxRenderable {
   const row = new BoxRenderable(renderer, { flexDirection: "row", height: 1 });
-  row.add(new TextRenderable(renderer, { content: key.padEnd(keyWidth), fg: theme.textDim, selectable: false, flexShrink: 0 }));
+  row.add(
+    new TextRenderable(renderer, {
+      content: key.padEnd(keyWidth),
+      fg: theme.textDim,
+      selectable: false,
+      flexShrink: 0,
+    }),
+  );
   row.add(new TextRenderable(renderer, { content: "  ", flexShrink: 0 }));
-  row.add(new TextRenderable(renderer, { content: value, fg: valueColor ?? theme.text, wrapMode: "none", flexShrink: 1, minWidth: 0 }));
+  row.add(
+    new TextRenderable(renderer, {
+      content: value,
+      fg: valueColor ?? theme.text,
+      wrapMode: "none",
+      flexShrink: 1,
+      minWidth: 0,
+    }),
+  );
   return row;
 }
 
 /** Creates aligned key/value rows. */
-export function keyValueTable(renderer: CliRenderer, theme: Theme, pairs: Array<[string, string, ColorInput?]>): BoxRenderable {
+export function keyValueTable(
+  renderer: CliRenderer,
+  theme: Theme,
+  pairs: Array<[string, string, ColorInput?]>,
+): BoxRenderable {
   const box = new BoxRenderable(renderer, { flexDirection: "column" });
   const width = Math.max(...pairs.map(([k]) => k.length));
   for (const [k, v, c] of pairs) box.add(keyValueRow(renderer, theme, k, v, width, c));
@@ -64,8 +115,16 @@ export function keyValueTable(renderer: CliRenderer, theme: Theme, pairs: Array<
 }
 
 /** Creates a strong heading. */
-export function heading(renderer: CliRenderer, theme: Theme, text: string): TextRenderable {
-  return new TextRenderable(renderer, { content: text, fg: theme.textStrong, attributes: TextAttributes.BOLD });
+export function heading(
+  renderer: CliRenderer,
+  theme: Theme,
+  text: string,
+): TextRenderable {
+  return new TextRenderable(renderer, {
+    content: text,
+    fg: theme.textStrong,
+    attributes: TextAttributes.BOLD,
+  });
 }
 
 /** Creates secondary text. */
@@ -74,7 +133,12 @@ export function dim(renderer: CliRenderer, theme: Theme, text: string): TextRend
 }
 
 /** Creates a static bulleted list. */
-export function list(renderer: CliRenderer, theme: Theme, items: string[], marker = glyphs.bullet): BoxRenderable {
+export function list(
+  renderer: CliRenderer,
+  theme: Theme,
+  items: string[],
+  marker = glyphs.bullet,
+): BoxRenderable {
   const box = new BoxRenderable(renderer, { flexDirection: "column" });
   for (const item of items) {
     const row = new BoxRenderable(renderer, { flexDirection: "row" });
@@ -90,23 +154,47 @@ export function list(renderer: CliRenderer, theme: Theme, items: string[], marke
  * `onPress`; the screen also lists the same function in `actions` with
  * `key`, so the button and the shortcut stay the same command.
  */
-export function button(renderer: CliRenderer, theme: Theme, options: { key: string; label: string; icon?: TitleIcon; onPress: () => void }): BoxRenderable {
-  const label = options.icon ? withIcon(options.icon.icons, options.icon.name, options.label) : options.label;
-  const text = new TextRenderable(renderer, { content: ` ${label}`, fg: theme.text, selectable: false });
+export function button(
+  renderer: CliRenderer,
+  theme: Theme,
+  options: {
+    key: string;
+    label: string;
+    icon?: TitleIcon;
+    onPress: () => void;
+  },
+): BoxRenderable {
+  const label = options.icon
+    ? withIcon(options.icon.icons, options.icon.name, options.label)
+    : options.label;
+  const text = new TextRenderable(renderer, {
+    content: ` ${label}`,
+    fg: theme.text,
+    selectable: false,
+  });
   const box = new BoxRenderable(renderer, {
     flexDirection: "row",
     height: 1,
     flexShrink: 0,
-    onMouseDown: (event: MouseEvent) => {
-      if (event.button !== 0) return;
-      event.stopPropagation();
-      options.onPress();
-    },
-    onMouseOver: () => { text.fg = theme.accent; },
-    onMouseOut: () => { text.fg = theme.text; },
   });
-  box.add(new TextRenderable(renderer, { content: ` ${options.key} `, fg: theme.keyText, bg: theme.keyBackground, selectable: false }));
+  box.add(
+    new TextRenderable(renderer, {
+      content: ` ${options.key} `,
+      fg: theme.keyText,
+      bg: theme.keyBackground,
+      selectable: false,
+    }),
+  );
   box.add(text);
+
+  function updateHover(inside: boolean): void {
+    text.fg = inside ? theme.accent : theme.text;
+  }
+
+  clickable(renderer, box, {
+    onClick: options.onPress,
+    onHover: updateHover,
+  });
   return box;
 }
 
@@ -122,21 +210,34 @@ export function spacer(renderer: CliRenderer, height = 1): BoxRenderable {
  * Mouse: a click on a row selects it, hover marks the row under the pointer
  * and the wheel scrolls the list.
  */
-export function listPanel(renderer: CliRenderer, theme: Theme, options: {
-  title: string;
-  items: string[];
-  onSelect?: (index: number) => void;
-}) {
+export function listPanel(
+  renderer: CliRenderer,
+  theme: Theme,
+  options: {
+    title: string;
+    items: string[];
+    onSelect?: (index: number) => void;
+  },
+) {
   const box = new ScrollBoxRenderable(renderer, {
-    title: ` ${options.title} `, titleColor: theme.accent,
-    borderStyle: "rounded", borderColor: theme.borderActive,
-    backgroundColor: theme.surface, paddingLeft: 1, paddingRight: 1,
-    flexGrow: 1, minHeight: 0, scrollY: true, scrollX: false,
+    title: ` ${options.title} `,
+    titleColor: theme.accent,
+    borderStyle: "rounded",
+    borderColor: theme.borderActive,
+    backgroundColor: theme.surface,
+    paddingLeft: 1,
+    paddingRight: 1,
+    flexGrow: 1,
+    minHeight: 0,
+    scrollY: true,
+    scrollX: false,
+    scrollAcceleration: new LinearScrollAccel(),
     contentOptions: { flexDirection: "column" },
   });
   let index = options.items.length ? 0 : -1;
   let hovered = -1;
-  const rows = options.items.map((item, i) => {
+  /** Builds one row with mouse selection and hover routed through shared state. */
+  function createRow(item: string, i: number): TextRenderable {
     const row = new TextRenderable(renderer, {
       content: item,
       height: 1,
@@ -144,42 +245,417 @@ export function listPanel(renderer: CliRenderer, theme: Theme, options: {
       wrapMode: "none",
       fg: theme.text,
       selectable: false,
-      onMouseDown: (event: MouseEvent) => {
-        if (event.button !== 0) return;
-        event.stopPropagation();
-        select(i);
-      },
-      onMouseOver: () => { hovered = i; paint(); },
-      onMouseOut: () => { if (hovered === i) hovered = -1; paint(); },
+    });
+    function updateHover(inside: boolean): void {
+      hovered = inside ? i : -1;
+      paint();
+    }
+
+    clickable(renderer, row, {
+      onClick: () => select(i),
+      onHover: updateHover,
     });
     box.add(row);
     return row;
-  });
-  const paint = () => {
-    rows.forEach((row, i) => {
+  }
+
+  const rows = options.items.map(createRow);
+
+  /** Repaints selection and hover without activating an item. */
+  function paint(): void {
+    for (const [i, row] of rows.entries()) {
       row.content = `${i === index ? ">" : " "} ${options.items[i]}`;
       row.fg = i === index ? theme.accent : i === hovered ? theme.textStrong : theme.text;
       row.bg = i === index ? theme.surfaceHigh : theme.surface;
-    });
-  };
-  const highlight = (next: number) => {
+    }
+  }
+
+  /** Clamps the selection and keeps it inside the scroll viewport. */
+  function highlight(next: number): void {
     if (!rows.length || !Number.isFinite(next)) return;
     index = Math.max(0, Math.min(rows.length - 1, Math.trunc(next)));
     paint();
     box.scrollChildIntoView(rows[index]!);
-  };
-  const select = (next: number) => {
+  }
+
+  /** Selects a display index and reports it without activating the row. */
+  function select(next: number): void {
     if (!rows.length || !Number.isFinite(next)) return;
     highlight(next);
     options.onSelect?.(index);
-  };
-  const move = (delta: number) => highlight(index + delta);
-  box.handleKeyPress = (key) => {
-    if (key.name === "up" || key.name === "k") { move(-1); return true; }
-    if (key.name === "down" || key.name === "j") { move(1); return true; }
-    if (key.name === "return" || key.name === "enter") { select(index); return true; }
+  }
+
+  function move(delta: number): void {
+    highlight(index + delta);
+  }
+
+  function handleKeyPress(key: KeyEvent): boolean {
+    if (key.name === "up" || key.name === "k") {
+      move(-1);
+      return true;
+    }
+    if (key.name === "down" || key.name === "j") {
+      move(1);
+      return true;
+    }
+    if (key.name === "return" || key.name === "enter") {
+      select(index);
+      return true;
+    }
     return false;
-  };
+  }
+
+  box.handleKeyPress = handleKeyPress;
   highlight(index);
   return { box, select, selected: () => index, move };
+}
+
+/** A sortable table column, measured in terminal cells. */
+export interface TableColumn {
+  key: string;
+  title: string;
+  width?: number;
+  align?: "left" | "right" | "center";
+}
+
+/** Builds a sortable, scrollable table with selection and activation. */
+export function table(
+  renderer: CliRenderer,
+  theme: Theme,
+  options: {
+    columns: TableColumn[];
+    rows: Record<string, string>[];
+    empty?: string;
+    onSelect?: (index: number) => void;
+    onActivate?: (index: number) => void;
+  },
+) {
+  const box = new BoxRenderable(renderer, {
+    flexDirection: "column",
+    flexGrow: 1,
+    minHeight: 0,
+  });
+  const header = new BoxRenderable(renderer, {
+    flexDirection: "row",
+    height: 1,
+    flexShrink: 0,
+  });
+  const body = new ScrollBoxRenderable(renderer, {
+    flexGrow: 1,
+    minHeight: 0,
+    scrollY: true,
+    scrollX: false,
+    scrollAcceleration: new LinearScrollAccel(),
+  });
+  box.add(header);
+  box.add(body);
+  let rows = [...options.rows];
+  let index = rows.length ? 0 : -1;
+  let lastClicked = -1;
+  let sortKey = "";
+  let descending = false;
+  let rowNodes: BoxRenderable[] = [];
+  const headers: TextRenderable[] = [];
+  /** Uses fixed or flexible cell width while preserving the column alignment. */
+  function cell(text: string, column: TableColumn): TextRenderable {
+    return new TextRenderable(renderer, {
+      content: text,
+      width: column.width,
+      flexGrow: column.width ? 0 : 1,
+      flexShrink: 1,
+      minWidth: 0,
+      height: 1,
+      wrapMode: "none",
+      selectable: false,
+      textAlign: column.align ?? "left",
+      fg: theme.text,
+    });
+  }
+  /** Applies the selected-row colors to every cell in the table. */
+  function paint(): void {
+    for (const [i, node] of rowNodes.entries()) {
+      node.backgroundColor = i === index ? theme.surfaceHigh : theme.surface;
+      for (const child of node.getChildren()) {
+        (child as TextRenderable).fg = i === index ? theme.accent : theme.text;
+      }
+    }
+  }
+  /** Reports a clamped display index without activating the selected row. */
+  function select(next: number): void {
+    if (!rows.length || !Number.isFinite(next)) return;
+    index = Math.max(0, Math.min(rows.length - 1, Math.trunc(next)));
+    paint();
+    body.scrollChildIntoView(rowNodes[index]!);
+    options.onSelect?.(index);
+  }
+  /** Replaces table rows after sorting or data replacement, retaining selection. */
+  function rebuild(): void {
+    for (const node of body.getChildren()) {
+      body.remove(node);
+      node.destroyRecursively();
+    }
+    function createRow(row: Record<string, string>, i: number): BoxRenderable {
+      const node = new BoxRenderable(renderer, {
+        flexDirection: "row",
+        height: 1,
+        flexShrink: 0,
+      });
+      for (const column of options.columns) node.add(cell(row[column.key] ?? "", column));
+      /** A second click on the same selected row activates it. */
+      function clickRow(): void {
+        const activate = lastClicked === i && index === i;
+        select(i);
+        lastClicked = i;
+        if (activate) options.onActivate?.(i);
+      }
+
+      function updateHover(inside: boolean): void {
+        node.backgroundColor = inside || index === i ? theme.surfaceHigh : theme.surface;
+      }
+
+      clickable(renderer, node, {
+        onClick: clickRow,
+        onHover: updateHover,
+      });
+      body.add(node);
+      return node;
+    }
+
+    rowNodes = rows.map(createRow);
+    if (!rows.length) body.add(dim(renderer, theme, options.empty ?? "No items"));
+    paint();
+  }
+  /** Toggles sort direction and preserves selection by row identity. */
+  function sortBy(key: string): void {
+    const selectedRow = rows[index];
+    lastClicked = -1;
+    descending = sortKey === key ? !descending : false;
+    sortKey = key;
+    rows.sort(
+      (a, b) => (a[key] ?? "").localeCompare(b[key] ?? "") * (descending ? -1 : 1),
+    );
+    // Keep the caller's array in display order so callback indices stay meaningful.
+    options.rows.splice(0, options.rows.length, ...rows);
+    index = selectedRow ? rows.indexOf(selectedRow) : -1;
+    for (const [i, node] of headers.entries()) {
+      const col = options.columns[i]!;
+      node.content = `${col.title}${col.key === key ? (descending ? " ▼" : " ▲") : ""}`;
+    }
+    rebuild();
+    if (index >= 0) options.onSelect?.(index);
+  }
+  for (const column of options.columns) {
+    const node = cell(column.title, column);
+    node.fg = theme.textStrong;
+    clickable(renderer, node, {
+      onClick: () => sortBy(column.key),
+      onHover: (inside) => {
+        node.fg = inside ? theme.accent : theme.textStrong;
+      },
+    });
+    headers.push(node);
+    header.add(node);
+  }
+  function move(delta: number): void {
+    select(index + delta);
+  }
+
+  function handleKeyPress(key: KeyEvent): boolean {
+    switch (key.name) {
+      case "up":
+      case "k":
+        move(-1);
+        return true;
+      case "down":
+      case "j":
+        move(1);
+        return true;
+      case "home":
+        select(0);
+        return true;
+      case "end":
+        select(rows.length - 1);
+        return true;
+      case "pageup":
+        move(-Math.max(1, body.height - 1));
+        return true;
+      case "pagedown":
+        move(Math.max(1, body.height - 1));
+        return true;
+      case "return":
+      case "enter":
+        if (index >= 0) options.onActivate?.(index);
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  body.handleKeyPress = handleKeyPress;
+  box.handleKeyPress = (key) => body.handleKeyPress(key);
+  rebuild();
+  return {
+    box,
+    move,
+    select,
+    selected: () => index,
+    sortBy,
+    /** Replaces data without retaining a stale double-click activation. */
+    setRows(next: Record<string, string>[]) {
+      lastClicked = -1;
+      rows = [...next];
+      options.rows = next;
+      index = rows.length ? Math.max(0, Math.min(index, rows.length - 1)) : -1;
+      rebuild();
+    },
+  };
+}
+
+/** Builds a centered loading, empty or error message with an optional action. */
+export function stateView(
+  renderer: CliRenderer,
+  theme: Theme,
+  icons: IconSet,
+  options: {
+    kind: "loading" | "empty" | "error";
+    title: string;
+    message?: string;
+    action?: { key: string; label: string; onPress: () => void };
+  },
+): BoxRenderable {
+  const box = new BoxRenderable(renderer, {
+    flexDirection: "column",
+    flexGrow: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  });
+  const icon =
+    icons[
+      options.kind === "error" ? "error" : options.kind === "loading" ? "refresh" : "list"
+    ];
+  box.add(
+    new TextRenderable(renderer, {
+      content: `${icon} ${options.title}`,
+      fg: options.kind === "error" ? theme.error : theme.textStrong,
+    }),
+  );
+  if (options.message) box.add(dim(renderer, theme, options.message));
+  if (options.action) box.add(button(renderer, theme, options.action));
+  return box;
+}
+
+/** Creates an explicitly started spinner and releases its timer on destruction. */
+export function spinner(
+  renderer: CliRenderer,
+  theme: Theme,
+  options: { label: string; ascii?: boolean },
+) {
+  const frames =
+    (options.ascii ?? currentIcons() === iconSets.ascii)
+      ? ["|", "/", "-", "\\"]
+      : ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+  let label = options.label;
+  let frame = 0;
+  let timer: ReturnType<typeof setInterval> | undefined;
+  const box = new TextRenderable(renderer, {
+    content: `${frames[0]} ${label}`,
+    fg: theme.accent,
+    height: 1,
+  });
+  function paint(): void {
+    box.content = `${frames[frame]} ${label}`;
+  }
+  function stop(): void {
+    if (timer) clearInterval(timer);
+    timer = undefined;
+  }
+  /** Releases the interval on node or renderer destruction. */
+  function cleanup(): void {
+    stop();
+    renderer.off("destroy", cleanup);
+  }
+  function advanceFrame(): void {
+    frame = (frame + 1) % frames.length;
+    paint();
+  }
+
+  renderer.once("destroy", cleanup);
+  box.once("destroyed", cleanup);
+  return {
+    box,
+    start() {
+      if (!timer && !box.isDestroyed && !renderer.isDestroyed)
+        timer = setInterval(advanceFrame, 80);
+    },
+    stop,
+    setLabel(text: string) {
+      label = text;
+      paint();
+    },
+  };
+}
+
+/** Creates a clamped progress indicator. */
+export function progressBar(
+  renderer: CliRenderer,
+  theme: Theme,
+  options: { label: string; value: number; width?: number },
+) {
+  let label = options.label;
+  const box = new TextRenderable(renderer, { fg: theme.accent, height: 1 });
+  /** Clamps progress to the supported range before drawing filled cells. */
+  function set(value: number, text?: string): void {
+    if (text !== undefined) label = text;
+    const clamped = Number.isNaN(value) ? 0 : Math.max(0, Math.min(1, value));
+    const width = Math.max(1, Math.floor(options.width ?? 20));
+    const filled = Math.round(clamped * width);
+    box.content = `${label} [${"█".repeat(filled)}${"░".repeat(width - filled)}] ${Math.round(clamped * 100)}%`;
+  }
+
+  set(options.value);
+  return { box, set };
+}
+
+/** Creates an OSC 8 hyperlink; a plain click copies its URL through OSC 52. */
+export function link(
+  renderer: CliRenderer,
+  theme: Theme,
+  options: {
+    url: string;
+    text?: string;
+    notify?: (message: string, tone?: "ok" | "warn") => void;
+  },
+): TextRenderable {
+  const box = new TextRenderable(renderer, {
+    content: new StyledText([styledLink(options.url)(options.text ?? options.url)]),
+    fg: theme.accentSecondary,
+    attributes: TextAttributes.UNDERLINE,
+  });
+  /** Copies the public URL through the terminal's optional clipboard protocol. */
+  function copyUrl(): void {
+    let copied = false;
+    try {
+      copied = renderer.copyToClipboardOSC52(options.url);
+    } catch (error) {
+      options.notify?.(
+        error instanceof Error ? error.message : "Clipboard unavailable",
+        "warn",
+      );
+      return;
+    }
+    options.notify?.(
+      copied ? "URL copied" : "Clipboard unavailable",
+      copied ? "ok" : "warn",
+    );
+  }
+
+  function updateHover(inside: boolean): void {
+    box.fg = inside ? theme.accent : theme.accentSecondary;
+  }
+
+  clickable(renderer, box, {
+    onClick: copyUrl,
+    onHover: updateHover,
+  });
+  return box;
 }

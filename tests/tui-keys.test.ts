@@ -9,23 +9,26 @@ test("numbered tabs include icons and declared actions appear in the bar", async
   await withTui(async (setup) => {
     const frame = setup.captureCharFrame();
     expect(frame).toContain("1 ⌂ Overview");
-    expect(frame).toContain("2 ℹ About");
+    expect(frame).toContain("5 ℹ About");
     const bar = frame.trimEnd().split("\n").at(-1)!;
     expect(bar).toContain("reload");
     expect(bar).toContain("copy MCP config");
   });
 });
-test("Shift+Tab goes backwards and brackets switch tabs", async () => {
+test("Tab keeps the active tab and brackets switch through the new tab order", async () => {
   await withTui(async (setup) => {
     setup.mockInput.pressTab({ shift: true });
     await setup.renderOnce();
-    expect(setup.captureCharFrame()).toContain("Credits");
+    expect(setup.captureCharFrame()).toContain("Environment");
     setup.mockInput.pressKey("[");
+    await setup.renderOnce();
+    expect(setup.captureCharFrame()).toContain("Credits");
+    setup.mockInput.pressKey("]");
     await setup.renderOnce();
     expect(setup.captureCharFrame()).toContain("Environment");
     setup.mockInput.pressKey("]");
     await setup.renderOnce();
-    expect(setup.captureCharFrame()).toContain("Credits");
+    expect(setup.captureCharFrame()).toContain("Setting details");
   });
 });
 test("Escape closes help before quitting and reload reports success", async () => {
@@ -82,7 +85,7 @@ test("refresh and shutdown destroy replaced and cached nodes and leave the activ
       setup.mockInput.pressKey("1");
       await setup.renderOnce();
       expect(nodes[1]!.isDestroyed).toBe(false);
-      setup.mockInput.pressKey("3");
+      setup.mockInput.pressKey(String(registry.indexOf(fixture) + 1));
       setup.mockInput.pressKey("q");
       expect(nodes.every((node) => node.isDestroyed)).toBe(true);
       expect(leaves).toBe(3);
@@ -135,9 +138,9 @@ test("switching tabs destroys the obsolete key bar items", async () => {
   await withTui(async (setup) => {
     const app = setup.renderer.root.getChildren()[0]!;
     const bar = app.getChildren().at(-1)!;
-    const actions = bar.getChildren()[0]!;
+    const actions = bar.getChildren()[1]!;
     const items = actions.getChildren();
-    setup.mockInput.pressKey("2");
+    setup.mockInput.pressKey("5");
     await setup.renderOnce();
     expect(actions.isDestroyed).toBe(true);
     expect(items.every((item) => item.isDestroyed)).toBe(true);

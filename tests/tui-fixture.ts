@@ -2,14 +2,14 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createTestRenderer, type TestRendererSetup } from "@opentui/core/testing";
+import { createTestRenderer, type TestRendererSetup, type TestRendererOptions } from "@opentui/core/testing";
 import { HOME_VARIABLE, MASTER_KEY_VARIABLE } from "../src/config/paths.ts";
 import { mountTui } from "../src/tui/index.ts";
 import { iconSets } from "../src/tui/icons.ts";
 import { themes } from "../src/tui/theme.ts";
 
 /** Runs a shell fixture and always closes native resources and restores environment. */
-export async function withTui(run: (setup: TestRendererSetup) => Promise<void>, initialTab = "overview"): Promise<void> {
+export async function withTui(run: (setup: TestRendererSetup) => Promise<void>, initialTab = "overview", options: TestRendererOptions = {}): Promise<void> {
   const dir = mkdtempSync(join(tmpdir(), "termfy-input-"));
   const previous = new Map([HOME_VARIABLE, MASTER_KEY_VARIABLE].map((key) => [key, process.env[key]]));
   process.env[HOME_VARIABLE] = dir;
@@ -17,8 +17,8 @@ export async function withTui(run: (setup: TestRendererSetup) => Promise<void>, 
   let setup: TestRendererSetup | undefined;
   let closed: Promise<void> | undefined;
   try {
-    setup = await createTestRenderer({ width: 160, height: 36 });
-    closed = mountTui(setup.renderer, { initialTab, icons: iconSets.unicode }, themes.night);
+    setup = await createTestRenderer({ width: 160, height: 36, ...options });
+    closed = mountTui(setup.renderer, { initialTab, icons: iconSets.unicode, motion: false }, themes.night);
     await setup.renderOnce();
     await run(setup);
   } finally {

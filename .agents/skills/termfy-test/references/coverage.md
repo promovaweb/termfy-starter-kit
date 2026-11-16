@@ -37,19 +37,33 @@ de linhas executadas não substitui assertions sobre a saída e os efeitos.
 
 ## Screen
 
-- Frame inicial com os dados descritos no Behavior da spec, sem segredo e com tema esperado.
-- Navegação até a screen, ação de tecla própria, help e encerramento.
-- Para `listPanel`, seleção por teclado, clique na linha, item ativado,
-  rolagem e lista vazia. Consulte `tests/tui-list.test.ts` e
-  `src/tui/components.ts`.
+- Frame inicial com os resultados descritos no Behavior da spec, sem segredo
+  e com tema esperado.
+- Um frame por faixa de largura: 60×16 (`compact`), 80×24 (`medium`) e
+  120×32 (`wide`). Confira que a tela cabe em 60×16 ou que a mensagem
+  "terminal too small" aparece.
+- Navegação até a screen, ação de tecla própria, help, paleta e encerramento.
+- Para `table`, seleção por teclado, clique na linha, ordenação pelo clique
+  no cabeçalho, ativação no segundo clique ou Enter e coleção vazia.
+  Para `listPanel`, consulte `tests/tui-list.test.ts`.
 - Cada `ScreenAction` tem tecla e clique. Envie a tecla com
   `mockInput.pressKey` e o clique com `setup.mockMouse`. Confira o mesmo
-  efeito nas duas entradas.
+  efeito nas duas entradas. Cada ação aparece na paleta (`Ctrl+K` ou `:`)
+  pelo texto de `description`, inclusive a ação com `hidden: true`.
+- Diálogos: `ctx.confirm` aceito e negado; `ctx.prompt` com um valor
+  recusado por `validate` e depois aceito; `ctx.choose` com índice inicial e
+  cancelamento por `Esc`.
+- Valor com `secret: true` não aparece no frame do diálogo aberto, no toast
+  nem no texto de `ctx.status`.
+- `ctx.status` mostra o resumo da tela e cada ação notifica o resultado.
 - A barra de abas mostra o número e o ícone do papel. O clique na aba abre a
   tela.
 - Com `tui.icons` em `unicode` e em `ascii`, o frame não traz glifo do
   conjunto `nerd`.
-- Estado vazio e falha de carregamento, quando a screen carregar dados.
+- Estado vazio, carregando e erro com ação de tentar de novo.
+- `watch()`: escreva o arquivo listado e confira a atualização da tela.
+- `onPause` para timers; `onResume` retoma. Chame os dois com o stub de tela e
+  confira que nenhum timer fica ativo.
 - Mudança de aba dispara a limpeza prevista; saída destrói o renderer.
 - Renderização após cada interação antes de capturar o frame. Timers e
   subscriptions não permanecem ativos depois do teste.

@@ -155,6 +155,98 @@ test("tab navigation shows About and quit destroys the renderer", async () => {
 Adapte as teclas à screen declarada em `src/tui/screens/index.ts`. Para
 seleção e rolagem de `listPanel`, consulte `tests/tui-list.test.ts`.
 
+## TUI nas três faixas de largura
+
+Capture um frame por faixa. O shell remonta a screen ao mudar de faixa, então
+cada tamanho recebe uma montagem própria no teste.
+
+```ts
+/** Renders one screen at the three width classes. */
+import { test, expect } from "bun:test";
+import { createTestRenderer } from "@opentui/core/testing";
+import { mountTui } from "../src/tui/index.ts";
+
+test("items screen fits compact, medium and wide frames", async () => {
+  const sizes = [[60, 16], [80, 24], [120, 32]] as const;
+  for (const [width, height] of sizes) {
+    const setup = await createTestRenderer({ width, height });
+    const closed = mountTui(setup.renderer, { initialTab: "items" });
+    try {
+      await setup.renderOnce();
+      const frame = setup.captureCharFrame();
+      expect(frame).toContain("Items");
+      expect(frame).not.toContain("terminal too small");
+      if (width >= 80) expect(frame).toContain("Status");
+    } finally {
+      setup.renderer.destroy();
+      await closed;
+    }
+  }
+});
+```
+
+Um tamanho abaixo de 60×16, como 50×14, mostra "terminal too small" no lugar
+da tela. Adapte `initialTab` e os textos ao recurso da spec.
+
+## Diálogo com confirmação e validação
+
+O kit expõe um stub de tela em `tests/tui-context.ts`, com `confirm`,
+`prompt` e `choose` configuráveis. Confira os nomes exportados no arquivo
+antes de escrever. A assertion fica no efeito do domínio, não no diálogo.
+
+```ts
+/** Drives a delete action through a denied and an accepted confirm. */
+import { test, expect } from "bun:test";
+import { createTestRenderer } from "@opentui/core/testing";
+import { createTestContext } from "./tui-context.ts";
+import { createItemsScreen } from "../src/tui/screens/items.ts";
+
+test("delete runs only after the confirm is accepted", async () => {
+  const setup = await createTestRenderer({ width: 100, height: 30 });
+  const answers = [false, true];
+  const removed: string[] = [];
+  const ctx = createTestContext(setup.renderer, {
+    confirm: async () => answers.shift() ?? false,
+  });
+  const screen = createItemsScreen([{ id: "a", name: "Alpha" }], {
+    onRemove: (id) => removed.push(id),
+  });
+  try {
+    setup.renderer.root.add(screen.mount(ctx));
+    screen.onEnter?.(ctx);
+    const remove = screen.actions!.find((action) => action.keys.includes("d"))!;
+    await remove.run(ctx);
+    expect(removed).toEqual([]);
+    await remove.run(ctx);
+    expect(removed).toEqual(["a"]);
+  } finally {
+    setup.renderer.destroy();
+  }
+});
+```
+
+Para `prompt`, devolva um valor recusado por `validate`, confira que o
+diálogo continua aberto e devolva um valor válido na chamada seguinte. Para
+`secret`, capture o frame do diálogo aberto e confira a ausência do valor.
+
+## Paleta de comandos e clique na tabela
+
+Abra a paleta com a tecla global, busque pelo texto de `description` e
+confirme. Confira a assinatura de `mockInput` na versão instalada de
+`@opentui/core/testing` antes de fixar o modificador.
+
+```ts
+setup.mockInput.pressKey("k", { ctrl: true });
+await setup.renderOnce();
+setup.mockInput.pressKey("d");
+await setup.renderOnce();
+expect(setup.captureCharFrame()).toContain("delete");
+```
+
+Para o clique na linha de `table`, localize o texto da linha no frame e
+clique com `framePoint`, como em `tests/tui-mouse.test.ts`. Confira que o
+primeiro clique seleciona, o segundo ativa e o clique no cabeçalho ordena.
+
 ## Configuração em pasta temporária
 
 Modelo de `tests/config.test.ts`. Restaure o ambiente anterior, inclusive

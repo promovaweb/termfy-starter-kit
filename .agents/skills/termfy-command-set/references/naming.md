@@ -71,18 +71,26 @@ houver dados estruturados de erro, o mesmo objeto em `structuredContent`.
 Não exponha campos sensíveis dos `details`. Na screen, apresente o erro e
 uma ação de tentar novamente, sem deixar Promise rejeitada sem tratamento.
 
-## Lista na TUI
+## Lista e detalhe na TUI
+
+A screen da família segue o padrão lista e detalhe: `table` para a coleção e
+`keyValueTable` no painel de detalhe. Em `wide`, tabela à esquerda e detalhe
+à direita. Em `medium`, tabela em cima e detalhe embaixo. Em `compact`, uma
+visão por vez, com ação de voltar.
 
 Separe labels de ids. O índice selecionado aponta para a coleção que gerou
-os labels; não extraia ids a partir do texto renderizado. `listPanel`
-retorna `box`, `move`, `select` e `selected`. Monte `box` e use índices
-válidos. `move` não chama `onSelect`; `select` chama. Para coleção vazia,
-`selected()` é -1. Declare as ações da lista em `actions`, com `keys`,
-`description`, `icon` e `run`. O clique na linha chama a mesma função da
-ação de selecionar.
+os labels; não extraia ids a partir do texto renderizado. `table` retorna
+`box`, `move`, `select`, `selected`, `setRows` e `sortBy`. Use índices
+válidos. Para coleção vazia, `selected()` é -1.
 
-`mount(ctx)` retorna um Renderable síncrono. Carregue a lista em
+Declare as ações em `actions`, com `keys`, `description`, `icon` e `run`:
+`n` cria pelo `ctx.prompt`, `return` abre o detalhe, `d` apaga com
+`ctx.confirm` e `danger: true`, `r` recarrega. O clique na linha chama a
+mesma função da ação. Use `stateView` para os estados vazio, carregando e
+erro, com botão de tentar de novo.
+
+`mount(ctx)` retorna um Renderable síncrono. Carregue a coleção em
 `onEnter(ctx)` e guarde uma geração de request ou mecanismo de cancelamento.
 Invalide a geração em `onLeave(ctx)` para impedir que uma resposta antiga
-altere uma screen que já saiu. Ao substituir o painel, remova e descarte o
-anterior conforme a API do OpenTUI; não acumule componentes a cada refresh.
+altere uma screen que já saiu. Ao recarregar, atualize a `table` com
+`setRows`; não acumule componentes a cada refresh.

@@ -43,7 +43,7 @@ export const SETTINGS_SCHEMA: readonly SettingDefinition[] = Object.freeze([
     key: "tui.initialTab",
     type: "enum",
     default: "overview",
-    values: ["overview", "about"],
+    values: ["overview", "settings", "credentials", "docs", "about"],
     description: "Tab opened when the TUI starts.",
   },
   {
@@ -59,6 +59,12 @@ export const SETTINGS_SCHEMA: readonly SettingDefinition[] = Object.freeze([
     default: "auto",
     values: ["auto", "nerd", "unicode", "ascii"],
     description: "TUI icon set. `auto` (default) uses Nerd Font glyphs on Ghostty, Kitty, WezTerm and Omarchy, plain characters on the Linux console and Unicode symbols elsewhere.",
+  },
+  {
+    key: "tui.motion",
+    type: "boolean",
+    default: true,
+    description: "Short TUI animations (dialogs and toasts sliding in). Turn off for a static interface.",
   },
   {
     key: "tui.mouse",

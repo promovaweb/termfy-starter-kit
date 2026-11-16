@@ -20,7 +20,8 @@ Keys em notação de ponto. O schema do esqueleto:
 | `output.format` | `text` ou `json` | `text` | formato padrão da saída do CLI |
 | `output.colors` | boolean | `true` | cores ANSI na saída de texto |
 | `tui.icons` | `auto`, `nerd`, `unicode` ou `ascii` | `auto` | conjunto de ícones da TUI; `auto` usa `nerd` no Ghostty, no Kitty, no WezTerm e no Omarchy, `ascii` no console Linux e `unicode` nos demais terminais |
-| `tui.initialTab` | `overview` ou `about` | `overview` | aba aberta ao iniciar a TUI |
+| `tui.initialTab` | `overview`, `settings`, `credentials`, `docs` ou `about` | `overview` | aba aberta ao iniciar a TUI |
+| `tui.motion` | boolean | `true` | animações curtas de diálogos e toasts; `false` deixa a interface estática |
 | `tui.mouse` | boolean | `true` | mouse na TUI: clique, hover e roda. `false` devolve a seleção de texto ao terminal |
 | `tui.theme` | `terminal`, `night` ou `day` | `terminal` | paleta da TUI |
 | `telemetry.enabled` | boolean | `false` | reservado para projetos derivados |

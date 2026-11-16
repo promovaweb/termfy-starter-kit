@@ -37,7 +37,9 @@ projeto derivado, não no repositório do framework.
    de rede, forneça respostas locais controladas no transporte da aplicação.
 5. Monte TUI com `createTestRenderer` e `mountTui`. Pressione teclas por
    `mockInput.pressKey`, renderize novamente e confira `captureCharFrame`.
-   Evite snapshots de todo o frame quando um trecho e uma transição bastam.
+   Capture um frame em 60×16, 80×24 e 120×32. Evite snapshots de todo o
+   frame quando um trecho e uma transição bastam. Cubra diálogos, paleta e
+   clique na linha de `table` conforme [coverage.md](references/coverage.md).
 6. Use fixtures sintéticas sem segredos reais. Remova `MASTER_KEY_VARIABLE`
    do ambiente do subprocesso, salvo quando testar essa variável. Testes
    de config e TUI restauram as variáveis do processo no `finally`.
@@ -81,9 +83,11 @@ relacionados e as limitações restantes. Não imprima valores reais de credenci
 
 ## Compatibilidade
 
-Starter kit a partir da v0.11.0, com o tema `terminal` em `tui.theme`, specs
-em Markdown puro e sem command
-`spec`. Caminhos usados incluem `specs/`,
+Starter kit a partir da v0.12.0, com paleta de comandos, diálogos
+`confirm`/`prompt`/`choose`, `ctx.layout()` com as faixas `wide`, `medium` e
+`compact`, `Screen.watch()`, `onPause`/`onResume` e o tema `terminal` em
+`tui.theme`. Specs em Markdown puro e sem command `spec`. Caminhos usados
+incluem `specs/`,
 `src/main.ts`, `src/cli/registry.ts`, `src/app/exit-codes.ts`,
 `src/config/paths.ts`, `src/config/settings.ts`, `src/config/credentials.ts`,
 `src/mcp/server.ts`, `src/tui/index.ts`, `src/tui/components.ts` e `tests/`.

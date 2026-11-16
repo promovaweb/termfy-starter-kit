@@ -3,7 +3,8 @@
 | Dado | Fonte | Quem lê |
 | --- | --- | --- |
 | `bin` | `package.json` → `termfy.bin` (ou `name`) | `manifest.bin`: pasta `~/.<bin>/`, prefixo `<BIN>_HOME` e `<BIN>_MASTER_KEY`, esquema `<bin>://`, nome do servidor MCP, `--version`, usage do `--help`, completion |
-| `title` | `package.json` → `termfy.title` | cabeçalho da TUI, aba About, `about`, `info.title` do OpenCLI, título da tool `operate` |
+| `title` | `package.json` → `termfy.title` | título da janela do terminal (com a aba ativa), cabeçalho da TUI, logotipo opcional em `ASCIIFont` na aba About, `about`, `info.title` do OpenCLI, título da tool `operate` |
+| aba ativa | `Screen.title` de `src/tui/screens/` | título da janela do terminal, ao lado de `manifest.title` |
 | `description` | `package.json` → `description` | `--help`, cabeçalho da TUI, aba About, `about`, `info.summary` do OpenCLI, `instructions` do servidor MCP |
 | `version` | `package.json` → `version` | `--version`, `about`, aba About, `info.version` do OpenCLI, versão do servidor MCP |
 | `author` | `package.json` → `termfy.author` | `about`, aba About, `info.contact.name` do OpenCLI |
@@ -26,10 +27,10 @@
 ## O que `bun run init` não toca e esta skill cuida
 
 Créditos, paleta, glifos, ícones de papel, painel "Standards", `license`, os
-campos de identidade do `CLISPEC.md` (título, `bin` e `description`) e
-qualquer texto do `README.md` além das substituições literais do nome
-anterior. A superfície, o índice `## Specs` e os arquivos de `specs/` não
-mudam com a identidade.
+campos de identidade do `CLISPEC.md` (título, `bin` e `description`), o
+logotipo opcional em `ASCIIFont` da aba About e qualquer texto do `README.md`
+além das substituições literais do nome anterior. A superfície, o índice
+`## Specs` e os arquivos de `specs/` não mudam com a identidade.
 
 ## Paleta: papéis e uso
 

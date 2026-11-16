@@ -23,6 +23,9 @@ acontece aqui, pela leitura dos arquivos.
   `src/config/credentials.ts`, `src/mcp/server.ts` e `src/tui/theme.ts`.
 - [checklist.md](references/checklist.md) para executar as verificações.
 - [severity.md](references/severity.md) para ordenar e escrever os achados.
+- A [checklist de qualidade da TUI](../termfy-tui/references/quality-checklist.md)
+  para revisar foco, estados, faixas de largura, diálogos, toasts, segredo e
+  timers.
 
 ## Regras
 
@@ -40,7 +43,8 @@ acontece aqui, pela leitura dos arquivos.
    divergências. Não presuma aprovação a
    partir de um resultado antigo ou de um teste sem assertions pertinentes.
 4. Confira descriptions, exit codes, segredos, stdout do MCP, cores da TUI,
-   documentação e idioma conforme `references/checklist.md`.
+   documentação e idioma conforme `references/checklist.md`. Aplique a
+   checklist de qualidade da TUI a cada screen alterada.
 5. Buscas apontam candidatos. Leia o contexto e siga chamadas antes de relatar
    vazamento ou violação. Não copie um segredo encontrado para o relatório.
 6. Não chame serviços externos para reproduzir falhas. Use testes locais e
@@ -82,9 +86,11 @@ cite o que foi conferido, sem prometer ausência de falhas fora do escopo.
 
 ## Compatibilidade
 
-Starter kit a partir da v0.11.0, com o tema `terminal` em `tui.theme`, specs
-em Markdown puro e sem command
-`spec`. Caminhos usados incluem `specs/`,
+Starter kit a partir da v0.12.0, com paleta de comandos em `Ctrl+K` e `:`,
+diálogos `confirm`, `prompt` e `choose`, `ctx.layout()` com as faixas
+`wide`, `medium` e `compact`, toasts, `Screen.watch()`, `onPause`/`onResume`
+e a setting `tui.motion`. Tem o tema `terminal` em `tui.theme`, specs em
+Markdown puro e sem command `spec`. Caminhos usados incluem `specs/`,
 `src/cli/commands.ts`, `src/cli/registry.ts`, `src/app/exit-codes.ts`,
 `src/app/errors.ts`, `src/config/credentials.ts`, `src/mcp/server.ts`,
 `src/tui/theme.ts`, `src/tui/screens/index.ts`, `src/mcp/`, `tests/` e

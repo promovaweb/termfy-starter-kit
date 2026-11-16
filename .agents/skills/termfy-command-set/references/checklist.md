@@ -35,15 +35,22 @@
 ## TUI
 
 - [ ] A screen está em `src/tui/screens/index.ts`.
-- [ ] O `box` de `listPanel` está montado e recebe o tema da screen.
-- [ ] Lista vazia, carregamento, falha e sucesso têm estados próprios.
+- [ ] A `table` da coleção está montada e recebe o tema da screen.
+- [ ] Lista vazia, carregamento, falha e sucesso usam `stateView`.
+- [ ] As ações `n` criar, `return` detalhe, `d` apagar e `r` recarregar
+  estão em `actions`, com `keys`, `description` e `icon`.
+- [ ] `n` usa `ctx.prompt` com `validate`; `d` usa `ctx.confirm` com
+  `danger: true` e mostra o item afetado.
 - [ ] A screen descarta respostas antigas após `onLeave` e após refresh.
 - [ ] `up`, `down`, `j`, `k` e `return` atuam sobre a seleção correta.
-- [ ] Teclas globais e encerramento continuam funcionando.
+- [ ] Em `compact` a tela mostra uma visão por vez, com ação de voltar.
+- [ ] Teclas globais, paleta e encerramento continuam funcionando.
 - [ ] `createTestRenderer` e `mountTui` cobrem frame e navegação, conforme
   `tests/tui.test.ts` e `tests/tui-list.test.ts`.
 - [ ] O teste espera a carga controlada terminar antes de capturar o frame;
   não usa pausas arbitrárias para esconder uma condição de concorrência.
+- [ ] A [checklist de qualidade](../../termfy-tui/references/quality-checklist.md)
+  da skill `termfy-tui` foi aplicada.
 
 ## Integração e encerramento
 

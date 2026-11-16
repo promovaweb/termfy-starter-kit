@@ -1,6 +1,6 @@
 ---
 name: termfy-command-set
-description: Implementa uma família de commands prevista na spec aberta com funções compartilhadas, tools MCP correspondentes, screen de lista, testes nos três modos e itens da spec marcados.
+description: Implementa uma família de commands prevista na spec aberta com funções compartilhadas, tools MCP correspondentes, screen de lista e detalhe, testes nos três modos e itens da spec marcados.
 ---
 
 # Implementar uma família de commands
@@ -28,6 +28,8 @@ solicitados. Esses arquivos são novos; as pastas e os registros já existem.
 - [Checklist de entrega](references/checklist.md).
 - As skills `termfy-cli`, `termfy-mcp`, `termfy-tui` e `termfy-config`.
   Para serviço HTTP, use também `termfy-api`.
+- O padrão [lista e detalhe](../termfy-tui/references/screen-patterns.md) e
+  a [checklist de qualidade da TUI](../termfy-tui/references/quality-checklist.md).
 
 ## Regras
 
@@ -55,13 +57,14 @@ solicitados. Esses arquivos são novos; as pastas e os registros já existem.
    spec e na descrição. Se o contrato exigir confirmação ou `dryRun`,
    implemente-os explicitamente também na tool; não suponha que uma
    annotation do MCP executa a verificação.
-7. A screen usa `listPanel(renderer, theme, { title, items, onSelect })`.
-   Monte o `box` retornado. `move(delta)` muda o destaque;
-   `select(index)` também ativa `onSelect`; `selected()` devolve o índice
-   ou -1 para lista vazia. Declare as teclas da lista em `actions`, com
-   `description`, `icon` e `run`. Um clique na linha seleciona e ativa o
-   item, então o clique chama a mesma função da ação. Não transforme `mount`
-   em função async.
+7. A screen da família segue o padrão lista e detalhe de
+   `references/screen-patterns.md` da skill `termfy-tui`. Use `table` para a
+   coleção, com cabeçalho que ordena e linha clicável, além de
+   `keyValueTable` no painel de detalhe. Declare as ações em `actions`: `n`
+   cria pelo `ctx.prompt`, `return` abre o detalhe, `d` apaga com
+   `ctx.confirm` e `danger: true`, `r` recarrega. Use `stateView` para os
+   estados vazio, carregando e erro. Um clique na linha chama a mesma função
+   da ação. `mount` retorna um Renderable síncrono.
 8. Teste CLI em subprocesso, MCP com `Client` e TUI com
    `createTestRenderer` e `mountTui`. Use `mockInput.pressKey` para a tecla
    e `mockMouse` para o clique da mesma ação. Use fixtures locais controladas
@@ -86,13 +89,13 @@ solicitados. Esses arquivos são novos; as pastas e os registros já existem.
    `src/tui/screens/index.ts`. Caso ela possa ser aba inicial, acrescente
    seu id aos valores de `tui.initialTab` em `src/config/settings.ts`
    e de `--tab` em `src/cli/commands/tui.ts`.
-6. Em `mount`, devolva um contêiner síncrono. Carregue dados em `onEnter`,
-   com estados de carregamento, vazio e erro. Capture rejeições e descarte
-   respostas atrasadas após `onLeave`. Quando os dados mudarem, recrie o
-   `listPanel` no contêiner; ele não oferece método para substituir items.
-   Trate `up`, `down`, `j`, `k` e `return` em `actions`, preservando as
-   teclas globais. Confira a seleção antes de abrir detalhes. A screen
-   declara `icon`. Todo elemento clicável chama a mesma função da ação.
+6. Em `mount`, devolva um contêiner síncrono. Carregue informações em
+   `onEnter`, com estados de carregamento, vazio e erro. Capture rejeições e
+   descarte respostas atrasadas após `onLeave`. Quando a coleção mudar,
+   atualize a `table` com `setRows` e preserve a seleção. Confira a seleção
+   antes de abrir o detalhe. A screen declara `icon`. Todo elemento clicável
+   chama a mesma função da ação. Em `compact`, uma visão por vez, com ação
+   de voltar.
 7. Acrescente os testes às suítes dos três modos ou crie arquivos próprios
    sob `tests/`. Cubra sucesso, validação, credencial ausente, falha de
    serviço, lista vazia, navegação, clique e o efeito de cada verbo de
@@ -129,10 +132,11 @@ pendências sem marcar funcionalidades que ainda não foram testadas.
 
 ## Compatibilidade
 
-Starter kit a partir da v0.11.0 (specs em Markdown puro, sem command
-`spec`). Referências existentes em `src/cli/registry.ts`,
-`src/cli/commands.ts`, `src/mcp/server.ts`, `src/tui/screen.ts`,
-`src/tui/components.ts`, `src/tui/screens/index.ts`,
+Starter kit a partir da v0.12.0 (screen da família com `table`, `stateView`,
+`ctx.confirm`, `ctx.prompt`, `ctx.layout()` e paleta de comandos; specs em
+Markdown puro, sem command `spec`). Referências existentes em
+`src/cli/registry.ts`, `src/cli/commands.ts`, `src/mcp/server.ts`,
+`src/tui/screen.ts`, `src/tui/components.ts`, `src/tui/screens/index.ts`,
 `src/config/settings.ts`, `src/cli/commands/tui.ts`,
 `template/command/example.ts`, `template/tool/example.ts`,
 `template/screen/example.ts`, `tests/cli.test.ts`, `tests/mcp.test.ts`,

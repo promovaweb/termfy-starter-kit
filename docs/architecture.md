@@ -28,12 +28,15 @@ src/
     resources/            resources e templates
     prompts.ts            prompts
   tui/
-    index.ts              montagem: header, tabs, content, status bar
+    index.ts              shell: aba ativa, foco, paleta, status bar, watch, pausa
+    overlays.ts           diálogos, paleta de comandos, help e toasts
+    pointer.ts            clickable: clique, hover e ponteiro de mão
     theme.ts              temas terminal, night e day
     icons.ts              conjuntos de ícones nerd, unicode e ascii
     screen.ts             contrato Screen e ScreenContext
-    components.ts         panel, keyValueTable, list, heading, dim
-    screens/              uma aba por arquivo
+    components.ts         panel, table, listPanel, stateView, spinner, link
+    screens/              uma aba por arquivo: overview, settings,
+                          credentials, docs e about
   skill/
     index.ts              docs/ embutida + referência gerada do registry
 docs/                     documentação do binário; entra no --skill
@@ -64,7 +67,7 @@ transporte ou o renderer fechar.
 - `config/` importa só de `app/`.
 - `cli/`, `mcp/` e `tui/` importam de `app/` e `config/`. `mcp/` e `tui/`
   podem reutilizar funções de `cli/commands/*` que coletam dados (como
-  `aboutData`), nunca o contrário.
+  `aboutData`). Fora do command `tui`, `cli/` não importa de `tui/`.
 - `skill/` importa de `cli/registry.ts` para gerar a referência.
 
 ## Idioma do código

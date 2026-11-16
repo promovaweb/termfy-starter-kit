@@ -181,17 +181,35 @@ ou `RGBA.defaultBackground`. Hex aparece só em `themes.night` e `themes.day`.
 
 ```bash
 rg -n 'actions:|ScreenAction|keys: \[' src/tui
-rg -n 'onMouseDown|onMouseOver|onMouseOut' src/tui
+rg -n 'clickable|onMouseDown|onMouseOver|onMouseOut' src/tui
 rg -n 'withIcon|ctx\.icons' src/tui
+rg -n 'ctx\.layout|layout\(\)' src/tui
+rg -n 'ctx\.(confirm|prompt|choose)|danger:|secret:|validate:' src/tui
+rg -n 'watch\(\)|onPause|onResume|setInterval|setTimeout|motion' src/tui
+rg -n 'createTestRenderer\(\{ width: (60|80|120)' tests
 ```
 
-- Cada comando de uma screen está em `actions`, com `keys` preenchido e
-  `description` curta.
-- Cada elemento com `onMouseDown` chama a mesma função de uma ação, não uma
-  cópia da lógica.
+- Cada comando de uma screen está em `actions`, com `keys` preenchido,
+  `description` curta e `icon`, para entrar no help e na paleta (`Ctrl+K`).
+- Cada elemento clicável usa `clickable` de `src/tui/pointer.ts` e chama a
+  mesma função de uma ação, não uma cópia da lógica.
 - O rótulo de cada aba mostra o número e o ícone de `Screen.icon`.
 - Nenhum glifo de ícone fixo fora de `src/tui/icons.ts`. As screens usam
   `ctx.icons` e `withIcon`.
+- A tela compõe para `ctx.layout()` e trata `wide`, `medium` e `compact`, sem
+  medida fixa de coluna.
+- Entrada de um ou dois campos usa `ctx.prompt`, `ctx.choose` e
+  `ctx.confirm`; não há tela de formulário improvisada. Efeito destrutivo usa
+  `danger: true`. Valor oculto usa `secret: true`.
+- A tela declara `watch()` para cada arquivo que lê. Timers e assinaturas
+  param em `onLeave` e em `onPause`.
+- Cada estado (vazio, carregando, erro) mostra texto próprio; o erro oferece
+  ação de tentar de novo.
+- O frame de um diálogo com `secret` não contém o valor digitado, no toast
+  nem em `ctx.status`.
+- Os testes capturam frames em 60×16, 80×24 e 120×32 e cobrem `confirm`
+  aceito e negado, `prompt` com `validate`, a paleta, o clique na linha de
+  `table` e o segredo fora do frame.
 
 ## Documentação e idioma
 

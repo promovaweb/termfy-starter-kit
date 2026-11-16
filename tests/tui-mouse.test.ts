@@ -5,20 +5,20 @@ import { button, listPanel, panel } from "../src/tui/components.ts";
 import { themes } from "../src/tui/theme.ts";
 import { framePoint, withTui } from "./tui-fixture.ts";
 
-test("clicking tab 2 opens About and the tab wheel moves in both directions", async () => {
+test("clicking tab 5 opens About and the tab wheel moves in both directions", async () => {
   await withTui(async (setup) => {
-    await setup.mockMouse.click(...framePoint(setup, "2 ℹ About"), 2);
+    await setup.mockMouse.click(...framePoint(setup, "5 ℹ About"), 2);
     await setup.renderOnce();
     expect(setup.captureCharFrame()).toContain("Environment");
-    await setup.mockMouse.click(...framePoint(setup, "2 ℹ About"));
+    await setup.mockMouse.click(...framePoint(setup, "5 ℹ About"));
     await setup.renderOnce();
     expect(setup.captureCharFrame()).toContain("Credits");
-    await setup.mockMouse.scroll(...framePoint(setup, "2 ℹ About"), "up");
+    await setup.mockMouse.scroll(...framePoint(setup, "5 ℹ About"), "down");
     await setup.renderOnce();
     expect(setup.captureCharFrame()).toContain("Environment");
     await setup.mockMouse.scroll(...framePoint(setup, "1 ⌂ Overview"), "down");
     await setup.renderOnce();
-    expect(setup.captureCharFrame()).toContain("Credits");
+    expect(setup.captureCharFrame()).toContain("Setting details");
   });
 });
 test("clicking quit in the key bar destroys the renderer", async () => {
