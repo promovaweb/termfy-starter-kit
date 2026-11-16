@@ -53,7 +53,9 @@ cuida do rename inicial; esta skill cuida de tudo que vem depois e do que o
    Um campo novo entra em `aboutData()` e nas duas superfícies.
 7. Nada de logo em ASCII ocupando linhas: o cabeçalho da TUI usa o glifo
    `▌` mais o título. Se a pessoa quiser um glifo próprio, troque
-   `glyphs.block` em `src/tui/theme.ts`.
+   `glyphs.block` em `src/tui/theme.ts`. Os ícones de papel das abas,
+   painéis, botões e mensagens ficam em `src/tui/icons.ts`, separados dos
+   glifos de marca.
 8. Depois de qualquer mudança: `bun run opencli` (o `info` do OpenCLI muda)
    e `bun run validate`. Confira à mão que o título, o `bin` e a
    `description` do `CLISPEC.md` batem com o `package.json`.

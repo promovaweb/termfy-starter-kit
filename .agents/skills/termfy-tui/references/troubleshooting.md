@@ -7,7 +7,9 @@ preserve o comportamento antes de alterar componentes compartilhados.
 | Sintoma | O que conferir | Correção a ensaiar |
 | --- | --- | --- |
 | Aba não aparece | Registro, id e ordem de `screens` | Registrar a instância e testar abertura direta |
-| Legenda aparece, tecla não funciona | `keys` não registra handler | Implementar `onKey` e testar efeito observado |
+| Legenda aparece, tecla não funciona | `keys` não registra handler | Declarar a ação em `actions`, com `run` |
+| Ícone aparece como quadrado | fonte do terminal sem Nerd Font | usar `tui.icons` em `unicode` ou instalar uma Nerd Font |
+| Mouse impede selecionar texto | mouse da TUI ligado | usar `Shift` e arraste, ou `tui.mouse false` |
 | Digitar `q` fecha a TUI | Campo e handler global compartilham entrada | Integrar modo de edição e foco no host |
 | Modificador não chega | `onKey` recebe só o nome | Transportar `KeyEvent` no contrato, com testes |
 | Cabeçalho desaparece com lista longa | Crescimento e shrink do viewport | Preservar altura do cabeçalho e limitar ScrollBox |

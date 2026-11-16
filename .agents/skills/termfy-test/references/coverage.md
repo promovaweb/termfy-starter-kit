@@ -39,8 +39,16 @@ de linhas executadas não substitui assertions sobre a saída e os efeitos.
 
 - Frame inicial com os dados descritos no Behavior da spec, sem segredo e com tema esperado.
 - Navegação até a screen, ação de tecla própria, help e encerramento.
-- Para `listPanel`, seleção por teclado, item ativado, rolagem e lista vazia.
-  Consulte `tests/tui-list.test.ts` e `src/tui/components.ts`.
+- Para `listPanel`, seleção por teclado, clique na linha, item ativado,
+  rolagem e lista vazia. Consulte `tests/tui-list.test.ts` e
+  `src/tui/components.ts`.
+- Cada `ScreenAction` tem tecla e clique. Envie a tecla com
+  `mockInput.pressKey` e o clique com `setup.mockMouse`. Confira o mesmo
+  efeito nas duas entradas.
+- A barra de abas mostra o número e o ícone do papel. O clique na aba abre a
+  tela.
+- Com `tui.icons` em `unicode` e em `ascii`, o frame não traz glifo do
+  conjunto `nerd`.
 - Estado vazio e falha de carregamento, quando a screen carregar dados.
 - Mudança de aba dispara a limpeza prevista; saída destrói o renderer.
 - Renderização após cada interação antes de capturar o frame. Timers e

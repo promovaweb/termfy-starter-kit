@@ -4,26 +4,34 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createTestRenderer, type TestRendererSetup } from "@opentui/core/testing";
-import { HOME_VARIABLE } from "../src/config/paths.ts";
+import { HOME_VARIABLE, MASTER_KEY_VARIABLE } from "../src/config/paths.ts";
 import { manifest } from "../src/app/manifest.ts";
 import { mountTui } from "../src/tui/index.ts";
 
 let dir: string;
 let setup: TestRendererSetup;
 let closed: Promise<void>;
+const previous = new Map([HOME_VARIABLE, MASTER_KEY_VARIABLE].map((key) => [key, process.env[key]]));
 
 beforeAll(async () => {
   dir = mkdtempSync(join(tmpdir(), "termfy-tui-"));
   process.env[HOME_VARIABLE] = dir;
+  delete process.env[MASTER_KEY_VARIABLE];
   setup = await createTestRenderer({ width: 120, height: 32 });
   closed = mountTui(setup.renderer, {});
   await setup.renderOnce();
 });
 
 afterAll(async () => {
-  await closed.catch(() => undefined);
-  rmSync(dir, { recursive: true, force: true });
-  delete process.env[HOME_VARIABLE];
+  try {
+    if (setup && !setup.renderer.isDestroyed) setup.renderer.destroy();
+    await closed;
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+    for (const [key, value] of previous) {
+      if (value === undefined) delete process.env[key]; else process.env[key] = value;
+    }
+  }
 });
 
 describe("tui", () => {

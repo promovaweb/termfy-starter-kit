@@ -14,6 +14,7 @@
 | créditos | `credits` em `src/app/manifest.ts` | `about`, aba About, tool MCP `about` |
 | paleta | `DEFAULT_TERMINAL_SLOTS`, `themes.night` e `themes.day` em `src/tui/theme.ts` | toda a TUI, por nome de papel |
 | glifos | `glyphs` em `src/tui/theme.ts` | cabeçalho, listas e estados da TUI |
+| ícones de papel | `iconSets` em `src/tui/icons.ts` | abas, painéis, botões, help e mensagem de `notify` |
 | padrões seguidos | painel "Standards" em `src/tui/screens/about.ts` | aba About |
 
 ## O que `bun run init` toca
@@ -24,11 +25,11 @@
 
 ## O que `bun run init` não toca e esta skill cuida
 
-Créditos, paleta, glifos, painel "Standards", `license`, os campos de
-identidade do `CLISPEC.md` (título, `bin` e `description`) e qualquer texto
-do `README.md` além das substituições literais do nome anterior. A
-superfície, o índice `## Specs` e os arquivos de `specs/` não mudam com a
-identidade.
+Créditos, paleta, glifos, ícones de papel, painel "Standards", `license`, os
+campos de identidade do `CLISPEC.md` (título, `bin` e `description`) e
+qualquer texto do `README.md` além das substituições literais do nome
+anterior. A superfície, o índice `## Specs` e os arquivos de `specs/` não
+mudam com a identidade.
 
 ## Paleta: papéis e uso
 

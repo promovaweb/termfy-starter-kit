@@ -6,20 +6,33 @@ além de testar seus componentes isoladamente.
 
 ## O que cada campo faz
 
-| Campo | Contrato no starter kit a partir da v0.9.0 |
+| Campo | Contrato no starter kit a partir da v0.11.0 |
 | --- | --- |
 | `id` | Identificador estável, usado na lista de abas e na abertura direta |
 | `title` | Rótulo curto mostrado no seletor de abas |
+| `icon` | Nome do ícone na aba, lido de `ctx.icons`, como `overview` ou `about` |
 | `description` | Descrição fornecida ao seletor; o host pode ocultá-la visualmente |
-| `keys` | Legendas da barra inferior; declarar aqui não cria o handler |
+| `actions` | Comandos da tela, cada um com `keys`, `label?`, `description`, `icon?` e `run`; o shell roda pela tecla e pelo clique |
+| `keys` | Legendas da barra inferior para telas antigas; declarar aqui não cria o handler |
 | `mount(ctx)` | Cria e devolve a raiz visual; o host guarda essa árvore por aba |
 | `onEnter(ctx)` | Executa quando a aba fica ativa, inclusive ao retornar |
 | `onLeave(ctx)` | Executa na troca para outra aba, não no fechamento atual do host |
 | `onKey(name, ctx)` | Recebe o nome da tecla; `true` interrompe o handler global do Termfy |
 
-O contexto fornece `renderer`, `theme`, `goTo(id)` e `quit()`. Não há serviço
-HTTP, storage, modal manager ou dispatcher de ações implícito nesse objeto.
-Injete serviços na factory da tela e use as funções existentes do domínio.
+O objeto da tela fornece `renderer`, `theme`, `icons`, `goTo(id)`,
+`refresh()`, `notify(message, tone)` e `quit()`. `refresh()` remonta a tela
+ativa e `notify` mostra uma mensagem curta à direita da barra inferior. Não
+há serviço HTTP, storage, modal manager ou dispatcher de ações implícito
+nesse objeto. Injete serviços na factory da tela e use as funções existentes
+do domínio.
+
+## Comandos e clique
+
+Cada comando é uma `ScreenAction`. O shell mostra a ação na barra inferior e
+no help, roda pela tecla de `keys` e roda no clique do item da barra. Os
+elementos clicáveis da tela chamam a mesma função: `button` recebe `key`,
+`label`, `icon` e `onPress`. A linha de `listPanel` seleciona e ativa o
+item. Teclado e mouse chegam ao mesmo efeito, então teste os dois.
 
 ## Estado por instância
 

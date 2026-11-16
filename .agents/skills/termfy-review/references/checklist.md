@@ -177,6 +177,22 @@ Não confunda essa regra com as sequências ANSI do CLI em `src/cli/format.ts`.
 No tema `terminal`, cada cor sai de `RGBA.fromIndex`, `RGBA.defaultForeground`
 ou `RGBA.defaultBackground`. Hex aparece só em `themes.night` e `themes.day`.
 
+## Ações, clique e ícones da TUI
+
+```bash
+rg -n 'actions:|ScreenAction|keys: \[' src/tui
+rg -n 'onMouseDown|onMouseOver|onMouseOut' src/tui
+rg -n 'withIcon|ctx\.icons' src/tui
+```
+
+- Cada comando de uma screen está em `actions`, com `keys` preenchido e
+  `description` curta.
+- Cada elemento com `onMouseDown` chama a mesma função de uma ação, não uma
+  cópia da lógica.
+- O rótulo de cada aba mostra o número e o ícone de `Screen.icon`.
+- Nenhum glifo de ícone fixo fora de `src/tui/icons.ts`. As screens usam
+  `ctx.icons` e `withIcon`.
+
 ## Documentação e idioma
 
 ```bash

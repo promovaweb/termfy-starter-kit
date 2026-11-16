@@ -6,25 +6,61 @@ encerra com exit code 8.
 
 ## Abas
 
-| Aba | Conteúdo |
-| --- | --- |
-| Overview | Environment (binary, runtime, platform, terminal, data directory), estado de settings.json e do cofre, settings em vigor e next steps. |
-| About | Binary, project, license, credits e standards seguidos. |
+| Aba | Ícone | Conteúdo |
+| --- | --- | --- |
+| Overview | `overview` | Environment (binary, runtime, platform, terminal, data directory), estado de settings.json e do cofre, settings em vigor e next steps. |
+| About | `about` | Binary, project, license, credits e standards seguidos. |
 
-A aba inicial vem de `tui.initialTab` em settings.json ou de `--tab`.
+Cada aba mostra o número e o ícone do papel: ` 1 ⌂ Overview ` e
+` 2 ℹ About `. O clique abre a aba. A roda do mouse sobre a barra de abas
+troca de aba. A aba inicial vem de `tui.initialTab` em settings.json ou de
+`--tab`.
 
 ## Teclas
 
 | Tecla | Ação |
 | --- | --- |
 | `←` `→` `[` `]` | aba anterior ou seguinte |
-| `Tab` | próxima aba |
+| `Tab` `Shift+Tab` | próxima aba ou aba anterior |
 | `1` … `9` | ir para a aba de mesmo número |
 | `?` | mostrar ou esconder o help de teclas |
-| `q` `Esc` `Ctrl+C` | sair |
+| `Esc` | fechar o help; com o help fechado, sair |
+| `q` `Ctrl+C` | sair |
 
-Cada screen pode declarar teclas próprias em `keys` e tratá-las em `onKey`.
-Elas aparecem na barra inferior antes das teclas globais.
+Cada screen declara os próprios comandos em `actions`. O shell executa a
+ação pela tecla, mostra na barra inferior, mostra no help e executa no
+clique. As ações da tela aparecem antes das globais.
+
+`keys` mais `onKey` continuam aceitos em telas escritas antes de `actions`.
+A entrada de `keys` aparece na barra inferior como legenda e não cria
+handler.
+
+## Mouse
+
+A TUI responde ao mouse com `tui.mouse` em `true`, o padrão. O clique numa
+aba abre a aba, numa linha da lista seleciona e ativa o item, num botão ou
+num item da barra inferior roda a mesma ação da tecla. Numa linha do help,
+roda o comando. A roda rola a lista e troca de aba sobre a barra de abas.
+O item sob o ponteiro recebe destaque.
+
+Com o mouse ligado, a maioria dos terminais deixa de selecionar texto por
+arrastar. Use `Shift` e arraste para selecionar. Com `tui.mouse` em `false`,
+o terminal volta a selecionar com o mouse e a TUI fica só com o teclado.
+
+## Ícones
+
+`src/tui/icons.ts` guarda três conjuntos com os mesmos nomes de papel:
+`nerd` (Nerd Font), `unicode` e `ascii`. Os papéis seguem o significado
+(`overview`, `about`, `settings`, `terminal`, `copy`, `refresh`, `ok`,
+`warn`, `error` e outros), não o desenho.
+
+`tui.icons` escolhe o conjunto. `auto` (padrão) usa `nerd` no Ghostty, no
+Kitty, no WezTerm e no Omarchy (`OMARCHY_PATH` ou a pasta
+`~/.local/share/omarchy`), `ascii` no console Linux (`TERM=linux` ou
+`dumb`) e `unicode` nos demais terminais.
+
+A screen lê os ícones de `ctx.icons` e monta o texto com `withIcon()`.
+Nenhum glifo fixo fica no código da screen.
 
 ## Tema
 
@@ -91,20 +127,43 @@ Princípios do visual, no estilo modern unix:
 ## Como criar uma screen
 
 1. Copie `template/screen/example.ts` para `src/tui/screens/<id>.ts`.
-2. Preencha `id`, `title`, `description` e `mount(ctx)`. Use os componentes
-   de `src/tui/components.ts` (`panel`, `keyValueTable`, `list`, `heading`,
-   `dim`) e as cores de `ctx.theme`.
-3. Se a screen precisar de atualização periódica, inicie o timer em
+2. Preencha `id`, `title`, `icon`, `description` e `mount(ctx)`. Use os
+   componentes de `src/tui/components.ts` (`panel`, `keyValueTable`, `list`,
+   `heading`, `dim`) e as cores de `ctx.theme`. Os ícones vêm de `ctx.icons`.
+3. Declare os comandos em `actions`. Cada entrada tem `keys`, `description`,
+   `icon` e `run`. O shell roda a ação pela tecla, mostra na barra inferior,
+   mostra no help e roda no clique.
+
+   ```ts
+   const actions: ScreenAction[] = [
+     {
+       keys: ["r"],
+       description: "reload",
+       icon: "refresh",
+       run: (ctx) => {
+         ctx.refresh();
+         ctx.notify("Reloaded", "ok");
+       },
+     },
+   ];
+   ```
+
+4. Monte os elementos clicáveis com `button({ key, label, icon, onPress })`
+   e com `listPanel`. Os dois chamam a mesma função de uma ação, então tecla
+   e clique fazem o mesmo.
+5. Use `ctx.notify(message, tone)` para a mensagem curta à direita da barra
+   inferior, que some em 4 segundos. Use `ctx.refresh()` para remontar a tela.
+6. Se a screen precisar de atualização periódica, inicie o timer em
    `onEnter` e limpe em `onLeave`.
-4. Registre em `src/tui/screens/index.ts`. A ordem da lista é a ordem das abas.
+7. Registre em `src/tui/screens/index.ts`. A ordem da lista é a ordem das abas.
    O stub exporta a factory `createExampleScreen()`: registre o `Screen` que
    ela devolve, para que seleção e renderables fiquem por instância.
-5. Se o `id` for uma opção válida de aba inicial, acrescente-o em
+8. Se o `id` for uma opção válida de aba inicial, acrescente-o em
    `tui.initialTab` (`src/config/settings.ts`) e em `--tab`
    (`src/cli/commands/tui.ts`).
 
 A TUI roda sobre o OpenTUI (`@opentui/core`). Use `BoxRenderable`,
-`TextRenderable`, `TabSelectRenderable`, `ScrollBoxRenderable` e os demais
+`TextRenderable`, `ScrollBoxRenderable` e os demais
 renderables do pacote. Toda saída devolve o terminal com
 `renderer.destroy()`; `mountTui()` já cuida disso para `q`, `Esc` e
 `Ctrl+C`.
@@ -113,14 +172,17 @@ renderables do pacote. Toda saída devolve o terminal com
 
 `tests/tui.test.ts` monta a interface com `createTestRenderer` de
 `@opentui/core/testing`, envia teclas com `mockInput.pressKey` e confere
-o frame com `captureCharFrame`. `mountTui` aceita qualquer renderer;
-`startTui` cria o renderer real.
+o frame com `captureCharFrame`. `setup.mockMouse` envia clique, hover e
+roda, para conferir o caminho de mouse da mesma ação. `mountTui` aceita
+qualquer renderer; `startTui` cria o renderer real.
 
 ## Lista com seleção
 
 `listPanel(renderer, theme, { title, items, onSelect })` monta uma lista
 com `ScrollBoxRenderable`. O item atual recebe `theme.surfaceHigh` no fundo
-e `theme.accent` no texto. A rolagem acompanha o item selecionado.
+e `theme.accent` no texto. A rolagem acompanha o item selecionado. Um
+clique numa linha seleciona e ativa o item, o hover destaca a linha sob o
+ponteiro e a roda rola a lista.
 
 | Retorno | Uso |
 | --- | --- |
@@ -131,6 +193,7 @@ e `theme.accent` no texto. A rolagem acompanha o item selecionado.
 
 Na screen, trate up/k com `move(-1)`, down/j com `move(1)` e Enter com
 `select(selected())` dentro de `onKey`. A tecla `r` pode voltar ao primeiro
-item com `move(-selected())`. Declare essas teclas em `keys` para aparecerem
-na barra inferior. O exemplo completo está em `template/screen/example.ts`.
+item com `move(-selected())`. Declare esses comandos em `actions` para
+aparecerem na barra inferior e no help. O exemplo completo está em
+`template/screen/example.ts`.
 Não encaminhe a mesma tecla pelo foco de `box` e por `onKey` simultaneamente.

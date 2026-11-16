@@ -1,19 +1,29 @@
 /**
  * Visual components shared by the screens.
  *
- * `panel` creates a box with a rounded border and a title. `keyValueRow`
- * builds "label  value" with a dimmed label. `list` stacks items with a
- * marker. Everything receives the theme so screens never hard-code colors.
+ * `panel` creates a box with a rounded border and a title, optionally with
+ * an icon. `keyValueRow` builds "label  value" with a dimmed label. `list`
+ * stacks items with a marker. `button` and `listPanel` are clickable and
+ * show hover; each one runs the same function as its keyboard shortcut.
+ * Everything receives the theme so screens never hard-code colors.
  */
-import { ScrollBoxRenderable, BoxRenderable, TextRenderable, TextAttributes, type CliRenderer, type ColorInput } from "@opentui/core";
+import { ScrollBoxRenderable, BoxRenderable, TextRenderable, TextAttributes, type CliRenderer, type ColorInput, type MouseEvent } from "@opentui/core";
 import { glyphs, type Theme } from "./theme.ts";
+import { withIcon, type IconName, type IconSet } from "./icons.ts";
+
+/** Optional icon for a panel title: the set and the role. */
+export interface TitleIcon {
+  icons: IconSet;
+  name: IconName;
+}
 
 /** Creates a themed bordered panel. */
 export function panel(
   renderer: CliRenderer,
   theme: Theme,
-  options: { title: string; flexGrow?: number; width?: number | "auto" | `${number}%`; height?: number | "auto" | `${number}%`; active?: boolean },
+  options: { title: string; icon?: TitleIcon; flexGrow?: number; width?: number | "auto" | `${number}%`; height?: number | "auto" | `${number}%`; active?: boolean },
 ): BoxRenderable {
+  const title = options.icon ? withIcon(options.icon.icons, options.icon.name, options.title) : options.title;
   return new BoxRenderable(renderer, {
     flexGrow: options.flexGrow,
     width: options.width,
@@ -21,7 +31,7 @@ export function panel(
     flexDirection: "column",
     borderStyle: "rounded",
     borderColor: options.active ? theme.borderActive : theme.border,
-    title: ` ${options.title} `,
+    title: ` ${title} `,
     titleColor: options.active ? theme.accent : theme.textDim,
     backgroundColor: theme.surface,
     paddingLeft: 1,
@@ -39,9 +49,9 @@ export function keyValueRow(
   valueColor?: ColorInput,
 ): BoxRenderable {
   const row = new BoxRenderable(renderer, { flexDirection: "row", height: 1 });
-  row.add(new TextRenderable(renderer, { content: key.padEnd(keyWidth), fg: theme.textDim, selectable: false }));
-  row.add(new TextRenderable(renderer, { content: "  " }));
-  row.add(new TextRenderable(renderer, { content: value, fg: valueColor ?? theme.text, wrapMode: "none" }));
+  row.add(new TextRenderable(renderer, { content: key.padEnd(keyWidth), fg: theme.textDim, selectable: false, flexShrink: 0 }));
+  row.add(new TextRenderable(renderer, { content: "  ", flexShrink: 0 }));
+  row.add(new TextRenderable(renderer, { content: value, fg: valueColor ?? theme.text, wrapMode: "none", flexShrink: 1, minWidth: 0 }));
   return row;
 }
 
@@ -75,6 +85,31 @@ export function list(renderer: CliRenderer, theme: Theme, items: string[], marke
   return box;
 }
 
+/**
+ * Creates a one-line clickable button: `[key] label`. A left click runs
+ * `onPress`; the screen also lists the same function in `actions` with
+ * `key`, so the button and the shortcut stay the same command.
+ */
+export function button(renderer: CliRenderer, theme: Theme, options: { key: string; label: string; icon?: TitleIcon; onPress: () => void }): BoxRenderable {
+  const label = options.icon ? withIcon(options.icon.icons, options.icon.name, options.label) : options.label;
+  const text = new TextRenderable(renderer, { content: ` ${label}`, fg: theme.text, selectable: false });
+  const box = new BoxRenderable(renderer, {
+    flexDirection: "row",
+    height: 1,
+    flexShrink: 0,
+    onMouseDown: (event: MouseEvent) => {
+      if (event.button !== 0) return;
+      event.stopPropagation();
+      options.onPress();
+    },
+    onMouseOver: () => { text.fg = theme.accent; },
+    onMouseOut: () => { text.fg = theme.text; },
+  });
+  box.add(new TextRenderable(renderer, { content: ` ${options.key} `, fg: theme.keyText, bg: theme.keyBackground, selectable: false }));
+  box.add(text);
+  return box;
+}
+
 /** Creates vertical spacing. */
 export function spacer(renderer: CliRenderer, height = 1): BoxRenderable {
   return new BoxRenderable(renderer, { height });
@@ -84,6 +119,8 @@ export function spacer(renderer: CliRenderer, height = 1): BoxRenderable {
  * Creates a scrollable selection list. move changes the highlight silently;
  * select highlights and activates an item. Empty lists return selected() = -1.
  * Screens may forward keys to box.handleKeyPress or call move/select in onKey.
+ * Mouse: a click on a row selects it, hover marks the row under the pointer
+ * and the wheel scrolls the list.
  */
 export function listPanel(renderer: CliRenderer, theme: Theme, options: {
   title: string;
@@ -98,19 +135,37 @@ export function listPanel(renderer: CliRenderer, theme: Theme, options: {
     contentOptions: { flexDirection: "column" },
   });
   let index = options.items.length ? 0 : -1;
-  const rows = options.items.map((item) => {
-    const row = new TextRenderable(renderer, { content: item, height: 1, flexShrink: 0, wrapMode: "none", fg: theme.text });
+  let hovered = -1;
+  const rows = options.items.map((item, i) => {
+    const row = new TextRenderable(renderer, {
+      content: item,
+      height: 1,
+      flexShrink: 0,
+      wrapMode: "none",
+      fg: theme.text,
+      selectable: false,
+      onMouseDown: (event: MouseEvent) => {
+        if (event.button !== 0) return;
+        event.stopPropagation();
+        select(i);
+      },
+      onMouseOver: () => { hovered = i; paint(); },
+      onMouseOut: () => { if (hovered === i) hovered = -1; paint(); },
+    });
     box.add(row);
     return row;
   });
+  const paint = () => {
+    rows.forEach((row, i) => {
+      row.content = `${i === index ? ">" : " "} ${options.items[i]}`;
+      row.fg = i === index ? theme.accent : i === hovered ? theme.textStrong : theme.text;
+      row.bg = i === index ? theme.surfaceHigh : theme.surface;
+    });
+  };
   const highlight = (next: number) => {
     if (!rows.length || !Number.isFinite(next)) return;
     index = Math.max(0, Math.min(rows.length - 1, Math.trunc(next)));
-    rows.forEach((row, i) => {
-      row.content = `${i === index ? ">" : " "} ${options.items[i]}`;
-      row.fg = i === index ? theme.accent : theme.text;
-      row.bg = i === index ? theme.surfaceHigh : theme.surface;
-    });
+    paint();
     box.scrollChildIntoView(rows[index]!);
   };
   const select = (next: number) => {

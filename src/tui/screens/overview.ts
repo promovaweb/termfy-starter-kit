@@ -4,26 +4,59 @@
  * Shows runtime, data directory, settings.json and vault state, and the
  * first suggested actions. It is the default initial tab and the natural
  * place for derived projects to show their own indicators.
+ *
+ * Actions: `r` reloads the panels from disk; `c` copies the MCP client
+ * configuration to the clipboard (OSC 52). Both also run from the key bar
+ * and from the buttons in the "Next steps" panel.
  */
 import { BoxRenderable } from "@opentui/core";
 import { manifest } from "../../app/manifest.ts";
 import { paths, exists } from "../../config/paths.ts";
 import { vaultStatus } from "../../config/credentials.ts";
 import { flatten, readSettings } from "../../config/settings.ts";
-import { spacer, list, panel, dim, keyValueTable, heading } from "../components.ts";
+import { spacer, list, panel, dim, keyValueTable, heading, button } from "../components.ts";
 import { glyphs } from "../theme.ts";
-import type { Screen } from "../screen.ts";
+import type { Screen, ScreenAction, ScreenContext } from "../screen.ts";
+
+/** MCP client configuration suggested to agents. */
+export function mcpClientConfig(): string {
+  return `{ "command": "${manifest.bin}", "args": ["mcp"] }`;
+}
+
+function copyMcpConfig(ctx: ScreenContext): void {
+  let copied = false;
+  try {
+    copied = ctx.renderer.copyToClipboardOSC52(mcpClientConfig());
+  } catch {
+    // Clipboard writes may be unavailable in this renderer or terminal phase.
+  }
+  if (copied) ctx.notify("MCP config copied", "ok");
+  else ctx.notify("This terminal does not accept clipboard writes (OSC 52)", "warn");
+}
+
+function reload(ctx: ScreenContext): void {
+  ctx.refresh();
+  ctx.notify("Reloaded", "ok");
+}
+
+const actions: ScreenAction[] = [
+  { keys: ["r"], description: "reload", icon: "refresh", run: reload },
+  { keys: ["c"], description: "copy MCP config", icon: "copy", run: copyMcpConfig },
+];
 
 export const overviewScreen: Screen = {
   id: "overview",
   title: "Overview",
+  icon: "overview",
   description: "Environment, configuration and vault at a glance",
-  mount: ({ renderer, theme }) => {
+  actions,
+  mount: (ctx) => {
+    const { renderer, theme, icons } = ctx;
     const rootBox = new BoxRenderable(renderer, { flexDirection: "column", flexGrow: 1 });
 
     const topRow = new BoxRenderable(renderer, { flexDirection: "row", flexShrink: 0 });
 
-    const environment = panel(renderer, theme, { title: "Environment", flexGrow: 1, active: true });
+    const environment = panel(renderer, theme, { title: "Environment", icon: { icons, name: "terminal" }, flexGrow: 1, active: true });
     environment.add(
       keyValueTable(renderer, theme, [
         ["Binary", `${manifest.bin} v${manifest.version}`, theme.textStrong],
@@ -37,7 +70,7 @@ export const overviewScreen: Screen = {
 
     const vault = vaultStatus();
     const hasSettings = exists(paths.settings());
-    const state = panel(renderer, theme, { title: "State", width: 46 });
+    const state = panel(renderer, theme, { title: "State", icon: { icons, name: "state" }, width: 46 });
     state.add(
       keyValueTable(renderer, theme, [
         ["settings.json", hasSettings ? `${glyphs.ok} saved` : `${glyphs.bullet} defaults`, hasSettings ? theme.ok : theme.textDim],
@@ -51,7 +84,7 @@ export const overviewScreen: Screen = {
 
     const bottomRow = new BoxRenderable(renderer, { flexDirection: "row", flexGrow: 1 });
 
-    const config = panel(renderer, theme, { title: "Settings in effect", flexGrow: 1 });
+    const config = panel(renderer, theme, { title: "Settings in effect", icon: { icons, name: "settings" }, flexGrow: 1 });
     let pairs: Array<[string, string]>;
     try {
       pairs = flatten(readSettings()).map(([k, v]) => [k, JSON.stringify(v)]);
@@ -61,9 +94,9 @@ export const overviewScreen: Screen = {
     config.add(keyValueTable(renderer, theme, pairs.map(([k, v]) => [k, v, theme.text])));
     bottomRow.add(config);
 
-    const actions = panel(renderer, theme, { title: "Next steps", width: 46 });
-    actions.add(heading(renderer, theme, "In the terminal"));
-    actions.add(
+    const next = panel(renderer, theme, { title: "Next steps", icon: { icons, name: "docs" }, width: 46 });
+    next.add(heading(renderer, theme, "In the terminal"));
+    next.add(
       list(renderer, theme, [
         `${manifest.bin} --help`,
         `${manifest.bin} credentials set <name>`,
@@ -71,10 +104,13 @@ export const overviewScreen: Screen = {
         `${manifest.bin} --skill`,
       ], glyphs.arrow),
     );
-    actions.add(spacer(renderer));
-    actions.add(heading(renderer, theme, "For agents"));
-    actions.add(dim(renderer, theme, `MCP client: { "command": "${manifest.bin}", "args": ["mcp"] }`));
-    bottomRow.add(actions);
+    next.add(spacer(renderer));
+    next.add(heading(renderer, theme, "For agents"));
+    next.add(dim(renderer, theme, `MCP client: ${mcpClientConfig()}`));
+    next.add(spacer(renderer));
+    next.add(button(renderer, theme, { key: "c", label: "copy MCP config", icon: { icons, name: "copy" }, onPress: () => copyMcpConfig(ctx) }));
+    next.add(button(renderer, theme, { key: "r", label: "reload", icon: { icons, name: "refresh" }, onPress: () => reload(ctx) }));
+    bottomRow.add(next);
     rootBox.add(bottomRow);
 
     return rootBox;

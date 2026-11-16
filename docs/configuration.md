@@ -19,7 +19,9 @@ Keys em notação de ponto. O schema do esqueleto:
 | --- | --- | --- | --- |
 | `output.format` | `text` ou `json` | `text` | formato padrão da saída do CLI |
 | `output.colors` | boolean | `true` | cores ANSI na saída de texto |
+| `tui.icons` | `auto`, `nerd`, `unicode` ou `ascii` | `auto` | conjunto de ícones da TUI; `auto` usa `nerd` no Ghostty, no Kitty, no WezTerm e no Omarchy, `ascii` no console Linux e `unicode` nos demais terminais |
 | `tui.initialTab` | `overview` ou `about` | `overview` | aba aberta ao iniciar a TUI |
+| `tui.mouse` | boolean | `true` | mouse na TUI: clique, hover e roda. `false` devolve a seleção de texto ao terminal |
 | `tui.theme` | `terminal`, `night` ou `day` | `terminal` | paleta da TUI |
 | `telemetry.enabled` | boolean | `false` | reservado para projetos derivados |
 
@@ -73,8 +75,8 @@ printf '%s' "$TOKEN" | {{bin}} credentials set github.token --stdin
 ## O que a cifra protege
 
 A cifra protege o arquivo contra leitura casual, cópia em backup e varredura
-do disco por outras ferramentas. Quem tem acesso à mesma conta do sistema
-consegue ler `master.key` e decifrar o conteúdo. Para um nível acima, injete a
+do disco por outras ferramentas. Um processo que roda com o mesmo usuário do
+sistema consegue ler `master.key` e decifrar o conteúdo. Para um nível acima, injete a
 chave por `{{BIN}}_MASTER_KEY` a partir de um gerenciador de segredos e não
 grave `master.key` em disco.
 
@@ -86,7 +88,7 @@ import { getCredential } from "../config/credentials.ts";
 const token = getCredential("github.token"); // lança AppError(4) quando não existe
 ```
 
-Nunca escreva o valor em log, em erro, em `data` do `--json` nem em
+O valor fica fora de log, de mensagem de erro, de `data` do `--json` e de
 resposta de tool MCP.
 
 ## Variáveis de ambiente

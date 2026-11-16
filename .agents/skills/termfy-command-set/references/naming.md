@@ -77,7 +77,9 @@ Separe labels de ids. O índice selecionado aponta para a coleção que gerou
 os labels; não extraia ids a partir do texto renderizado. `listPanel`
 retorna `box`, `move`, `select` e `selected`. Monte `box` e use índices
 válidos. `move` não chama `onSelect`; `select` chama. Para coleção vazia,
-`selected()` é -1. Atualize os hints de `keys` e trate teclado em `onKey`.
+`selected()` é -1. Declare as ações da lista em `actions`, com `keys`,
+`description`, `icon` e `run`. O clique na linha chama a mesma função da
+ação de selecionar.
 
 `mount(ctx)` retorna um Renderable síncrono. Carregue a lista em
 `onEnter(ctx)` e guarde uma geração de request ou mecanismo de cancelamento.

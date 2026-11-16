@@ -54,6 +54,19 @@ export const SETTINGS_SCHEMA: readonly SettingDefinition[] = Object.freeze([
     description: "TUI palette. `terminal` (default) inherits the terminal theme colors; `night` and `day` are fixed palettes.",
   },
   {
+    key: "tui.icons",
+    type: "enum",
+    default: "auto",
+    values: ["auto", "nerd", "unicode", "ascii"],
+    description: "TUI icon set. `auto` (default) uses Nerd Font glyphs on Ghostty, Kitty, WezTerm and Omarchy, plain characters on the Linux console and Unicode symbols elsewhere.",
+  },
+  {
+    key: "tui.mouse",
+    type: "boolean",
+    default: true,
+    description: "Mouse support in the TUI: click tabs, key bar items, help rows and list rows; wheel scrolls. Turn off to let the terminal select text.",
+  },
+  {
     key: "telemetry.enabled",
     type: "boolean",
     default: false,

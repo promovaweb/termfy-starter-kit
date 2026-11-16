@@ -30,6 +30,7 @@ src/
   tui/
     index.ts              montagem: header, tabs, content, status bar
     theme.ts              temas terminal, night e day
+    icons.ts              conjuntos de ícones nerd, unicode e ascii
     screen.ts             contrato Screen e ScreenContext
     components.ts         panel, keyValueTable, list, heading, dim
     screens/              uma aba por arquivo

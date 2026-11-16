@@ -11,7 +11,7 @@ Esquema ilustrativo com rótulos traduzidos; a interface do binário usa inglês
 ```text
 ▌ Título v<version>   │  descrição em uma linha            linux-x64 • Bun 1.4.4 
 ──────────────────────────────────────────────────────────────────────────────
- Overview      About
+  1 ⌂ Overview    2 ℹ About
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬
  ╭─ Painel em foco ──────────────────────╮╭─ Painel ───────────────────────────╮
  │ rótulo      valor                     ││ rótulo     valor                   │
@@ -23,9 +23,10 @@ Esquema ilustrativo com rótulos traduzidos; a interface do binário usa inglês
 1. Cabeçalho de uma linha: glifo de marca em acento, título em negrito,
    versão apagada, descrição que encolhe sem quebrar, plataforma à direita.
 2. Filete na cor da borda separando cabeçalho e abas.
-3. Abas horizontais (`TabSelectRenderable`) com sublinhado na aba ativa.
+3. Abas horizontais com número e ícone do papel, sublinhado na aba ativa.
 4. Conteúdo em painéis com borda arredondada e título na borda.
-5. Barra inferior com teclas em bloco invertido e ação ao lado.
+5. Barra inferior com teclas em bloco invertido e ação ao lado. O clique no
+   item roda a ação.
 
 ## Paleta
 
@@ -67,6 +68,7 @@ a `day` parte do Tokyo Night Day. Mantenha contraste mínimo 4.5:1 entre
 - Listas com `•` em acento ou `→` para comandos.
 - Nada em caixa alta além de siglas.
 - Glifos de uma célula apenas. Evite emoji: largura varia por terminal.
+- Ícones de papel vêm de `ctx.icons`, sem glifo fixo na screen.
 
 ## Movimento e estado
 
@@ -92,7 +94,10 @@ a `day` parte do Tokyo Night Day. Mantenha contraste mínimo 4.5:1 entre
 
 - [ ] Nenhuma cor literal fora de `src/tui/theme.ts`.
 - [ ] Nenhum `console.log`.
-- [ ] Barra inferior lista as teclas da tela.
+- [ ] Barra inferior lista as ações da tela.
+- [ ] Toda ação tem tecla e clique. O clique chama a mesma função.
+- [ ] Abas com número e ícone.
+- [ ] Sem glifo fixo fora de `src/tui/icons.ts`.
 - [ ] Frame de teste em 110×30 sem texto cortado em rótulos.
 - [ ] Funciona com `tui.theme = terminal` em um tema claro e um escuro.
 - [ ] Funciona com `tui.theme = day`.

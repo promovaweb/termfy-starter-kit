@@ -30,30 +30,33 @@ Todo o código é em inglês: arquivos, identificadores, comentários, mensagens
 commands, options, keys e campos do `--json`. A documentação é em português.
 
 ```text
- ▌ Termfy v0.10.0  │  CLI, TUI and MCP stdio server skeleton in Bun, with th  linux-x64 • Bun 1.4.4
+ ▌ Termfy v0.11.0  │  CLI, TUI and MCP stdio server skeleton in Bun, with th  linux-x64 • Bun 1.4.4
+  1 ⌂ Overview   2 ℹ About
  ──────────────────────────────────────────────────────────────────────────────────────────────────
- Overview      About
-▬▬▬▬▬▬▬▬▬▬▬▬▬▬
- ╭─ Environment ────────────────────────────────────╮╭─ State ────────────────────────────────────╮
- │ Binary    termfy v0.10.0                         ││ settings.json     • defaults               │
+ ╭─ ❯ Environment ──────────────────────────────────╮╭─ ◉ State ──────────────────────────────────╮
+ │ Binary    termfy v0.11.0                         ││ settings.json     • defaults               │
  │ Runtime   Bun 1.4.4                              ││ credentials.json  • empty                  │
  │ Platform  linux-x64                              ││ master key        not created              │
- │ Terminal  100×24  xterm-256color                 ││ MCP               termfy mcp               │
+ │ Terminal  100×26  xterm-256color                 ││ MCP               termfy mcp               │
  │ Data      ~/.termfy                              ││                                            │
  ╰──────────────────────────────────────────────────╯╰────────────────────────────────────────────╯
- ╭─ Settings in effect ─────────────────────────────╮╭─ Next steps ───────────────────────────────╮
+ ╭─ ⚙ Settings in effect ───────────────────────────╮╭─ ≡ Next steps ─────────────────────────────╮
  │ output.colors      true                          ││ In the terminal                            │
  │ output.format      "text"                        ││ → termfy --help                            │
  │ telemetry.enabled  false                         ││ → termfy credentials set <name>            │
- │ tui.initialTab     "overview"                    ││ → termfy config set tui.theme day          │
- │ tui.theme          "terminal"                    ││ → termfy --skill                           │
- │                                                  ││                                            │
- │                                                  ││ For agents                                 │
+ │ tui.icons          "auto"                        ││ → termfy config set tui.theme day          │
+ │ tui.initialTab     "overview"                    ││ → termfy --skill                           │
+ │ tui.mouse          true                          ││                                            │
+ │ tui.theme          "terminal"                    ││ For agents                                 │
  │                                                  ││ MCP client: { "command": "termfy", "args": │
  │                                                  ││ ["mcp"] }                                  │
  │                                                  ││                                            │
+ │                                                  ││  c  ❐ copy MCP config                      │
+ │                                                  ││  r  ↻ reload                               │
+ │                                                  ││                                            │
  ╰──────────────────────────────────────────────────╯╰────────────────────────────────────────────╯
-  ←/→  tab   1-9  go   ?  help   q  quit
+  r  reload   c  copy MCP config   ←/→  tab   ?  help   q  quit
+
 ```
 
 ## Sobre o template

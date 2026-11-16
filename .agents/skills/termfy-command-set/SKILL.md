@@ -58,10 +58,14 @@ solicitados. Esses arquivos são novos; as pastas e os registros já existem.
 7. A screen usa `listPanel(renderer, theme, { title, items, onSelect })`.
    Monte o `box` retornado. `move(delta)` muda o destaque;
    `select(index)` também ativa `onSelect`; `selected()` devolve o índice
-   ou -1 para lista vazia. Não transforme `mount` em função async.
+   ou -1 para lista vazia. Declare as teclas da lista em `actions`, com
+   `description`, `icon` e `run`. Um clique na linha seleciona e ativa o
+   item, então o clique chama a mesma função da ação. Não transforme `mount`
+   em função async.
 8. Teste CLI em subprocesso, MCP com `Client` e TUI com
-   `createTestRenderer` e `mountTui`. Use dados locais controlados e a
-   mesma expectativa de domínio nos três modos.
+   `createTestRenderer` e `mountTui`. Use `mockInput.pressKey` para a tecla
+   e `mockMouse` para o clique da mesma ação. Use fixtures locais controladas
+   e a mesma expectativa de domínio nos três modos.
 
 ## Passos
 
@@ -86,11 +90,13 @@ solicitados. Esses arquivos são novos; as pastas e os registros já existem.
    com estados de carregamento, vazio e erro. Capture rejeições e descarte
    respostas atrasadas após `onLeave`. Quando os dados mudarem, recrie o
    `listPanel` no contêiner; ele não oferece método para substituir items.
-   Trate `up`, `down`, `j`, `k` e `return` em `onKey`, preservando as teclas
-   globais. Confira a seleção antes de abrir detalhes.
+   Trate `up`, `down`, `j`, `k` e `return` em `actions`, preservando as
+   teclas globais. Confira a seleção antes de abrir detalhes. A screen
+   declara `icon`. Todo elemento clicável chama a mesma função da ação.
 7. Acrescente os testes às suítes dos três modos ou crie arquivos próprios
    sob `tests/`. Cubra sucesso, validação, credencial ausente, falha de
-   serviço, lista vazia, navegação e o efeito de cada verbo de gravação.
+   serviço, lista vazia, navegação, clique e o efeito de cada verbo de
+   gravação.
 8. Atualize `docs/cli.md`, `docs/mcp.md` e `docs/tui.md`. Se houver novas
    keys ou credenciais, atualize `docs/configuration.md`. Use `termfy-docs`
    para conferir a documentação embutida.
@@ -123,7 +129,7 @@ pendências sem marcar funcionalidades que ainda não foram testadas.
 
 ## Compatibilidade
 
-Starter kit a partir da v0.9.0 (specs em Markdown puro, sem command
+Starter kit a partir da v0.11.0 (specs em Markdown puro, sem command
 `spec`). Referências existentes em `src/cli/registry.ts`,
 `src/cli/commands.ts`, `src/mcp/server.ts`, `src/tui/screen.ts`,
 `src/tui/components.ts`, `src/tui/screens/index.ts`,

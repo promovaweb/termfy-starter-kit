@@ -27,7 +27,8 @@ a composição quando as dimensões mudarem; não capture o tamanho só na entra
 | --- | --- | --- |
 | Texto e status | `TextRenderable` | Quebra, contraste, texto vazio e atualização de `content` |
 | Agrupamento | `BoxRenderable` ou `panel` | Bordas, tamanho mínimo e filhos que podem encolher |
-| Lista com ação | `listPanel` ou `SelectRenderable` | Seleção, ativação, vazio e último item |
+| Lista com ação | `listPanel` ou `SelectRenderable` | Seleção, clique, ativação, vazio e último item |
+| Ação de uma linha | `button` | Tecla, clique, hover e ícone do papel |
 | Conteúdo longo | `ScrollBoxRenderable` | Altura delimitada e item selecionado visível |
 | Edição de linha | `InputRenderable` | Foco, mudança, submissão e cancelamento |
 | Edição multilinha | `TextareaRenderable` | Movimento do cursor e separação entre Enter e salvar |
@@ -42,7 +43,10 @@ antes de usar propriedades. Esses componentes não têm a mesma API entre si.
 
 O helper `listPanel` constrói linhas a partir de `items` na montagem. Ele não
 expõe `setItems`. `move(delta)` muda o destaque; `select(index)` também chama
-`onSelect`. Não suponha que `box.handleKeyPress` será chamado automaticamente:
+`onSelect`. Um clique na linha seleciona e ativa o item, o hover destaca a
+linha sob o ponteiro e a roda rola a lista. `button` monta uma linha
+acionável com a tecla e o rótulo. O clique chama a mesma função da ação.
+Não suponha que `box.handleKeyPress` será chamado automaticamente:
 o exemplo Termfy encaminha as teclas pelo `Screen.onKey`.
 
 Para resultados substituídos por um filtro, mantenha o item selecionado por

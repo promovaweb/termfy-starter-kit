@@ -6,10 +6,18 @@ Leia com `termfy-tui`, [Keyboard](opentui/core-concepts/keyboard.mdx),
 
 ## O host atual
 
-`mountTui` mantém o `TabSelectRenderable` em foco e encaminha somente
-`key.name` para `Screen.onKey`. A tela não recebe `ctrl`, `shift`, `meta`,
-texto colado nem o evento completo. O retorno `true` interrompe o handler do
-Termfy, mas não equivale por si só a cancelar todos os listeners do OpenTUI.
+`mountTui` trata as teclas globais: `←` `→` `[` `]`, `Tab`, `Shift+Tab` e
+`1` … `9` trocam de aba, `?` mostra o help, `q` e `Ctrl+C` saem. `Esc`
+fecha o help e, com o help fechado, sai. Depois das globais, o shell roda a
+ação da tela com a tecla declarada em `actions`. A tela não recebe `ctrl`,
+`shift`, `meta`, texto colado nem o evento completo em `onKey`. O retorno
+`true` interrompe o handler do Termfy, mas não equivale por si só a cancelar
+todos os listeners do OpenTUI.
+
+O mouse percorre o mesmo caminho. O clique numa aba abre a aba, numa linha
+de lista seleciona e ativa o item, num botão ou item da barra roda a ação. A
+roda rola a lista e troca de aba sobre a barra de abas. `tui.mouse` em
+`false` desliga o mouse e devolve a seleção de texto ao terminal.
 
 Por isso, um formulário não fica pronto apenas ao montar `InputRenderable`.
 É preciso coordenar o foco do seletor de abas, o campo e os atalhos globais.
@@ -23,6 +31,7 @@ versão instalada e adapte o contrato do host para transportar o evento.
 | Navegação | Aba ou lista ativa | Setas, dígitos, Tab, ajuda e saída |
 | Edição | Campo atual | Letras, números, setas do cursor, colagem e Enter |
 | Confirmação | Ação ou diálogo ativo | Confirmar, cancelar e retorno ao foco anterior |
+| Mouse | Aba, linha, botão ou item da barra | Clique, hover e roda, com o mesmo efeito da tecla |
 
 O significado de Esc precisa aparecer na spec. Em edição ele pode cancelar
 o campo; fora dela, o host atual encerra a TUI. O mesmo vale para Tab: hoje
@@ -56,3 +65,5 @@ não modifica o roteamento de teclas do host. Essa fronteira é intencional.
 
 Mouse é uma alternativa de entrada. Toda ação importante também precisa de
 um percurso por teclado, com foco visível e indicação textual de estado.
+O clique chama a mesma função da tecla, não uma cópia da lógica. Com o mouse
+ligado, selecione texto com `Shift` e arraste.

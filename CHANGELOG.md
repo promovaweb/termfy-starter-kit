@@ -2,6 +2,48 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.11.0] - 2026-11-16
+
+### Adicionado
+
+- TUI operável por inteiro com teclado e com mouse. Toda interação tem
+  tecla de atalho e um caminho de mouse que chama a mesma função.
+- Abas numeradas com ícone (` 1 ⌂ Overview `). Clique abre a aba. A roda
+  do mouse sobre a barra de abas troca de aba. `Shift+Tab` volta uma aba.
+- `Screen.actions` com `ScreenAction { keys, label, description, icon, run }`.
+  O shell roda a ação pela tecla, mostra na barra inferior e no help e roda
+  no clique. `ScreenContext` ganhou `icons`, `refresh()` e `notify()`.
+- Barra inferior clicável e mensagens curtas à direita por 4 segundos. Help
+  com as ações da aba, as globais e o uso do mouse, com linhas clicáveis.
+- `src/tui/icons.ts` com os conjuntos `nerd`, `unicode` e `ascii`, e as
+  settings `tui.icons` (`auto` escolhe pelo terminal: Nerd Font no
+  Ghostty, no Kitty, no WezTerm e no Omarchy) e `tui.mouse`.
+- Componente `button`, ícone no título de `panel` e clique, hover e roda no
+  `listPanel`.
+- Ações `r` (recarregar) e `c` (copiar a configuração MCP por OSC 52) no
+  Overview e `c` (copiar o link do repositório) no About, com botões.
+- Testes de mouse, de teclado e de ícones (`tests/tui-mouse.test.ts`,
+  `tests/tui-keys.test.ts`, `tests/tui-icons.test.ts`), com 104 testes no
+  total.
+
+### Alterado
+
+- A barra de abas é própria e substitui o `TabSelectRenderable`.
+- `Esc` fecha o help antes de sair da TUI.
+- `template/screen/example.ts` declara os comandos em `actions`.
+- `docs/tui.md`, `docs/configuration.md`, `docs/architecture.md` e o frame
+  do `README.md` descrevem mouse, teclado, abas numeradas e ícones.
+- Skills do Termfy atualizadas para a 0.13.0.
+
+### Corrigido
+
+- Rótulos de `keyValueRow` não encolhem mais em painéis estreitos
+  ("Repositor" no lugar de "Repository").
+- `Ctrl+C` não aciona mais a ação da tecla `c`.
+- Uma tecla consumida pelo shell não chega duas vezes à lista em foco.
+- Trocar de aba, recarregar, fechar o help e sair destroem os nós antigos e
+  chamam `onLeave`.
+
 ## [0.10.0] - 2026-11-16
 
 ### Adicionado
