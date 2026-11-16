@@ -53,8 +53,10 @@ comportamentos, exemplos escolhidos e verificações antes de editar.
 3. Reutilize `panel`, `keyValueTable`, `list`, `heading`, `dim`, `spacer` e
    `listPanel`. Confira assinaturas no arquivo real, sem deduzi-las pelo nome.
    `spacer(renderer, height)` não recebe tema.
-4. Use `ctx.theme` para cores. Mantenha as duas paletas e o contrato visual
-   existente. Componentes compartilhados recebem tema como parâmetro.
+4. Use `ctx.theme` para cores. Mantenha as três paletas (`terminal`, `night`
+   e `day`) e o contrato visual existente. O padrão de `tui.theme` continua
+   `terminal`, que herda as cores do tema do terminal. Componentes
+   compartilhados recebem tema como parâmetro.
 5. Use `mount` para criar nós. Inicie trabalho ativo em `onEnter` e interrompa
    em `onLeave`. Trate também `renderer` emitindo `destroy`: a versão atual
    de `mountTui` não chama `onLeave` ao encerrar a aplicação.
@@ -86,8 +88,9 @@ comportamentos, exemplos escolhidos e verificações antes de editar.
    nomes de teclas que o contrato atual não recebe.
 6. Teste a lógica isolada, depois a tela com `createTestRenderer` e finalmente
    a navegação pelo `mountTui`. Inclua saída durante uma requisição pendente.
-7. Confira `night` e `day` em 80×24, 110×30 e 160×40. Acrescente 40×12 para
-   verificar a mensagem de terminal pequeno ou a composição compacta.
+7. Confira `terminal`, `night` e `day` em 80×24, 110×30 e 160×40.
+   Acrescente 40×12 para verificar a mensagem de terminal pequeno ou a
+   composição compacta.
 8. Atualize `docs/tui.md` e os exemplos de uso. Se a tela mudou em relação
    à spec, revise a Surface e o Behavior com `termfy-spec`.
    Execute a validação do projeto e relate falhas alheias ao escopo.
@@ -117,7 +120,8 @@ executados, exemplos apenas compilados e comportamentos ainda não exercitados.
 
 ## Compatibilidade
 
-Starter kit a partir da v0.9.0 (specs em Markdown puro, sem command
+Starter kit a partir da v0.10.0 (tema `terminal` em `tui.theme`; specs em
+Markdown puro, sem command
 `spec`; `tui.initialTab` aceita `overview` e `about`) e OpenTUI Core 0.8.4,
 conferidos no checkout. A faixa
 `^0.8.4` não prova qual versão está instalada. Não atualize dependências

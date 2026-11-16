@@ -28,9 +28,55 @@ Elas aparecem na barra inferior antes das teclas globais.
 
 ## Tema
 
-Duas paletas em `src/tui/theme.ts`: `night` (padrão) e `day`. A escolha vem
-de `tui.theme`. As cores têm nomes de papel (`accent`, `textDim`, `border`),
-não de matiz, para que uma troca de paleta não exija tocar nas screens.
+Três paletas em `src/tui/theme.ts`: `terminal` (padrão), `night` e `day`.
+A escolha vem de `tui.theme`. As cores têm nomes de papel (`accent`,
+`textDim`, `border`), não de matiz, para que uma troca de paleta não exija
+alterar as screens.
+
+### terminal
+
+O tema `terminal` herda as cores do tema do terminal (Ghostty, Alacritty,
+Kitty, Omarchy, Termius, Herdr e outros). Cada cor da TUI é uma referência à
+paleta do terminal (as 16 cores ANSI) ou ao texto e fundo padrão, sem
+RGB fixo. O terminal pinta com o tema dele, então trocar o tema do terminal
+muda a TUI na hora. O fundo é o fundo padrão do terminal, então a
+transparência e o blur do terminal continuam.
+
+Ao abrir, a TUI pergunta a paleta ao terminal (OSC 4, 10 e 11) com espera
+curta de 300 ms. Com resposta, ela escolhe qual cor da paleta ocupa cada
+papel: texto apagado legível sobre o fundo (alguns temas, como o Solarized
+Dark, pintam o preto brilhante igual ao fundo), sombra da seleção, acento
+com contraste (troca entre a cor normal e a brilhante) e o texto da barra de
+teclas. Sem resposta, usa o mapeamento padrão. A escolha do slot vale até a
+próxima abertura. As cores em si acompanham o terminal com a TUI aberta.
+
+Mapeamento padrão:
+
+| Papel | Slot |
+| --- | --- |
+| `background`, `surface`, `surfaceHigh` | fundo padrão do terminal |
+| `text`, `textStrong` | texto padrão do terminal |
+| `textDim`, `border`, `barText` | ANSI 8 (preto brilhante) |
+| `barBackground` | fundo padrão do terminal |
+| `accent`, `borderActive`, `keyBackground` | ANSI 4 (azul) |
+| `accentSecondary` | ANSI 5 (magenta) |
+| `ok` | ANSI 2 (verde) |
+| `warn` | ANSI 3 (amarelo) |
+| `error` | ANSI 1 (vermelho) |
+| `keyText` | texto padrão do terminal |
+
+`night` (Tokyo Night) e `day` (Tokyo Night Day) são paletas fixas em RGB,
+iguais em qualquer terminal.
+
+O acento do binário, nesse tema, é um slot ANSI em
+`DEFAULT_TERMINAL_SLOTS` (`accent: ANSI.cyan`, por exemplo). Um hex ali
+deixaria a TUI fora do tema do terminal.
+
+Um token novo precisa existir nas três paletas. No `terminal`, ele aponta
+para um slot ANSI ou para o texto ou fundo padrão do terminal. Os testes
+visuais conferem `terminal`, `night` e `day`. Para testar a escolha dos
+slots, passe uma paleta conhecida a `terminalTheme(colors)`, como faz
+`tests/tui-theme.test.ts`.
 
 Princípios do visual, no estilo modern unix:
 
@@ -59,13 +105,14 @@ Princípios do visual, no estilo modern unix:
 
 A TUI roda sobre o OpenTUI (`@opentui/core`). Use `BoxRenderable`,
 `TextRenderable`, `TabSelectRenderable`, `ScrollBoxRenderable` e os demais
-renderables do pacote. Sempre devolva o terminal com `renderer.destroy()`;
-`mountTui()` já cuida disso para `q`, `Esc` e `Ctrl+C`.
+renderables do pacote. Toda saída devolve o terminal com
+`renderer.destroy()`; `mountTui()` já cuida disso para `q`, `Esc` e
+`Ctrl+C`.
 
 ## Testar sem terminal
 
 `tests/tui.test.ts` monta a interface com `createTestRenderer` de
-`@opentui/core/testing`, pressiona teclas com `mockInput.pressKey` e confere
+`@opentui/core/testing`, envia teclas com `mockInput.pressKey` e confere
 o frame com `captureCharFrame`. `mountTui` aceita qualquer renderer;
 `startTui` cria o renderer real.
 

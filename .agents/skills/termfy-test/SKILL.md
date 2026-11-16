@@ -81,7 +81,8 @@ relacionados e as limitações restantes. Não imprima valores reais de credenci
 
 ## Compatibilidade
 
-Starter kit a partir da v0.9.0, com specs em Markdown puro e sem command
+Starter kit a partir da v0.10.0, com o tema `terminal` em `tui.theme`, specs
+em Markdown puro e sem command
 `spec`. Caminhos usados incluem `specs/`,
 `src/main.ts`, `src/cli/registry.ts`, `src/app/exit-codes.ts`,
 `src/config/paths.ts`, `src/config/settings.ts`, `src/config/credentials.ts`,

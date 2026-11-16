@@ -82,7 +82,8 @@ cite o que foi conferido, sem prometer ausência de falhas fora do escopo.
 
 ## Compatibilidade
 
-Starter kit a partir da v0.9.0, com specs em Markdown puro e sem command
+Starter kit a partir da v0.10.0, com o tema `terminal` em `tui.theme`, specs
+em Markdown puro e sem command
 `spec`. Caminhos usados incluem `specs/`,
 `src/cli/commands.ts`, `src/cli/registry.ts`, `src/app/exit-codes.ts`,
 `src/app/errors.ts`, `src/config/credentials.ts`, `src/mcp/server.ts`,

@@ -167,11 +167,15 @@ não são logs da aplicação.
 ```bash
 rg -n '#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(' src/tui --glob '!theme.ts'
 rg -n 'fg:|bg:|Color:|color:|theme\.' src/tui
+rg -n 'RGBA\.(fromIndex|defaultForeground|defaultBackground)|#[0-9a-fA-F]{3,8}' src/tui/theme.ts
 ```
 
 Inspecione também nomes de cor literais e variáveis locais apontadas pela
 segunda busca. Cores de screens e componentes devem vir de `src/tui/theme.ts`.
 Não confunda essa regra com as sequências ANSI do CLI em `src/cli/format.ts`.
+
+No tema `terminal`, cada cor sai de `RGBA.fromIndex`, `RGBA.defaultForeground`
+ou `RGBA.defaultBackground`. Hex aparece só em `themes.night` e `themes.day`.
 
 ## Documentação e idioma
 

@@ -29,7 +29,7 @@ src/
     prompts.ts            prompts
   tui/
     index.ts              montagem: header, tabs, content, status bar
-    theme.ts              paletas night e day
+    theme.ts              temas terminal, night e day
     screen.ts             contrato Screen e ScreenContext
     components.ts         panel, keyValueTable, list, heading, dim
     screens/              uma aba por arquivo

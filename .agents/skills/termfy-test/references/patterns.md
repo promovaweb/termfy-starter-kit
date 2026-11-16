@@ -176,7 +176,7 @@ test("settings preserve a valid theme and reject an unknown enum value", () => {
   delete process.env[MASTER_KEY_VARIABLE];
   try {
     const settings = readSettings();
-    expect(getPath(settings, "tui.theme")).toBe("night");
+    expect(getPath(settings, "tui.theme")).toBe("terminal");
     setPath(settings, "tui.theme", convertValue("tui.theme", "day"));
     writeSettings(settings);
     expect(getPath(readSettings(), "tui.theme")).toBe("day");

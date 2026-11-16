@@ -52,7 +52,8 @@ credenciais, mudar a política da chave mestra ou depurar a pasta
 2. Leia o valor com `getPath(readSettings(), "group.key")`.
 3. Se a chave alimentar `--tab` ou outra opção, atualize os `values`
    correspondentes. Para `tui.theme`, mantenha os valores do esquema
-   alinhados às paletas de `src/tui/theme.ts`.
+   alinhados a `THEME_NAMES` de `src/tui/theme.ts` (`terminal`, `night` e
+   `day`).
 4. Teste em `tests/config.test.ts` (conversão e padrão).
 5. Atualize a tabela em `docs/configuration.md`.
 
@@ -94,7 +95,8 @@ executados. Nunca cole valores de credenciais na resposta.
 
 ## Compatibilidade
 
-Starter kit a partir da v0.9.0 (specs em Markdown puro, sem command
+Starter kit a partir da v0.10.0 (tema `terminal` em `tui.theme`; specs em
+Markdown puro, sem command
 `spec`). Caminhos citados: `src/config/paths.ts`,
 `src/config/settings.ts`, `src/config/crypto.ts`,
 `src/config/credentials.ts`, `tests/config.test.ts` e `docs/configuration.md`.

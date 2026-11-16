@@ -2,6 +2,41 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.10.0] - 2026-11-16
+
+### Adicionado
+
+- Tema `terminal` na TUI, novo padrão de `tui.theme`. Cada cor é uma
+  referência à paleta ANSI do terminal ou ao texto e fundo padrão dele,
+  sem RGB fixo. A TUI herda o tema do Ghostty, do Alacritty, do Kitty,
+  do Omarchy, do Termius, do Herdr e de outros terminais. Trocar o tema do
+  terminal muda a TUI na hora. O fundo padrão mantém a transparência e o
+  blur do terminal.
+- Consulta da paleta ao abrir (OSC 4, 10 e 11), com espera limitada a
+  300 ms. Com resposta, `chooseTerminalSlots` escolhe o slot de cada papel
+  pelo contraste real: texto apagado legível mesmo onde o preto brilhante é
+  igual ao fundo (Solarized Dark), sombra da seleção, acento normal ou
+  brilhante e texto da barra de teclas. Sem resposta, vale o mapeamento
+  padrão.
+- `DEFAULT_TERMINAL_SLOTS` e `ANSI` em `src/tui/theme.ts`: a marca escolhe
+  o slot do acento (`accent: ANSI.cyan`, por exemplo) sem sair do tema do
+  terminal.
+- `tests/tui-theme.test.ts`, com paletas reais do Tokyo Night, do Solarized
+  Dark e Light e do Gruvbox Dark, respostas incompletas, consulta que não
+  responde e montagem da TUI com o tema `terminal`.
+
+### Alterado
+
+- `tui.theme` aceita `terminal`, `night` e `day`, com padrão `terminal`.
+  `night` e `day` seguem como paletas fixas.
+- Os tokens de `Theme` passam a ter o tipo `ColorInput` (string ou
+  `RGBA`). `keyValueRow` e `keyValueTable` aceitam o mesmo tipo.
+- `docs/tui.md`, `docs/configuration.md`, `docs/architecture.md`,
+  `docs/cli.md`, `docs/customize-template.md` e o frame do `README.md`
+  descrevem os três temas.
+- Skills do Termfy atualizadas para a 0.12.0, que exige o tema `terminal`
+  como padrão dos binários derivados.
+
 ## [0.9.4] - 2026-11-13
 
 ### Corrigido

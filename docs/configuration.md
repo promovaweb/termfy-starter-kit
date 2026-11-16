@@ -20,7 +20,7 @@ Keys em notação de ponto. O schema do esqueleto:
 | `output.format` | `text` ou `json` | `text` | formato padrão da saída do CLI |
 | `output.colors` | boolean | `true` | cores ANSI na saída de texto |
 | `tui.initialTab` | `overview` ou `about` | `overview` | aba aberta ao iniciar a TUI |
-| `tui.theme` | `night` ou `day` | `night` | paleta da TUI |
+| `tui.theme` | `terminal`, `night` ou `day` | `terminal` | paleta da TUI |
 | `telemetry.enabled` | boolean | `false` | reservado para projetos derivados |
 
 Commands:

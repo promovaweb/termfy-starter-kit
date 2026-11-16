@@ -5,7 +5,7 @@
  * builds "label  value" with a dimmed label. `list` stacks items with a
  * marker. Everything receives the theme so screens never hard-code colors.
  */
-import { ScrollBoxRenderable, BoxRenderable, TextRenderable, TextAttributes, type CliRenderer } from "@opentui/core";
+import { ScrollBoxRenderable, BoxRenderable, TextRenderable, TextAttributes, type CliRenderer, type ColorInput } from "@opentui/core";
 import { glyphs, type Theme } from "./theme.ts";
 
 /** Creates a themed bordered panel. */
@@ -36,7 +36,7 @@ export function keyValueRow(
   key: string,
   value: string,
   keyWidth: number,
-  valueColor?: string,
+  valueColor?: ColorInput,
 ): BoxRenderable {
   const row = new BoxRenderable(renderer, { flexDirection: "row", height: 1 });
   row.add(new TextRenderable(renderer, { content: key.padEnd(keyWidth), fg: theme.textDim, selectable: false }));
@@ -46,7 +46,7 @@ export function keyValueRow(
 }
 
 /** Creates aligned key/value rows. */
-export function keyValueTable(renderer: CliRenderer, theme: Theme, pairs: Array<[string, string, string?]>): BoxRenderable {
+export function keyValueTable(renderer: CliRenderer, theme: Theme, pairs: Array<[string, string, ColorInput?]>): BoxRenderable {
   const box = new BoxRenderable(renderer, { flexDirection: "column" });
   const width = Math.max(...pairs.map(([k]) => k.length));
   for (const [k, v, c] of pairs) box.add(keyValueRow(renderer, theme, k, v, width, c));

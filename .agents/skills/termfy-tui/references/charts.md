@@ -108,7 +108,8 @@ um exemplo próprio: a receita acima os rejeita intencionalmente.
 Cubra lista vazia, amostra única, valores constantes, todos os valores zero,
 NaN, Infinity, rótulos longos, símbolos Unicode e muitas amostras. Confira
 80×24, 110×30, 160×40 e a apresentação compacta em 40×12. Teste os temas
-`night` e `day`, atualizações, troca de aba e encerramento durante coleta.
+`terminal`, `night` e `day`, atualizações, troca de aba e encerramento
+durante coleta.
 
 O gráfico deve trazer também último valor, mínimo, máximo e unidade em
 texto. Compare números do gráfico com a saída CLI/MCP do mesmo serviço.

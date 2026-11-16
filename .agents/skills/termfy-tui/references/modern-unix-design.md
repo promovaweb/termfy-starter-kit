@@ -29,7 +29,8 @@ Esquema ilustrativo com rótulos traduzidos; a interface do binário usa inglês
 
 ## Paleta
 
-Dois temas em `src/tui/theme.ts`. Papéis:
+Três temas em `src/tui/theme.ts`: `terminal` (padrão), `night` e `day`.
+Papéis:
 
 | Papel | Uso |
 | --- | --- |
@@ -43,8 +44,20 @@ Dois temas em `src/tui/theme.ts`. Papéis:
 | `ok`, `warn`, `error` | estado, nunca decoração |
 | `barBackground`, `barText`, `keyBackground`, `keyText` | barra inferior |
 
-A paleta `night` parte do Tokyo Night; a `day` parte do Tokyo Night Day.
-Mantenha contraste mínimo 4.5:1 entre `text` e `surface`.
+O tema `terminal` não guarda cor: cada papel é uma referência à paleta do
+terminal ou ao texto e fundo padrão. A identidade de cor da marca, nesse
+tema, é a escolha do slot ANSI em `DEFAULT_TERMINAL_SLOTS`. Não coloque hex
+no tema `terminal`.
+
+O padrão de `tui.theme` é `terminal` em todo binário derivado. Um token novo
+existe nas três paletas. No `terminal`, ele aponta para
+`RGBA.fromIndex(slot)`, `RGBA.defaultForeground()` ou
+`RGBA.defaultBackground()`. A escolha de slot conforme as cores reais fica em
+`chooseTerminalSlots`, nunca numa screen.
+
+As paletas `night` e `day` são fixas em RGB. A `night` parte do Tokyo Night;
+a `day` parte do Tokyo Night Day. Mantenha contraste mínimo 4.5:1 entre
+`text` e `surface`.
 
 ## Tipografia de terminal
 
@@ -81,4 +94,5 @@ Mantenha contraste mínimo 4.5:1 entre `text` e `surface`.
 - [ ] Nenhum `console.log`.
 - [ ] Barra inferior lista as teclas da tela.
 - [ ] Frame de teste em 110×30 sem texto cortado em rótulos.
+- [ ] Funciona com `tui.theme = terminal` em um tema claro e um escuro.
 - [ ] Funciona com `tui.theme = day`.

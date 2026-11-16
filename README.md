@@ -30,12 +30,12 @@ Todo o código é em inglês: arquivos, identificadores, comentários, mensagens
 commands, options, keys e campos do `--json`. A documentação é em português.
 
 ```text
- ▌ Termfy v0.9.4  │  CLI, TUI and MCP stdio server skeleton in Bun, with the  linux-x64 • Bun 1.4.4
+ ▌ Termfy v0.10.0  │  CLI, TUI and MCP stdio server skeleton in Bun, with th  linux-x64 • Bun 1.4.4
  ──────────────────────────────────────────────────────────────────────────────────────────────────
  Overview      About
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬
  ╭─ Environment ────────────────────────────────────╮╭─ State ────────────────────────────────────╮
- │ Binary    termfy v0.9.4                          ││ settings.json     • defaults               │
+ │ Binary    termfy v0.10.0                         ││ settings.json     • defaults               │
  │ Runtime   Bun 1.4.4                              ││ credentials.json  • empty                  │
  │ Platform  linux-x64                              ││ master key        not created              │
  │ Terminal  100×24  xterm-256color                 ││ MCP               termfy mcp               │
@@ -46,7 +46,7 @@ commands, options, keys e campos do `--json`. A documentação é em português.
  │ output.format      "text"                        ││ → termfy --help                            │
  │ telemetry.enabled  false                         ││ → termfy credentials set <name>            │
  │ tui.initialTab     "overview"                    ││ → termfy config set tui.theme day          │
- │ tui.theme          "night"                       ││ → termfy --skill                           │
+ │ tui.theme          "terminal"                    ││ → termfy --skill                           │
  │                                                  ││                                            │
  │                                                  ││ For agents                                 │
  │                                                  ││ MCP client: { "command": "termfy", "args": │
