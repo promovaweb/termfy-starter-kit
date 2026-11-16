@@ -41,8 +41,8 @@ describe("tui", () => {
     expect(frame).toContain(`v${manifest.version}`);
     expect(frame).toContain("Overview");
     expect(frame).toContain("About");
-    expect(frame).toContain("Environment");
-    expect(frame).toContain("Settings in effect");
+    expect(frame).toContain("ENVIRONMENT");
+    expect(frame).toContain("STATE");
     expect(frame).toContain("quit");
   });
 
@@ -50,7 +50,7 @@ describe("tui", () => {
     setup.mockInput.pressKey("5");
     await setup.renderOnce();
     let frame = setup.captureCharFrame();
-    expect(frame).toContain("Credits");
+    expect(frame).toContain("CREDITS");
     expect(frame).toContain("OpenTUI");
     setup.mockInput.pressKey("?");
     await setup.renderOnce();

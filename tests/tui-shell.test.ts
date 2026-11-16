@@ -60,7 +60,7 @@ test("palette opens by Ctrl+K and colon, filters, executes by Enter/click and na
     setup.mockInput.pressKey(":"); await setup.renderOnce(); await escape(setup);
     expect(setup.captureCharFrame()).not.toContain("command(s)"); expect(setup.renderer.isDestroyed).toBe(false);
     setup.mockInput.pressKey(":"); await setup.mockInput.typeText("Go to Docs"); await setup.renderOnce();
-    setup.mockInput.pressEnter(); await setup.renderOnce(); expect(setup.captureCharFrame()).toContain("Topics");
+    setup.mockInput.pressEnter(); await setup.renderOnce(); expect(setup.captureCharFrame()).toContain("TOPICS");
     setup.mockInput.pressKey(":"); await setup.mockInput.typeText("Fixture: count"); await setup.renderOnce();
     setup.mockInput.pressEnter(); await setup.renderOnce(); expect(state.calls).toBe(3); expect(setup.captureCharFrame()).toContain("Mounted 1");
   });
@@ -186,7 +186,7 @@ test("Settings and Credentials focus cycles with Tab and leaves tab navigation a
       setup.mockInput.pressTab({ shift: true });
       expect(setup.renderer.currentFocusedRenderable).toBe(details);
     }
-    setup.mockInput.pressKey("1"); await setup.renderOnce(); expect(setup.captureCharFrame()).toContain("Environment"); expect(setup.renderer.currentFocusedRenderable === null).toBe(true);
+    setup.mockInput.pressKey("1"); await setup.renderOnce(); expect(setup.captureCharFrame()).toContain("ENVIRONMENT"); expect(setup.renderer.currentFocusedRenderable === null).toBe(true);
   });
 });
 
@@ -257,7 +257,7 @@ test("cached tabs restore status and modal paste cannot reach a focused editor",
   await withTui(async (setup) => {
     setup.mockInput.pressKey("5"); setup.mockInput.pressKey("1"); await setup.renderOnce();
     const bar = setup.captureCharFrame().trimEnd().split("\n").at(-1)!;
-    expect(bar).toContain("settings:");
+    expect(bar).toContain("credentials · defaults");
   });
   let input: InputRenderable;
   await fixture(async (setup, ctx) => {

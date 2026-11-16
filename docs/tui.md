@@ -8,7 +8,7 @@ encerra com exit code 8.
 
 | Aba | Ícone | Conteúdo |
 | --- | --- | --- |
-| Overview | `overview` | Environment (binary, runtime, platform, terminal, data directory), estado de settings.json e do cofre, settings em vigor e next steps. |
+| Overview | `overview` | Environment (binary, runtime e platform), State (settings e cofre) e Next steps com comandos de terminal, configuração MCP e ações de copiar/recarregar. |
 | Settings | `settings` | Tabela com key, valor e padrão de cada setting, com painel de detalhe. |
 | Credentials | `vault` | Nomes das credenciais do cofre, origem da master key e total de credenciais. Valores não aparecem. |
 | Docs | `docs` | Índice dos tópicos da documentação embutida e o documento em Markdown. |
@@ -120,6 +120,18 @@ coluna e esconde o conteúdo secundário.
 Abaixo de 60×16 o shell troca a tela pela mensagem "Terminal too small" até
 o terminal crescer. Não repita essa mensagem na screen.
 
+O shell, as abas e a barra alinham o conteúdo na mesma margem. A aba ativa
+recebe um indicador `━` sob o rótulo. Em `medium` e `wide`, as margens
+laterais têm três colunas. Os cartões têm padding de duas colunas e uma
+linha. Os gaps têm quatro colunas e uma linha. Uma linha vazia separa
+cabeçalho, abas, conteúdo e barra. Em `compact`, as margens e o padding
+lateral têm uma coluna, sem padding vertical nem linhas de separação.
+As screens acessam os tokens por `ctx.space`; componentes usam
+`spacingFor(renderer.width)`. Botões usam `[c] copy MCP config`, com a
+tecla em accent e dois espaços entre controles. Os cartões limitam a altura
+ao conteúdo ou à área de leitura disponível; conteúdo excedente rola.
+Diálogos e toasts têm padding de duas colunas e uma linha.
+
 ## Arquivos e pausa
 
 `Screen.watch()` devolve os arquivos que a tela lê. Quando outro processo
@@ -204,12 +216,12 @@ slots, passe uma paleta conhecida a `terminalTheme(colors)`, como faz
 
 Princípios do visual, no estilo modern unix:
 
-- bordas arredondadas com título na própria borda;
+- cartões com bordas arredondadas e título em caixa alta acima da borda;
 - rótulos apagados à esquerda e valores em cor plena à direita;
 - uma cor de accent para o que está ativo, uma secundária para links e
   origens externas; verde, âmbar e vermelho só para estado;
-- barra de status com teclas em blocos invertidos;
-- sem espaços vazios entre painéis vizinhos; padding interno de uma célula;
+- barra de status sem fundo cheio, com teclas em accent bold e descrição apagada;
+- margens, padding e gaps definidos em `src/tui/spacing.ts`, conforme a faixa;
 - nada pisca, nada rola sozinho.
 
 ## Componentes
@@ -219,10 +231,10 @@ tema e, quando desenham ícone, um `TitleIcon` com `{ icons, name }`.
 
 | Componente | Uso |
 | --- | --- |
-| `panel` | Caixa com borda arredondada e título, `active` para o painel em foco. |
-| `scrollPanel` | Painel com título e rolagem por teclado e roda; barra discreta aparece apenas quando o conteúdo excede a altura. |
+| `panel` | Cartão com título acima da borda arredondada, `active` para o painel em foco. |
+| `scrollPanel` | Cartão com título acima da borda e rolagem por teclado e roda; barra discreta aparece apenas quando o conteúdo excede a altura. |
 | `keyValueTable` | Rótulo apagado e valor alinhados, com cor opcional por linha. |
-| `table` | Tabela com cabeçalho que ordena no clique, linha clicável e teclado. |
+| `table` | Tabela com cabeçalho em caixa alta que ordena no clique, duas colunas entre células, seleção com `›`, linha clicável e teclado. |
 | `listPanel` | Lista com rolagem, seleção e clique na linha. |
 | `stateView` | Bloco central de `loading`, `empty` ou `error`, com botão. |
 | `spinner` | Indicador animado com `start`, `stop` e `setLabel`. |
@@ -238,6 +250,9 @@ ascendente e descendente. O primeiro clique na linha seleciona, o segundo
 ativa; `Enter` também ativa. `setRows` troca as linhas e preserva o índice
 quando ele ainda existe. `empty` é o texto da tabela sem linhas.
 
+Os cartões `panel` e `scrollPanel` recebem conteúdo por `.add()` e expõem
+`.body` para acesso direto à caixa interna ou ao viewport de rolagem.
+
 `listPanel(renderer, theme, { title, items, onSelect })` devolve
 `{ box, move, select, selected }`. `move(delta)` muda o destaque sem chamar
 `onSelect`; `select(index)` também chama; `selected()` devolve -1 na lista
@@ -247,15 +262,28 @@ vazia. Os dois componentes respondem ao clique, ao hover e à roda.
 `key`, `label` e `onPress`. Use nos três estados de uma carga: carregando,
 vazio e erro.
 
-About usa um `scrollPanel` com Binary, Project, Credits e Standards em
-sequência no layout compacto; no médio, agrupa Binary/Project à esquerda e
-Credits/Standards à direita. No largo, mantém os quatro painéis. Na Overview
+About usa um `scrollPanel` com Binary, Project e Credits em sequência no
+layout compacto. No médio, Binary e Project ficam em cartões empilhados à
+esquerda, com Credits à direita. Standards aparece apenas no largo, abaixo
+de Credits. Cada crédito mostra nome e URL na mesma linha, com o papel
+abaixo; o largo acrescenta uma linha vazia entre créditos. Executable e
+Data usam elipse central, preservando o fim do caminho. Na Overview
 80×24, os botões de copiar a configuração MCP e recarregar ficam visíveis
-sem rolar o painel Next steps.
+fixos abaixo da leitura de Next steps. Em 100×30, os comandos e a configuração
+MCP ficam visíveis em duas colunas; em 80×24, a leitura rola e os botões
+continuam visíveis. No compacto, os comandos ficam em uma coluna e a
+configuração MCP é omitida.
 
 `clickable(renderer, node, { onClick, onHover })`, em `src/tui/pointer.ts`,
 liga o clique, o hover e o ponteiro de mão a qualquer renderable. Use nos
 elementos clicáveis que não vêm de `button`, `table` ou `listPanel`.
+
+A barra de rolagem dos cartões aparece somente quando existe conteúdo
+excedente e usa trilho `│` em border e polegar `┃` em textDim. A interação
+de mouse e a posição continuam no scrollbar nativo; `thinScrollbar` pinta
+a apresentação sobre a área da barra e encaminha seus eventos. Docs usa
+blocos Markdown estruturados para manter o hanging indent das listas. O
+rótulo do cartão mostra o tópico, sem repetir o heading inicial no corpo.
 
 ## Como criar uma screen
 

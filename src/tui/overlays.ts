@@ -1,3 +1,4 @@
+import { controlSpacing } from "./spacing.ts";
 /**
  * Modal layer of the TUI: dialogs, command palette, help and toasts.
  *
@@ -186,8 +187,10 @@ export class Overlays {
       backgroundColor: this.theme.surfaceHigh,
       title: ` ${withIcon(this.icons, options.icon ?? "list", options.title)} `,
       titleColor: this.theme.accent,
-      paddingLeft: 1,
-      paddingRight: 1,
+      paddingLeft: controlSpacing.modalX,
+      paddingRight: controlSpacing.modalX,
+      paddingTop: controlSpacing.modalY,
+      paddingBottom: controlSpacing.modalY,
       zIndex: 21,
     });
     // Clicks inside the modal must not reach the backdrop.
@@ -229,10 +232,10 @@ export class Overlays {
     items: Array<{ key: string; label: string; danger?: boolean; run: () => void }>,
     focused: () => number,
   ): () => void {
-    const row = new BoxRenderable(this.renderer, { flexDirection: "row", gap: 2, height: 1, marginTop: 1 });
+    const row = new BoxRenderable(this.renderer, { flexDirection: "row", gap: controlSpacing.gap, height: 1, marginTop: controlSpacing.modalY });
     const texts = items.map((item, index) => {
       const box = new BoxRenderable(this.renderer, { flexDirection: "row", flexShrink: 0 });
-      const keyText = new TextRenderable(this.renderer, { content: ` ${item.key} `, fg: this.theme.keyText, bg: item.danger ? this.theme.error : this.theme.keyBackground, selectable: false });
+      const keyText = new TextRenderable(this.renderer, { content: `[${item.key}]`, fg: item.danger ? this.theme.error : this.theme.accent, attributes: TextAttributes.BOLD, selectable: false });
       const label = new TextRenderable(this.renderer, { content: ` ${item.label} `, fg: this.theme.text, selectable: false });
       box.add(keyText);
       box.add(label);
@@ -258,7 +261,7 @@ export class Overlays {
       this.open({
         title: options.title,
         icon: options.danger ? "warn" : "help",
-        width: Math.max(44, Math.min(72, options.message.length + 6)),
+        width: Math.max(44, Math.min(72, Bun.stringWidth(options.message) + 8)),
         height: 12,
         cancel: () => resolve(false),
         build: (body, close) => {
@@ -576,14 +579,16 @@ export class Overlays {
     }
     const color = tone === "ok" ? this.theme.ok : tone === "warn" ? this.theme.warn : tone === "error" ? this.theme.error : this.theme.accent;
     const icon: IconName = tone === "ok" ? "ok" : tone === "warn" ? "warn" : tone === "error" ? "error" : "about";
-    const width = Math.min(Math.max(24, message.length + 6), Math.max(24, this.renderer.width - 4));
+    const width = Math.min(Math.max(24, Bun.stringWidth(withIcon(this.icons, icon, message)) + 8), Math.max(24, this.renderer.width - 4));
     const box = new BoxRenderable(this.renderer, {
       width,
       borderStyle: "rounded",
       borderColor: color,
       backgroundColor: this.theme.surfaceHigh,
-      paddingLeft: 1,
-      paddingRight: 1,
+      paddingLeft: controlSpacing.modalX,
+      paddingRight: controlSpacing.modalX,
+      paddingTop: controlSpacing.modalY,
+      paddingBottom: controlSpacing.modalY,
     });
     box.add(new TextRenderable(this.renderer, { content: withIcon(this.icons, icon, message), fg: this.theme.text, wrapMode: "word", selectable: false }));
     const dismiss = () => {

@@ -2,6 +2,31 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.13.0] - 2026-11-16
+
+### Alterado
+
+- Redesenho da TUI em cartões arejados: margem lateral, linha vazia entre
+  cabeçalho, abas, conteúdo e barra, rótulo da seção em caixa alta acima de
+  cada cartão e padding interno de duas colunas e uma linha.
+- Abas com um traço `━` sob a aba ativa no lugar da régua e do fundo
+  destacado.
+- Barra de status sem fundo cheio, com a tecla em acento e a descrição
+  apagada.
+- Botões no formato `[c] copy MCP config`, inclusive nos diálogos.
+- Overview com o cartão NEXT STEPS em duas colunas (comandos do terminal e
+  configuração MCP para agentes). About em cartões próprios (BINARY,
+  PROJECT, CREDITS), com caminhos e URLs cortados no meio.
+- Docs com recuo nos itens de lista que quebram linha e sem título
+  repetido.
+- Barras de rolagem só quando o conteúdo passa da altura, em traço fino.
+
+### Adicionado
+
+- `src/tui/spacing.ts` com os tokens de espaçamento por faixa de layout,
+  expostos em `ctx.space`.
+- Skills do Termfy atualizadas para a 0.15.0.
+
 ## [0.12.1] - 2026-11-16
 
 ### Corrigido

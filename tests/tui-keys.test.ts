@@ -19,16 +19,16 @@ test("Tab keeps the active tab and brackets switch through the new tab order", a
   await withTui(async (setup) => {
     setup.mockInput.pressTab({ shift: true });
     await setup.renderOnce();
-    expect(setup.captureCharFrame()).toContain("Environment");
+    expect(setup.captureCharFrame()).toContain("ENVIRONMENT");
     setup.mockInput.pressKey("[");
     await setup.renderOnce();
-    expect(setup.captureCharFrame()).toContain("Credits");
+    expect(setup.captureCharFrame()).toContain("CREDITS");
     setup.mockInput.pressKey("]");
     await setup.renderOnce();
-    expect(setup.captureCharFrame()).toContain("Environment");
+    expect(setup.captureCharFrame()).toContain("ENVIRONMENT");
     setup.mockInput.pressKey("]");
     await setup.renderOnce();
-    expect(setup.captureCharFrame()).toContain("Setting details");
+    expect(setup.captureCharFrame()).toContain("SETTING DETAILS");
   });
 });
 test("Escape closes help before quitting and reload reports success", async () => {
@@ -45,7 +45,7 @@ test("Escape closes help before quitting and reload reports success", async () =
     setup.mockInput.pressKey("r");
     await setup.renderOnce();
     expect(setup.captureCharFrame()).toContain("Reloaded");
-    expect(setup.captureCharFrame()).toContain("Environment");
+    expect(setup.captureCharFrame()).toContain("ENVIRONMENT");
     setup.mockInput.pressEscape();
     // A lone Escape waits for the input parser to rule out an escape sequence.
     await Bun.sleep(50);

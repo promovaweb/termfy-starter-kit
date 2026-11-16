@@ -37,6 +37,8 @@ com [os padrões de tela](screen-patterns.md).
 - [ ] Em 80×24 e em 120×32 a hierarquia continua legível.
 - [ ] Nenhum texto cai sobre a borda de um painel nem sobrepõe outro texto.
   Conteúdo maior que o painel rola num `scrollPanel`.
+- [ ] Espaçamento só de `ctx.space`: margem lateral, linha vazia entre
+  blocos e padding dentro do cartão.
 - [ ] A barra de baixo mostra `? help`, `q quit` e `^K commands` inteiros em
   todas as larguras; o status usa o espaço que sobra.
 - [ ] No layout largo os painéis dividem a largura por proporção, sem painel

@@ -1,7 +1,7 @@
 /**
  * Visual components shared by the screens.
  *
- * `panel` creates a box with a rounded border and a title, optionally with
+ * `panel` creates a rounded card with a separate uppercase caption, optionally with
  * an icon. `keyValueRow` builds "label  value" with a dimmed label. `list`
  * stacks items with a marker. `button` and `listPanel` are clickable and
  * show hover; each one runs the same function as its keyboard shortcut.
@@ -14,6 +14,7 @@
  */
 import {
   ScrollBoxRenderable,
+  parseColor,
   BoxRenderable,
   TextRenderable,
   TextAttributes,
@@ -24,6 +25,7 @@ import {
   StyledText,
   link as styledLink,
 } from "@opentui/core";
+import { spacingFor, controlSpacing } from "./spacing.ts";
 import { clickable } from "./pointer.ts";
 import { glyphs, type Theme } from "./theme.ts";
 import {
@@ -40,71 +42,97 @@ export interface TitleIcon {
   name: IconName;
 }
 
-/** Creates a themed bordered panel. */
-export function panel(
-  renderer: CliRenderer,
-  theme: Theme,
-  options: {
-    title: string;
-    icon?: TitleIcon;
-    flexGrow?: number;
-    width?: number | "auto" | `${number}%`;
-    height?: number | "auto" | `${number}%`;
-    active?: boolean;
-  },
-): BoxRenderable {
-  const title = options.icon
-    ? withIcon(options.icon.icons, options.icon.name, options.title)
-    : options.title;
-  return new BoxRenderable(renderer, {
-    flexGrow: options.flexGrow,
-    flexBasis: options.flexGrow && options.width === undefined ? 0 : "auto",
-    width: options.width,
-    height: options.height,
-    flexDirection: "column",
-    minWidth: 0,
-    minHeight: 0,
-    overflow: "hidden",
-    borderStyle: "rounded",
-    borderColor: options.active ? theme.borderActive : theme.border,
-    title: ` ${title} `,
-    titleColor: options.active ? theme.accent : theme.textDim,
-    backgroundColor: theme.surface,
-    paddingLeft: 1,
-    paddingRight: 1,
-  });
+/** A card keeps its caption outside the bordered content area. */
+class Card<T extends BoxRenderable> extends BoxRenderable {
+  /** The bordered box or scroll viewport that owns the card content. */
+  readonly body: T;
+
+  constructor(renderer: CliRenderer, theme: Theme, options: PanelOptions, body: T) {
+    super(renderer, {
+      flexDirection: "column", minWidth: 0, minHeight: 0,
+      flexGrow: options.flexGrow ?? 1,
+      flexBasis: options.width === undefined && options.flexGrow ? 0 : "auto",
+      width: options.width, height: options.height, overflow: "hidden",
+    });
+    this.body = body;
+    const title = options.icon ? withIcon(options.icon.icons, options.icon.name, options.title.toUpperCase()) : options.title.toUpperCase();
+    super.add(new TextRenderable(renderer, { content: title, fg: theme.textDim, attributes: TextAttributes.BOLD, height: 1, flexShrink: 0, wrapMode: "none" }));
+    super.add(body);
+  }
+
+  /** Adds a decoration after the card body without entering its scroll content. */
+  addDecoration(node: BoxRenderable): void { super.add(node); }
+
+  /** Focuses the native viewport so keyboard scrolling remains available. */
+  override focus(): void { this.body.focus(); }
+
+  /** Adds screen content inside the border, below the separate caption. */
+  override add(child: Parameters<BoxRenderable["add"]>[0], index?: number): number {
+    return this.body.add(child, index);
+  }
 }
 
-/** Creates a bordered, keyboard- and wheel-scrollable content viewport. */
-export function scrollPanel(
-  renderer: CliRenderer,
-  theme: Theme,
-  options: Parameters<typeof panel>[2],
-): ScrollBoxRenderable {
-  const box = new ScrollBoxRenderable(renderer, {
-    flexGrow: options.flexGrow ?? 1,
-    flexShrink: options.width === undefined ? 1 : 0,
-    flexBasis: options.width === undefined && options.height === undefined ? 0 : "auto",
-    width: options.width,
-    height: options.height,
-    minWidth: 0,
-    minHeight: 0,
-    borderStyle: "rounded",
-    borderColor: options.active ? theme.borderActive : theme.border,
-    title: ` ${options.icon ? withIcon(options.icon.icons, options.icon.name, options.title) : options.title} `,
-    titleColor: options.active ? theme.accent : theme.textDim,
+/** Layout and identity of a titled card. */
+interface PanelOptions {
+  title: string;
+  icon?: TitleIcon;
+  flexGrow?: number;
+  width?: number | "auto" | `${number}%`;
+  height?: number | "auto" | `${number}%`;
+  active?: boolean;
+}
+
+/** Creates a card with an uppercase caption and padded rounded border. */
+export function panel(renderer: CliRenderer, theme: Theme, options: PanelOptions): Card<BoxRenderable> {
+  const space = spacingFor(renderer.width);
+  const body = new BoxRenderable(renderer, {
+    flexDirection: "column", flexGrow: 1, minHeight: 0, minWidth: 0,
+    borderStyle: "rounded", focusedBorderColor: theme.borderActive, borderColor: options.active ? theme.borderActive : theme.border,
     backgroundColor: theme.surface,
-    paddingLeft: 1,
-    paddingRight: 1,
-    scrollY: true,
-    scrollX: false,
-    scrollAcceleration: new LinearScrollAccel(),
+    paddingLeft: space.cardPadX, paddingRight: space.cardPadX,
+    paddingTop: space.cardPadY, paddingBottom: space.cardPadY,
+  });
+  return new Card(renderer, theme, options, body);
+}
+
+/** Paints a narrow track and thumb while preserving native scrollbar input. */
+export function thinScrollbar(renderer: CliRenderer, box: ScrollBoxRenderable, theme: Theme, host: BoxRenderable): void {
+  box.verticalScrollBar.resetVisibilityControl();
+  const track = parseColor(theme.border);
+  const thumbColor = parseColor(theme.textDim);
+  const background = parseColor(theme.surface);
+  const overlay = new BoxRenderable(renderer, { position: "absolute", right: host instanceof Card ? 1 : spacingFor(renderer.width).cardPadX + 1, top: 0, width: 1, height: "100%", zIndex: 1 });
+  overlay.onMouse = (event) => { box.processMouseEvent(event); event.stopPropagation(); };
+  overlay.renderAfter = (buffer) => {
+    const bar = box.verticalScrollBar;
+    if (!bar.visible || bar.scrollSize <= bar.viewportSize || bar.height <= 0) return;
+    const thumb = Math.max(1, Math.floor(bar.height * bar.viewportSize / bar.scrollSize));
+    const offset = Math.round((bar.height - thumb) * bar.scrollPosition / Math.max(1, bar.scrollSize - bar.viewportSize));
+    for (let y = 0; y < bar.height; y++) {
+      const selected = y >= offset && y < offset + thumb;
+      buffer.drawText(selected ? "┃" : "│", bar.x, bar.y + y, selected ? thumbColor : track, background);
+    }
+  };
+  if (host instanceof Card) host.addDecoration(overlay);
+  else host.add(overlay);
+}
+
+/** Creates a captioned card with a keyboard- and wheel-scrollable body. */
+export function scrollPanel(renderer: CliRenderer, theme: Theme, options: PanelOptions): Card<ScrollBoxRenderable> {
+  const space = spacingFor(renderer.width);
+  const body = new ScrollBoxRenderable(renderer, {
+    flexGrow: 1, minWidth: 0, minHeight: 0,
+    borderStyle: "rounded", focusedBorderColor: theme.borderActive, borderColor: options.active ? theme.borderActive : theme.border,
+    backgroundColor: theme.surface,
+    paddingLeft: space.cardPadX, paddingRight: space.cardPadX,
+    paddingTop: space.cardPadY, paddingBottom: space.cardPadY,
+    scrollY: true, scrollX: false, scrollAcceleration: new LinearScrollAccel(),
     scrollbarOptions: { trackOptions: { backgroundColor: theme.border, foregroundColor: theme.textDim } },
     contentOptions: { flexDirection: "column" },
   });
-  // Automatic visibility follows the scroll range, including after resize.
-  box.verticalScrollBar.resetVisibilityControl();
-  return box;
+  const card = new Card(renderer, theme, options, body);
+  thinScrollbar(renderer, body, theme, card);
+  return card;
 }
 
 /** Fits terminal cells with an ellipsis, optionally preserving the path suffix. */
@@ -140,7 +168,7 @@ export function keyValueRow(
       flexShrink: 0,
     }),
   );
-  row.add(new TextRenderable(renderer, { content: "  ", flexShrink: 0 }));
+  row.add(new TextRenderable(renderer, { content: " ".repeat(spacingFor(renderer.width).labelGap), flexShrink: 0 }));
   row.add(
     new TextRenderable(renderer, {
       content: value,
@@ -230,9 +258,9 @@ export function button(
   });
   box.add(
     new TextRenderable(renderer, {
-      content: ` ${options.key} `,
-      fg: theme.keyText,
-      bg: theme.keyBackground,
+      content: `[${options.key}]`,
+      fg: theme.accent,
+      attributes: TextAttributes.BOLD,
       selectable: false,
     }),
   );
@@ -270,22 +298,8 @@ export function listPanel(
     onSelect?: (index: number) => void;
   },
 ) {
-  const box = new ScrollBoxRenderable(renderer, {
-    title: ` ${options.title} `,
-    titleColor: theme.accent,
-    borderStyle: "rounded",
-    borderColor: theme.borderActive,
-    backgroundColor: theme.surface,
-    paddingLeft: 1,
-    paddingRight: 1,
-    flexGrow: 1,
-    minHeight: 0,
-    scrollY: true,
-    scrollX: false,
-    scrollAcceleration: new LinearScrollAccel(),
-    scrollbarOptions: { trackOptions: { backgroundColor: theme.border, foregroundColor: theme.textDim } },
-    contentOptions: { flexDirection: "column" },
-  });
+  const card = scrollPanel(renderer, theme, { title: options.title, active: true });
+  const box = card.body;
   let index = options.items.length ? 0 : -1;
   let hovered = -1;
   /** Builds one row with mouse selection and hover routed through shared state. */
@@ -359,7 +373,8 @@ export function listPanel(
 
   box.handleKeyPress = handleKeyPress;
   highlight(index);
-  return { box, select, selected: () => index, move };
+  card.handleKeyPress = handleKeyPress;
+  return { box: card, select, selected: () => index, move };
 }
 
 /** A sortable table column, measured in terminal cells. */
@@ -391,6 +406,7 @@ export function table(
     flexDirection: "row",
     height: 1,
     flexShrink: 0,
+    paddingLeft: 2,
   });
   const body = new ScrollBoxRenderable(renderer, {
     flexGrow: 1,
@@ -428,10 +444,11 @@ export function table(
       Bun.stringWidth(column.title) + 2,
       ...rows.map((row) => Bun.stringWidth(row[column.key] ?? "")),
     ));
-    const gap = 2;
-    const budget = Math.max(0, available - gap * (widths.length - 1));
+    const gap = controlSpacing.gap;
+    const budget = Math.max(0, available - 2 - gap * (widths.length - 1));
     while (widths.reduce((sum, width) => sum + width, 0) > budget) {
-      const largest = widths.indexOf(Math.max(...widths));
+      const candidates = widths.map((width, i) => options.columns[i]!.width === undefined ? width : 0);
+      const largest = Math.max(...candidates) > 1 ? candidates.indexOf(Math.max(...candidates)) : widths.indexOf(Math.max(...widths));
       widths[largest] = Math.max(0, widths[largest]! - 1);
     }
     /** Aligns a clipped string without depending on intrinsic text layout. */
@@ -446,10 +463,10 @@ export function table(
     }
     headers.forEach((node, i) => {
       const column = options.columns[i]!;
-      place(node, column.title + (column.key === sortKey ? (descending ? " ▼" : " ▲") : ""), i);
+      place(node, column.title.toUpperCase() + (column.key === sortKey ? (descending ? " ▼" : " ▲") : ""), i);
     });
     rowNodes.forEach((node, row) => node.getChildren().forEach((child, i) => {
-      place(child as TextRenderable, rows[row]?.[options.columns[i]!.key] ?? "", i);
+      if (i > 0) place(child as TextRenderable, rows[row]?.[options.columns[i - 1]!.key] ?? "", i - 1);
     }));
   }
   header.onSizeChange = layoutColumns;
@@ -457,10 +474,11 @@ export function table(
   /** Applies the selected-row colors to every cell in the table. */
   function paint(): void {
     for (const [i, node] of rowNodes.entries()) {
-      node.backgroundColor = i === index ? theme.surfaceHigh : theme.surface;
+      (node.getChildren()[0] as TextRenderable).content = i === index ? "› " : "  ";
+      node.backgroundColor = theme.surface;
       for (const child of node.getChildren()) {
         (child as TextRenderable).fg = i === index ? theme.accent : theme.text;
-        (child as TextRenderable).attributes = i === index ? TextAttributes.BOLD | TextAttributes.UNDERLINE : TextAttributes.NONE;
+        (child as TextRenderable).attributes = i === index ? TextAttributes.BOLD : TextAttributes.NONE;
       }
     }
   }
@@ -484,6 +502,7 @@ export function table(
         height: 1,
         flexShrink: 0,
       });
+      node.add(new TextRenderable(renderer, { content: "  ", width: 2, height: 1, flexShrink: 0 }));
       for (const column of options.columns) node.add(cell(row[column.key] ?? "", column));
       /** A second click on the same selected row activates it. */
       function clickRow(): void {

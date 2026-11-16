@@ -1,3 +1,4 @@
+import { spacing } from "../src/tui/spacing.ts";
 /** Configurable screen context fixture without the application shell. */
 import type { CliRenderer } from "@opentui/core";
 import type { ChooseOptions, ConfirmOptions, Layout, PromptOptions, ScreenContext } from "../src/tui/screen.ts";
@@ -18,7 +19,7 @@ export function createScreenContext(renderer: CliRenderer, layout: Layout = "med
   };
   let refreshes = 0;
   const ctx: ScreenContext = {
-    renderer, theme: themes.night, icons: iconSets.unicode, layout: () => layout, motion: false,
+    renderer, theme: themes.night, icons: iconSets.unicode, layout: () => layout, space: spacing(layout), motion: false,
     goTo: () => {}, refresh: () => { refreshes++; }, quit: () => {},
     notify: (message, tone) => { notifications.push([message, tone]); }, status: (text) => { statuses.push(text); },
     prompt: async (options) => { prompts.push(options); return answers.prompt(options); },

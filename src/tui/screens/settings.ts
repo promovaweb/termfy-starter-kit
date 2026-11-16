@@ -163,13 +163,15 @@ export function createSettingsScreen(): Screen {
         }));
         const root = new BoxRenderable(renderer, {
           flexDirection: ctx.layout() === "compact" ? "column" : "row",
-          flexGrow: 1,
+          gap: ctx.layout() === "compact" ? ctx.space.gapY : ctx.space.gapX,
+          height: Math.min(renderer.height - (ctx.layout() === "compact" ? 4 : 8), ctx.layout() === "compact" ? 17 : rows.length + 6),
+          flexGrow: 0,
           minHeight: 0,
         });
         const details = scrollPanel(renderer, theme, {
           title: "Setting details",
-          width: ctx.layout() === "compact" ? "100%" : "40%",
-          height: ctx.layout() === "compact" ? 5 : undefined,
+          width: ctx.layout() === "compact" ? "100%" : ctx.layout() === "medium" ? "34%" : "40%",
+          height: ctx.layout() === "compact" ? 6 : undefined,
           flexGrow: 0,
         });
         const text = new TextRenderable(renderer, {
@@ -192,7 +194,7 @@ export function createSettingsScreen(): Screen {
 
         grid = table(renderer, theme, {
           columns: [
-            { key: "key", title: "Key" },
+            { key: "key", title: "Key", width: Math.max(...rows.map((row) => Bun.stringWidth(row.key!))) },
             { key: "value", title: "Value" },
             { key: "default", title: "Default" },
           ],

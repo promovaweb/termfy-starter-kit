@@ -1,32 +1,33 @@
 /**
  * Overview tab: the environment at a glance.
  *
- * Shows runtime, data directory, settings.json and vault state, and the
+ * Shows runtime, platform, settings and vault state, and the
  * first suggested actions. It is the default initial tab and the natural
  * place for derived projects to show their own indicators.
  *
  * Wide and medium use proportional columns and content-sized row limits.
- * Compact stacks Environment and Settings and hides secondary panels.
+ * Compact retains the same cards with smaller padding and gaps.
  * Watches settings.json, credentials.json and master.key for external updates.
  *
  * Actions: `r` reloads the panels from disk; `c` copies the MCP client
  * configuration to the clipboard (OSC 52). Both also run from the key bar
  * and from the buttons in the "Next steps" panel.
  */
-import { BoxRenderable } from "@opentui/core";
+import { BoxRenderable, ScrollBoxRenderable } from "@opentui/core";
 import { manifest } from "../../app/manifest.ts";
 import { paths, exists } from "../../config/paths.ts";
 import { vaultStatus } from "../../config/credentials.ts";
-import { flatten, readSettings } from "../../config/settings.ts";
 import {
-  spacer,
-  list,
   scrollPanel,
+  panel,
+  thinScrollbar,
+  heading,
+  list,
   dim,
   keyValueTable,
-  heading,
   button,
 } from "../components.ts";
+import { controlSpacing } from "../spacing.ts";
 import { glyphs } from "../theme.ts";
 import type { Screen, ScreenAction, ScreenContext } from "../screen.ts";
 
@@ -72,142 +73,60 @@ export const overviewScreen: Screen = {
   actions,
   watch: () => [paths.settings(), paths.credentials(), paths.masterKey()],
   mount(ctx) {
-    const { renderer, theme, icons } = ctx;
-    const rootBox = new BoxRenderable(renderer, { flexDirection: "column", flexGrow: 1 });
-
-    const topRow = new BoxRenderable(renderer, {
-      flexDirection: ctx.layout() === "compact" ? "column" : "row",
-      flexShrink: 0,
-      height: 7,
-      minHeight: 0,
-    });
-
-    const environment = scrollPanel(renderer, theme, {
-      title: "Environment",
-      icon: { icons, name: "terminal" },
-      flexGrow: 1,
-      active: true,
-    });
-    environment.add(
-      keyValueTable(renderer, theme, [
-        ["Binary", `${manifest.bin} v${manifest.version}`, theme.textStrong],
-        ["Runtime", `Bun ${Bun.version}`],
-        ["Platform", `${process.platform}-${process.arch}`],
-        ["Terminal", `${renderer.width}×${renderer.height}  ${process.env.TERM ?? ""}`],
-        ["Data", paths.base()],
-      ]),
-    );
+    const { renderer, theme } = ctx;
+    const space = ctx.space;
+    const compact = ctx.layout() === "compact";
+    const rootBox = new BoxRenderable(renderer, { flexDirection: "column", flexGrow: 1, gap: space.gapY, minHeight: 0 });
+    const topRow = new BoxRenderable(renderer, { flexDirection: "row", gap: space.gapX, height: compact ? 6 : 8, flexShrink: 0 });
+    const environment = scrollPanel(renderer, theme, { title: "Environment", flexGrow: 1, active: true });
+    environment.add(keyValueTable(renderer, theme, [
+      ["Binary", `${manifest.bin} v${manifest.version}`],
+      ["Runtime", `Bun ${Bun.version}`],
+      ["Platform", `${process.platform}-${process.arch}`],
+    ]));
     topRow.add(environment);
-
     const vault = vaultStatus();
     const hasSettings = exists(paths.settings());
-    ctx.status(`${vault.count} credential${vault.count === 1 ? "" : "s"} · settings: ${hasSettings ? "saved" : "defaults"}`);
-    const state = scrollPanel(renderer, theme, {
-      title: "State",
-      icon: { icons, name: "state" },
-      width: "50%",
-      flexGrow: 0,
-    });
-    state.add(
-      keyValueTable(renderer, theme, [
-        [
-          "settings.json",
-          hasSettings ? `${glyphs.ok} saved` : `${glyphs.bullet} defaults`,
-          hasSettings ? theme.ok : theme.textDim,
-        ],
-        [
-          "Vault",
-          vault.exists
-            ? `${glyphs.ok} ${vault.count} credential${vault.count === 1 ? "" : "s"}`
-            : `${glyphs.bullet} empty`,
-          vault.exists ? theme.ok : theme.textDim,
-        ],
-        [
-          "master key",
-          vault.masterKeySource === "none" ? "not created" : vault.masterKeySource,
-          vault.masterKeySource === "env" ? theme.accentSecondary : theme.text,
-        ],
-        ["MCP", `${manifest.bin} mcp`, theme.text],
-      ]),
-    );
-    if (ctx.layout() !== "compact") topRow.add(state);
+    ctx.status(`${vault.count} credential${vault.count === 1 ? "" : "s"} · ${hasSettings ? "saved" : "defaults"}`);
+    const state = scrollPanel(renderer, theme, { title: "State", flexGrow: 1 });
+    state.add(keyValueTable(renderer, theme, [
+      ["Settings", hasSettings ? `${glyphs.ok} saved` : `${glyphs.bullet} defaults`, hasSettings ? theme.ok : theme.textDim],
+      ["Vault", vault.exists ? `${glyphs.ok} ${vault.count} credential${vault.count === 1 ? "" : "s"}` : `${glyphs.bullet} empty`, vault.exists ? theme.ok : theme.textDim],
+      ["Master key", vault.masterKeySource === "none" ? "not created" : vault.masterKeySource],
+    ]));
+    topRow.add(state);
     rootBox.add(topRow);
-
-    const bottomRow = new BoxRenderable(renderer, {
-      flexDirection: ctx.layout() === "compact" ? "column" : "row",
-      flexGrow: 0,
-      height: Math.max(3, Math.min(ctx.layout() === "wide" ? 13 : 14, renderer.height - 11)),
-      minHeight: 0,
+    const next = panel(renderer, theme, { title: "Next steps", height: compact ? 7 : 11, flexGrow: 0 });
+    next.flexShrink = 1;
+    const reading = new ScrollBoxRenderable(renderer, {
+      flexGrow: 1, minHeight: 0, scrollY: true, scrollX: false,
+      contentOptions: { flexDirection: "column" },
+      scrollbarOptions: { trackOptions: { backgroundColor: theme.border, foregroundColor: theme.textDim } },
     });
-
-    const config = scrollPanel(renderer, theme, {
-      title: "Settings in effect",
-      icon: { icons, name: "settings" },
-      flexGrow: 1,
-    });
-    let pairs: Array<[string, string]>;
-    try {
-      pairs = flatten(readSettings()).map(([k, v]) => [k, JSON.stringify(v)]);
-    } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
-      ctx.notify(message, "error");
-      pairs = [["error", message]];
+    const columns = new BoxRenderable(renderer, { flexDirection: compact ? "column" : "row", gap: compact ? space.gapY : space.gapX, flexShrink: 0 });
+    const terminal = new BoxRenderable(renderer, { flexDirection: "column", flexGrow: compact ? 0 : 1, flexBasis: compact ? "auto" : 0, minWidth: 0 });
+    if (!compact && renderer.height >= 28) terminal.add(heading(renderer, theme, "IN THE TERMINAL"));
+    terminal.add(list(renderer, theme, [
+      `${manifest.bin} --help`,
+      `${manifest.bin} credentials set <name>`,
+      `${manifest.bin} --skill`,
+    ], glyphs.arrow));
+    columns.add(terminal);
+    if (!compact) {
+      const agents = new BoxRenderable(renderer, { flexDirection: "column", flexGrow: 1, flexBasis: 0, minWidth: 0 });
+      if (renderer.height >= 28) agents.add(heading(renderer, theme, "FOR AGENTS"));
+      agents.add(dim(renderer, theme, `{ "command": "${manifest.bin}",
+  "args": ["mcp"] }`));
+      columns.add(agents);
     }
-    config.add(
-      keyValueTable(
-        renderer,
-        theme,
-        pairs.map(([k, v]) => [k, v, theme.text]),
-      ),
-    );
-    bottomRow.add(config);
-
-    const next = scrollPanel(renderer, theme, {
-      title: "Next steps",
-      icon: { icons, name: "docs" },
-      width: "50%",
-      flexGrow: 0,
-    });
-    if (ctx.layout() === "wide") next.add(heading(renderer, theme, `In the terminal (${manifest.bin})`));
-    next.add(
-      list(
-        renderer,
-        theme,
-        [
-          `${manifest.bin} --help`,
-          `${manifest.bin} credentials set <name>`,
-          `${manifest.bin} config set tui.theme day`,
-          `${manifest.bin} --skill`,
-        ],
-        glyphs.arrow,
-      ),
-    );
-    next.add(spacer(renderer));
-    next.add(heading(renderer, theme, "For agents"));
-    next.add(dim(renderer, theme, `MCP client: ${mcpClientConfig()}`));
-    if (ctx.layout() === "wide") next.add(spacer(renderer));
-    next.add(
-      button(renderer, theme, {
-        key: "c",
-        label: "copy MCP config",
-        icon: { icons, name: "copy" },
-        onPress: () => copyMcpConfig(ctx),
-      }),
-    );
-    next.add(
-      button(renderer, theme, {
-        key: "r",
-        label: "reload",
-        icon: { icons, name: "refresh" },
-        onPress: () => reload(ctx),
-      }),
-    );
-    if (ctx.layout() !== "compact") bottomRow.add(next);
-    rootBox.add(bottomRow);
-    rootBox.onSizeChange = () => {
-      bottomRow.height = Math.max(3, Math.min(ctx.layout() === "wide" ? 13 : 14, rootBox.height - 7));
-    };
-
+    reading.add(columns);
+    next.add(reading);
+    const controls = new BoxRenderable(renderer, { flexDirection: "row", gap: compact ? controlSpacing.gap : space.gapX, flexShrink: 0, height: 1, marginTop: renderer.height >= 28 ? space.gapY : 0 });
+    controls.add(button(renderer, theme, { key: "c", label: "copy MCP config", onPress: () => copyMcpConfig(ctx) }));
+    controls.add(button(renderer, theme, { key: "r", label: "reload", onPress: () => reload(ctx) }));
+    next.add(controls);
+    thinScrollbar(renderer, reading, theme, next.body);
+    rootBox.add(next);
     return rootBox;
   },
 };

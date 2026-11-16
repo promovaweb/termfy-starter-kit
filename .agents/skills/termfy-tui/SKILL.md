@@ -62,7 +62,9 @@ escolhido e verificações antes de editar.
 3. Reutilize `table`, `stateView`, `spinner`, `progressBar`, `link`, `panel`,
    `scrollPanel`, `keyValueTable`, `listPanel`, `button`, `heading`, `dim` e
    `spacer`. Conteúdo que pode passar da altura do painel vai num
-   `scrollPanel`; nenhum texto cai sobre a borda nem sobrepõe outro.
+   `scrollPanel`; nenhum texto cai sobre a borda nem sobrepõe outro. Margens,
+   paddings e gaps vêm de `ctx.space` (`src/tui/spacing.ts`), no estilo de
+   cartões arejados de `references/modern-unix-design.md`.
    Confira assinaturas no arquivo real, sem deduí-las pelo nome.
    `spacer(renderer, height)` não recebe tema. `button` e `listPanel` já
    respondem ao clique.
@@ -169,7 +171,8 @@ ainda não exercitados.
 
 ## Compatibilidade
 
-Starter kit a partir da v0.12.0 (paleta de comandos em `Ctrl+K` e `:`,
+Starter kit a partir da v0.13.0 (tokens de espaçamento em `ctx.space`,
+paleta de comandos em `Ctrl+K` e `:`,
 `ctx.layout()` com as faixas `wide`, `medium` e `compact`, diálogos
 `confirm`, `prompt` e `choose`, toasts, `Screen.watch()`,
 `onPause`/`onResume`, setting `tui.motion`, componentes `table`,

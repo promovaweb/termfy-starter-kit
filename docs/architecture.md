@@ -31,6 +31,7 @@ src/
     index.ts              shell: aba ativa, foco, paleta, status bar, watch, pausa
     overlays.ts           diálogos, paleta de comandos, help e toasts
     pointer.ts            clickable: clique, hover e ponteiro de mão
+    spacing.ts            tokens de margem, padding e gaps por faixa
     theme.ts              temas terminal, night e day
     icons.ts              conjuntos de ícones nerd, unicode e ascii
     screen.ts             contrato Screen e ScreenContext

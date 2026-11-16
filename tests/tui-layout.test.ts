@@ -4,7 +4,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createTestRenderer } from "@opentui/core/testing";
-import { ScrollBoxRenderable, type Renderable } from "@opentui/core";
+import { BoxRenderable, ScrollBoxRenderable, TextRenderable, MarkdownRenderable, type Renderable } from "@opentui/core";
 import { HOME_VARIABLE, MASTER_KEY_VARIABLE } from "../src/config/paths.ts";
 import { setCredential } from "../src/config/credentials.ts";
 import { mountTui } from "../src/tui/index.ts";
@@ -51,12 +51,40 @@ for (const [width, height] of sizes) {
         expect(bar).toContain("help");
         expect(bar).toContain("quit");
         expect(bar).toContain("commands");
+        const barNode = setup.renderer.root.getChildren()[0]!.getChildren().at(-1)! as BoxRenderable;
+        expect(barNode.backgroundColor.a).toBe(0);
+        const assertPlainKeys = (node: Renderable): void => {
+          if (node instanceof TextRenderable) expect(node.bg.a).toBe(0);
+          node.getChildren().forEach(assertPlainKeys);
+        };
+        assertPlainKeys(barNode);
         expect(bar).not.toMatch(/\bq\s+q\b/);
         for (const line of lines) {
           expect(Bun.stringWidth(line)).toBeLessThanOrEqual(width);
-          if (/^\s*╰/.test(line)) expect(line).toMatch(/^[\s╰╯─]+$/);
+          for (const border of line.matchAll(/╰[^╯]*╯/g)) expect(border[0]).toMatch(/^[╰╯─]+$/);
         }
         expect(frame).not.toContain("visual-test-secret");
+        // The active tab alone owns a full-width indicator, without a background block.
+        expect(lines[width >= 80 ? 4 : 2]!.trim()).toMatch(/^━+$/);
+        if (width >= 80) {
+          expect(lines[5]!.trim()).toBe("");
+          expect(lines.at(-2)!.trim()).toBe("");
+          const visit = (node: Renderable): void => {
+            if (node instanceof BoxRenderable && node.constructor.name === "Card") {
+              const [caption, body] = node.getChildren();
+              expect(caption!.y).toBe(body!.y - 1);
+              const title = lines[caption!.y]!.slice(caption!.x, caption!.x + caption!.width).trim();
+              expect(title).toBe(title.toUpperCase());
+              if (body!.height > 4) {
+                for (let y = body!.y + 1; y < body!.y + body!.height - 1; y++) {
+                  expect(lines[y]!.slice(body!.x + 1, body!.x + 3)).toBe("  ");
+                }
+              }
+            }
+            node.getChildren().forEach(visit);
+          };
+          visit(setup.renderer.root);
+        }
         if (tab === "overview" || tab === "credentials") {
           expect(frame).toContain("1 credential");
           expect(frame).not.toContain("1 credentials");
@@ -84,21 +112,45 @@ for (const [width, height] of sizes) {
               sections += setup.captureCharFrame();
               if (panel.scrollTop === previous) break;
             }
-            for (const title of ["Binary", "Project", "Credits", "Standards"]) expect(sections).toContain(title);
-            expect(sections).toContain("master.key with mode 0600");
+            for (const title of ["Binary", "Project", "Credits"]) expect(sections).toContain(title);
+            expect(sections).not.toContain("Standards");
           } else {
-            expect(frame).toContain("Credits");
-            if (width < 120) expect(panels).toHaveLength(2);
+            expect(frame).toContain("CREDITS");
+            expect(frame).toContain("BINARY");
+            expect(frame).toContain("PROJECT");
+            expect(frame).not.toContain("BINARY / PROJECT");
+            expect(frame).not.toMatch(/[█▀▄]/);
+            if (width < 120) {
+              expect(panels).toHaveLength(3);
+              expect(frame).not.toContain("STANDARDS");
+              if (height >= 30) expect(panels.filter(panel => panel.verticalScrollBar.visible)).toHaveLength(0);
+            } else expect(frame).toContain("STANDARDS");
           }
         }
         if (tab === "overview" && width === 80 && height === 24) {
-          expect(bar).toContain("1 credential · settings: defaults");
+          expect(bar).toContain("1 credential · defaults");
           expect(bar).not.toContain("…");
           // Assert buttons in the content area, independently of status hints.
           const content = lines.slice(3, -1).join("\n");
-          expect(content).toMatch(/\bc\s+.*copy MCP config/);
-          expect(content).toMatch(/\br\s+.*reload/);
-          expect(scrollPanels(setup.renderer.root).filter(panel => panel.verticalScrollBar.visible)).toHaveLength(0);
+          expect(content).toMatch(/\[c\] copy MCP config/);
+          expect(content).toMatch(/\[r\] reload/);
+          const reading = scrollPanels(setup.renderer.root).find(panel => panel.verticalScrollBar.visible)!;
+          expect(reading).toBeDefined();
+          expect(content).toContain("termfy --help");
+          reading.scrollTo(Infinity);
+          await setup.renderOnce();
+          expect(setup.captureCharFrame()).toContain("termfy --skill");
+        }
+        if (tab === "overview" && width >= 80 && height >= 30) {
+          for (const text of ["IN THE TERMINAL", "FOR AGENTS", "termfy credentials set <name>", "termfy --skill", '"args": ["mcp"]']) expect(frame).toContain(text);
+        }
+        if (tab === "docs") {
+          const checkDocument = (node: Renderable): void => {
+            if (node instanceof MarkdownRenderable) expect(node.content).not.toMatch(/^# CLI\b/);
+            node.getChildren().forEach(checkDocument);
+          };
+          checkDocument(setup.renderer.root);
+          if (width === 80) expect(frame).toMatch(/│\s{4,}\[options\]\./);
         }
         if (tab === "overview" && width === 200) {
           const borders = lines.filter(line => /^\s*╰/.test(line));

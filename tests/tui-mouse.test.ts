@@ -9,16 +9,16 @@ test("clicking tab 5 opens About and the tab wheel moves in both directions", as
   await withTui(async (setup) => {
     await setup.mockMouse.click(...framePoint(setup, "5 ℹ About"), 2);
     await setup.renderOnce();
-    expect(setup.captureCharFrame()).toContain("Environment");
+    expect(setup.captureCharFrame()).toContain("ENVIRONMENT");
     await setup.mockMouse.click(...framePoint(setup, "5 ℹ About"));
     await setup.renderOnce();
-    expect(setup.captureCharFrame()).toContain("Credits");
+    expect(setup.captureCharFrame()).toContain("CREDITS");
     await setup.mockMouse.scroll(...framePoint(setup, "5 ℹ About"), "down");
     await setup.renderOnce();
-    expect(setup.captureCharFrame()).toContain("Environment");
+    expect(setup.captureCharFrame()).toContain("ENVIRONMENT");
     await setup.mockMouse.scroll(...framePoint(setup, "1 ⌂ Overview"), "down");
     await setup.renderOnce();
-    expect(setup.captureCharFrame()).toContain("Setting details");
+    expect(setup.captureCharFrame()).toContain("SETTING DETAILS");
   });
 });
 test("clicking quit in the key bar destroys the renderer", async () => {
@@ -113,10 +113,10 @@ test("tabs after the ninth remain reachable by click and wheel", async () => {
       expect(setup.captureCharFrame()).toContain("Opened Extra9");
       setup.mockInput.pressKey("1");
       await setup.renderOnce();
-      expect(setup.captureCharFrame()).toContain("Environment");
+      expect(setup.captureCharFrame()).toContain("ENVIRONMENT");
       setup.mockInput.pressKey("9");
       await setup.renderOnce();
-      expect(setup.captureCharFrame()).not.toContain("Environment");
+      expect(setup.captureCharFrame()).not.toContain("ENVIRONMENT");
     });
   } finally { registry.splice(originalLength); }
 });

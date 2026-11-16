@@ -10,10 +10,9 @@ import {
   ScrollBoxRenderable,
   MarkdownRenderable,
   SyntaxStyle,
-  LinearScrollAccel,
 } from "@opentui/core";
 import { SKILL_TOPICS, skillText } from "../../skill/index.ts";
-import { listPanel, stateView } from "../components.ts";
+import { listPanel, stateView, scrollPanel } from "../components.ts";
 import type { Screen, ScreenContext } from "../screen.ts";
 
 /** Joins source soft wraps while retaining Markdown block and list boundaries. */
@@ -140,7 +139,7 @@ export function createDocsScreen(): Screen {
         flexDirection: "row",
         flexGrow: 1,
         minHeight: 0,
-        gap: 1,
+        gap: ctx.space.gapX,
       });
       const host = new BoxRenderable(renderer, {
         flexDirection: "column",
@@ -201,32 +200,20 @@ export function createDocsScreen(): Screen {
           const { root: commands } = await import("../../cli/commands.ts");
           if (request !== generation || root.isDestroyed || renderer.isDestroyed) return;
 
-          const content = normalizeMarkdown(skillText(commands, selected));
+          const content = normalizeMarkdown(skillText(commands, selected)).replace(/^# [^\n]+\n+/, "");
           clear();
-          document = new ScrollBoxRenderable(renderer, {
-            scrollbarOptions: { trackOptions: { backgroundColor: ctx.theme.border, foregroundColor: ctx.theme.textDim } },
-            title: ` ${selected} `,
-            titleColor: theme.accent,
-            borderStyle: "rounded",
-            borderColor: theme.borderActive,
-            paddingLeft: 1,
-            paddingRight: 1,
-            flexGrow: 1,
-            flexBasis: 0,
-            minHeight: 0,
-            scrollY: true,
-            scrollX: false,
-            scrollAcceleration: new LinearScrollAccel(),
-          });
+          const card = scrollPanel(renderer, theme, { title: selected, active: true });
+          document = card.body;
           document.add(
             new MarkdownRenderable(renderer, {
               content,
               syntaxStyle: style,
+              internalBlockMode: "top-level",
               fg: theme.text,
               width: "100%",
             }),
           );
-          host.add(document);
+          host.add(card);
         } catch (error) {
           if (request !== generation || root.isDestroyed || renderer.isDestroyed) return;
 
@@ -258,8 +245,9 @@ export function createDocsScreen(): Screen {
           onSelect: selectTopic,
         });
         topicIndex = index;
-        index.box.width = 24;
+        index.box.width = ctx.layout() === "wide" ? 26 : 20;
         index.box.flexGrow = 0;
+        index.box.height = SKILL_TOPICS.length + 3 + ctx.space.cardPadY * 2;
         index.move(topic);
         root.add(index.box);
       }

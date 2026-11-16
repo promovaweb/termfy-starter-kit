@@ -156,7 +156,9 @@ export function createCredentialsScreen(): Screen {
 
         const root = new BoxRenderable(renderer, {
           flexDirection: ctx.layout() === "compact" ? "column" : "row",
-          flexGrow: 1,
+          gap: ctx.layout() === "compact" ? ctx.space.gapY : ctx.space.gapX,
+          height: Math.min(renderer.height - (ctx.layout() === "compact" ? 4 : 8), Math.max(8 + ctx.space.cardPadY * 2, rows.length + 4 + ctx.space.cardPadY * 2)),
+          flexGrow: 0,
           minHeight: 0,
         });
         if (rows.length) {
@@ -195,12 +197,12 @@ export function createCredentialsScreen(): Screen {
             ]),
           );
           detail.add(dim(renderer, theme, "File"));
-          const file = dim(renderer, theme, fitText(vault.file, Math.floor((renderer.width - 2) * 0.45) - 4, true));
+          const file = dim(renderer, theme, fitText(vault.file, Math.floor((renderer.width - ctx.space.pageX * 2 - ctx.space.gapX) * 0.45) - 2 - ctx.space.cardPadX * 2, true));
           file.width = "100%";
           file.height = 1;
           file.wrapMode = "none";
           detail.onSizeChange = () => {
-            file.content = fitText(vault.file, Math.max(0, detail.width - 4), true);
+            file.content = fitText(vault.file, Math.max(0, detail.width - 2 - ctx.space.cardPadX * 2), true);
           };
           detail.add(file);
           root.add(detail);

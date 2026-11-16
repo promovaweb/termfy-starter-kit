@@ -30,32 +30,36 @@ Todo o código é em inglês: arquivos, identificadores, comentários, mensagens
 commands, options, keys e campos do `--json`. A documentação é em português.
 
 ```text
- ▌ Termfy v0.12.1  │  CLI, TUI and MCP stdio server skeleton in Bun, with th  linux-x64 • Bun 1.4.4
-  1 ⌂ Overview   2 ⚙ Settings   3 ◈ Credentials   4 ≡ Docs   5 ℹ About
- ──────────────────────────────────────────────────────────────────────────────────────────────────
- ╭─ ❯ Environment ───────────────────────────────╮╭─ ◉ State ─────────────────────────────────────╮
- │ Binary    termfy v0.12.1                      ││ settings.json  • defaults                     │
- │ Runtime   Bun 1.4.4                           ││ Vault          • empty                        │
- │ Platform  linux-x64                           ││ master key     not created                    │
- │ Terminal  100×26  xterm-256color              ││ MCP            termfy mcp                     │
- │ Data      ~/.termfy                           ││                                               │
- ╰───────────────────────────────────────────────╯╰───────────────────────────────────────────────╯
- ╭─ ⚙ Settings in effect ────────────────────────╮╭─ ≡ Next steps ────────────────────────────────╮
- │ output.colors      true                       ││ → termfy --help                               │
- │ output.format      "text"                     ││ → termfy credentials set <name>               │
- │ telemetry.enabled  false                      ││ → termfy config set tui.theme day             │
- │ tui.icons          "auto"                     ││ → termfy --skill                              │
- │ tui.initialTab     "overview"                 ││                                               │
- │ tui.motion         true                       ││ For agents                                    │
- │ tui.mouse          true                       ││ MCP client: { "command": "termfy", "args": [  │
- │ tui.theme          "terminal"                 ││ "mcp"] }                                      │
- │                                               ││  c  ❐ copy MCP config                         │
- │                                               ││  r  ↻ reload                                  │
- │                                               ││                                               │
- │                                               ││                                               │
- ╰───────────────────────────────────────────────╯╰───────────────────────────────────────────────╯
 
- 0 credentials · settings: defaults   r  reload   ?  help   q  quit                    ^K  commands
+   ▌ Termfy  v0.13.0                                                        linux-x64 · Bun 1.4.4
+
+   1 ⌂ Overview    2 ⚙ Settings    3 ◈ Credentials    4 ≡ Docs    5 ℹ About
+   ━━━━━━━━━━━━
+
+   ENVIRONMENT                                      STATE
+   ╭───────────────────────────────────────────╮    ╭───────────────────────────────────────────╮
+   │                                           │    │                                           │
+   │  Binary     termfy v0.13.0                │    │  Settings     • defaults                  │
+   │  Runtime    Bun 1.4.4                     │    │  Vault        • empty                     │
+   │  Platform   linux-x64                     │    │  Master key   not created                 │
+   │                                           │    │                                           │
+   ╰───────────────────────────────────────────╯    ╰───────────────────────────────────────────╯
+
+   NEXT STEPS
+   ╭────────────────────────────────────────────────────────────────────────────────────────────╮
+   │                                                                                            │
+   │  IN THE TERMINAL                               FOR AGENTS                                  │
+   │  → termfy --help                               { "command": "termfy",                      │
+   │  → termfy credentials set <name>                 "args": ["mcp"] }                         │
+   │  → termfy --skill                                                                          │
+   │                                                                                            │
+   │  [c] copy MCP config    [r] reload                                                         │
+   │                                                                                            │
+   ╰────────────────────────────────────────────────────────────────────────────────────────────╯
+
+
+
+   0 credentials · defaults  r reload  c copy MCP config  ? help  q quit             ^K commands
 
 ```
 

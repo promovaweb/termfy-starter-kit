@@ -68,6 +68,8 @@ export interface ScreenContext {
   icons: IconSet;
   /** Current width class; the shell remounts the screen when it changes. */
   layout: () => Layout;
+  /** Current layout spacing in terminal cells. */
+  readonly space: ReturnType<typeof import("./spacing.ts").spacing>;
   /** True when `tui.motion` allows short animations. */
   motion: boolean;
   /** Switches the active tab by id. */
