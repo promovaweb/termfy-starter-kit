@@ -30,32 +30,32 @@ Todo o código é em inglês: arquivos, identificadores, comentários, mensagens
 commands, options, keys e campos do `--json`. A documentação é em português.
 
 ```text
- ▌ Termfy v0.12.0  │  CLI, TUI and MCP stdio server skeleton in Bun, with th  linux-x64 • Bun 1.4.4
+ ▌ Termfy v0.12.1  │  CLI, TUI and MCP stdio server skeleton in Bun, with th  linux-x64 • Bun 1.4.4
   1 ⌂ Overview   2 ⚙ Settings   3 ◈ Credentials   4 ≡ Docs   5 ℹ About
  ──────────────────────────────────────────────────────────────────────────────────────────────────
- ╭─ ❯ Environment ────────────────────────────────────╮╭─ ◉ State ────────────────────────────────╮
- │ Binary    termfy v0.12.0                           ││ settings.json     • defaults             │
- │ Runtime   Bun 1.4.4                                ││ credentials.json  • empty                │
- │ Platform  linux-x64                                ││ master key        not created            │
- │ Terminal  100×26  xterm-256color                   ││ MCP               termfy mcp             │
- │ Data      ~/.termfy                                ││                                          │
- ╰────────────────────────────────────────────────────╯╰──────────────────────────────────────────╯
- ╭─ ⚙ Settings in effect ─────────────────────────────╮╭─ ≡ Next steps ───────────────────────────╮
- │ output.colors      true                            ││ In the terminal                          │
- │ output.format      "text"                          ││ → termfy --help                          │
- │ telemetry.enabled  false                           ││ → termfy credentials set <name>          │
- │ tui.icons          "auto"                          ││ → termfy config set tui.theme day        │
- │ tui.initialTab     "overview"                      ││ → termfy --skill                         │
- │ tui.motion         true                            ││                                          │
- │ tui.mouse          true                            ││ For agents                               │
- │ tui.theme          "terminal"                      ││ MCP client: { "command": "termfy",       │
- │                                                    ││ "args": ["mcp"] }                        │
- │                                                    ││                                          │
- │                                                    ││  c  ❐ copy MCP config                    │
- │                                                    ││  r  ↻ reload                             │
- │                                                    ││                                          │
- ╰────────────────────────────────────────────────────╯╰──────────────────────────────────────────╯
- settings: defaults · vault: 0   r  reload   c  copy MCP config   ?  help   q  quit    ^K  commands
+ ╭─ ❯ Environment ───────────────────────────────╮╭─ ◉ State ─────────────────────────────────────╮
+ │ Binary    termfy v0.12.1                      ││ settings.json  • defaults                     │
+ │ Runtime   Bun 1.4.4                           ││ Vault          • empty                        │
+ │ Platform  linux-x64                           ││ master key     not created                    │
+ │ Terminal  100×26  xterm-256color              ││ MCP            termfy mcp                     │
+ │ Data      ~/.termfy                           ││                                               │
+ ╰───────────────────────────────────────────────╯╰───────────────────────────────────────────────╯
+ ╭─ ⚙ Settings in effect ────────────────────────╮╭─ ≡ Next steps ────────────────────────────────╮
+ │ output.colors      true                       ││ → termfy --help                               │
+ │ output.format      "text"                     ││ → termfy credentials set <name>               │
+ │ telemetry.enabled  false                      ││ → termfy config set tui.theme day             │
+ │ tui.icons          "auto"                     ││ → termfy --skill                              │
+ │ tui.initialTab     "overview"                 ││                                               │
+ │ tui.motion         true                       ││ For agents                                    │
+ │ tui.mouse          true                       ││ MCP client: { "command": "termfy", "args": [  │
+ │ tui.theme          "terminal"                 ││ "mcp"] }                                      │
+ │                                               ││  c  ❐ copy MCP config                         │
+ │                                               ││  r  ↻ reload                                  │
+ │                                               ││                                               │
+ │                                               ││                                               │
+ ╰───────────────────────────────────────────────╯╰───────────────────────────────────────────────╯
+
+ 0 credentials · settings: defaults   r  reload   ?  help   q  quit                    ^K  commands
 
 ```
 

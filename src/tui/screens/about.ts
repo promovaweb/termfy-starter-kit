@@ -3,10 +3,9 @@
  * Uses the same data as the `about` command, so the two surfaces never tell
  * different stories.
  *
- * Wide and medium show Binary/Project and Credits/Standards side by side.
- * Wide also shows the tiny title logo when it fits; compact keeps only the
- * primary panels, stacked in one column. No files are watched: identity and
- * credits come from the binary manifest.
+ * Wide shows four panels; medium groups sections into two scroll panels.
+ * Compact uses one scroll panel for all four sections. Identity and credits
+ * come from the binary manifest, so no files are watched.
  *
  * Action: `c` copies the repository URL (or the site when there is no
  * repository) to the clipboard through OSC 52, by key, key bar or button.
@@ -16,7 +15,7 @@ import { aboutData } from "../../cli/commands/about.ts";
 import {
   spacer,
   list,
-  panel,
+  scrollPanel,
   dim,
   keyValueTable,
   heading,
@@ -61,17 +60,30 @@ export const aboutScreen: Screen = {
     ctx.status(`${d.title} v${d.version}`);
     const rootBox = new BoxRenderable(renderer, { flexDirection: "column", flexGrow: 1 });
 
-    const top = new BoxRenderable(renderer, {
-      flexDirection: ctx.layout() === "compact" ? "column" : "row",
-      flexShrink: 0,
-    });
-
-    const binary = panel(renderer, theme, {
-      title: "Binary",
-      icon: { icons, name: "terminal" },
-      flexGrow: 1,
+    const layout = ctx.layout();
+    const top = new BoxRenderable(renderer, { flexDirection: "row", flexGrow: 1, flexBasis: 0, minHeight: 0 });
+    const bottom = layout === "wide"
+      ? new BoxRenderable(renderer, { flexDirection: "row", flexGrow: 1, flexBasis: 0, minHeight: 0 })
+      : undefined;
+    const primary = layout !== "wide" ? scrollPanel(renderer, theme, {
+      title: layout === "compact" ? "About" : "Binary / Project",
       active: true,
-    });
+    }) : undefined;
+    const secondary = layout === "medium" ? scrollPanel(renderer, theme, {
+      title: "Credits / Standards",
+    }) : primary;
+    if (primary) top.add(primary);
+    if (layout === "medium" && secondary) top.add(secondary);
+    /** Shares a viewport in smaller layouts while keeping each section headed. */
+    const section = (title: string, icon: "terminal" | "link" | "user" | "code", group = primary) => {
+      if (group) {
+        if (group.getChildren().length) group.add(spacer(renderer));
+        group.add(heading(renderer, theme, title));
+        return group;
+      }
+      return scrollPanel(renderer, theme, { title, icon: { icons, name: icon }, active: title === "Binary" });
+    };
+    const binary = section("Binary", "terminal");
     if (ctx.layout() === "wide" && d.title.length * 5 < renderer.width - 64)
       binary.add(
         new ASCIIFontRenderable(renderer, {
@@ -97,21 +109,23 @@ export const aboutScreen: Screen = {
         ["Data", d.dataDir],
       ]),
     );
-    top.add(binary);
+    if (layout === "wide") top.add(binary);
 
-    const project = panel(renderer, theme, {
-      title: "Project",
-      icon: { icons, name: "link" },
-      width: ctx.layout() === "wide" ? 58 : "45%",
-    });
+    const project = section("Project", "link");
     project.add(
       keyValueTable(renderer, theme, [
         ["Author", d.author || "-", theme.textStrong],
         ["License", d.license],
-        ["Site", d.site || "-", theme.accentSecondary],
-        ["Repository", d.repository || "-", theme.accentSecondary],
       ]),
     );
+    if (d.site) {
+      project.add(dim(renderer, theme, "Site"));
+      project.add(link(renderer, theme, { url: d.site, notify: ctx.notify }));
+    }
+    if (d.repository) {
+      project.add(dim(renderer, theme, "Repository"));
+      project.add(link(renderer, theme, { url: d.repository, notify: ctx.notify }));
+    }
     project.add(spacer(renderer));
     project.add(
       button(renderer, theme, {
@@ -121,36 +135,22 @@ export const aboutScreen: Screen = {
         onPress: () => copyLink(ctx),
       }),
     );
-    if (d.site) binary.add(link(renderer, theme, { url: d.site, notify: ctx.notify }));
-    if (d.repository)
-      binary.add(link(renderer, theme, { url: d.repository, notify: ctx.notify }));
-    if (ctx.layout() !== "compact") top.add(project);
+    if (layout === "wide") top.add(project);
     rootBox.add(top);
 
-    const bottom = new BoxRenderable(renderer, {
-      flexDirection: ctx.layout() === "compact" ? "column" : "row",
-      flexGrow: 1,
-    });
-
-    const creditsPanel = panel(renderer, theme, {
-      title: "Credits",
-      icon: { icons, name: "user" },
-      flexGrow: 1,
-    });
-    const nameWidth = Math.max(...d.credits.map((c) => c.name.length));
-    for (const c of d.credits) {
-      creditsPanel.add(
-        keyValueTable(renderer, theme, [[c.name.padEnd(nameWidth), c.role, theme.text]]),
-      );
-      creditsPanel.add(dim(renderer, theme, `${" ".repeat(nameWidth + 2)}${c.url}`));
+    const creditsPanel = section("Credits", "user", secondary);
+    for (const credit of d.credits) {
+      if (ctx.layout() === "compact") {
+        creditsPanel.add(link(renderer, theme, { url: credit.url, text: `${credit.name} ${credit.url}`, notify: ctx.notify }));
+        continue;
+      }
+      creditsPanel.add(heading(renderer, theme, credit.name));
+      if (ctx.layout() !== "compact") creditsPanel.add(dim(renderer, theme, credit.role));
+      creditsPanel.add(link(renderer, theme, { url: credit.url, notify: ctx.notify }));
     }
-    bottom.add(creditsPanel);
+    bottom?.add(creditsPanel);
 
-    const standards = panel(renderer, theme, {
-      title: "Standards",
-      icon: { icons, name: "code" },
-      width: ctx.layout() === "wide" ? 58 : "45%",
-    });
+    const standards = section("Standards", "code", secondary);
     standards.add(heading(renderer, theme, "Interface"));
     standards.add(
       list(renderer, theme, [
@@ -168,8 +168,10 @@ export const aboutScreen: Screen = {
         "master.key with mode 0600",
       ]),
     );
-    if (ctx.layout() !== "compact") bottom.add(standards);
-    rootBox.add(bottom);
+    if (bottom) {
+      bottom.add(standards);
+      rootBox.add(bottom);
+    }
 
     return rootBox;
   },

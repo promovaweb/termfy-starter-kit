@@ -35,6 +35,12 @@ com [os padrões de tela](screen-patterns.md).
 - [ ] Em 60×16 a tela cabe ou o shell mostra "terminal too small" sem
   quebrar.
 - [ ] Em 80×24 e em 120×32 a hierarquia continua legível.
+- [ ] Nenhum texto cai sobre a borda de um painel nem sobrepõe outro texto.
+  Conteúdo maior que o painel rola num `scrollPanel`.
+- [ ] A barra de baixo mostra `? help`, `q quit` e `^K commands` inteiros em
+  todas as larguras; o status usa o espaço que sobra.
+- [ ] No layout largo os painéis dividem a largura por proporção, sem painel
+  esticado e vazio.
 - [ ] A troca de faixa remonta a tela e preserva a seleção que importa.
 - [ ] Nada pisca, nada rola sozinho e nenhuma animação passa de
   `ctx.motion`.

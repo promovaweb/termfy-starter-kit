@@ -18,7 +18,7 @@ import {
   definitionOf,
 } from "../../config/settings.ts";
 import { paths } from "../../config/paths.ts";
-import { table, panel, stateView } from "../components.ts";
+import { table, panel, scrollPanel, stateView } from "../components.ts";
 import type { Screen, ScreenContext } from "../screen.ts";
 
 /** Creates an independent settings table and editor. */
@@ -166,9 +166,11 @@ export function createSettingsScreen(): Screen {
           flexGrow: 1,
           minHeight: 0,
         });
-        const details = panel(renderer, theme, {
+        const details = scrollPanel(renderer, theme, {
           title: "Setting details",
           width: ctx.layout() === "compact" ? "100%" : "40%",
+          height: ctx.layout() === "compact" ? 5 : undefined,
+          flexGrow: 0,
         });
         const text = new TextRenderable(renderer, {
           fg: theme.text,
@@ -180,7 +182,7 @@ export function createSettingsScreen(): Screen {
         function show(index: number): void {
           current = rows[index]?.key ?? "";
           const def = SETTINGS_SCHEMA.find((entry) => entry.key === current);
-          text.content = `${current}\n\n${def?.description ?? "Custom setting"}\nType: ${def?.type ?? "string"}\nAccepted: ${def?.values?.join(", ") ?? def?.type ?? "text"}`;
+          text.content = `${current}\n\n${def?.description ?? "Custom setting"}\nType: ${def?.type ?? "string"}${def?.type === "enum" ? `\nAccepted: ${def.values?.join(", ")}` : ""}`;
           ctx.status(`${rows.length} settings · ${current}`);
         }
 
@@ -198,7 +200,9 @@ export function createSettingsScreen(): Screen {
           onSelect: show,
           onActivate: activate,
         });
-        root.add(grid.box);
+        const collection = panel(renderer, theme, { title: "Settings", flexGrow: 1, active: true });
+        collection.add(grid.box);
+        root.add(collection);
         root.add(details);
         grid.select(
           Math.max(

@@ -61,6 +61,10 @@ as ações da tela no meio e `^K commands` à direita. No layout compacto
 ficam só `? help` e `q quit` no meio. O clique num item da barra executa a
 ação.
 
+O resumo usa o espaço disponível depois de reservar `? help`, `q quit` e
+`^K commands`. Ações da tela entram apenas quando cabem inteiras; o resumo
+recebe `…` somente se ultrapassar esse espaço.
+
 `ctx.notify(message, tone)` mostra um toast no canto inferior direito. No
 máximo três toasts ficam visíveis; o mais antigo fecha primeiro. Cada toast
 some em 4 segundos ou com um clique e não recebe teclado. O tom pode ser
@@ -216,6 +220,7 @@ tema e, quando desenham ícone, um `TitleIcon` com `{ icons, name }`.
 | Componente | Uso |
 | --- | --- |
 | `panel` | Caixa com borda arredondada e título, `active` para o painel em foco. |
+| `scrollPanel` | Painel com título e rolagem por teclado e roda; barra discreta aparece apenas quando o conteúdo excede a altura. |
 | `keyValueTable` | Rótulo apagado e valor alinhados, com cor opcional por linha. |
 | `table` | Tabela com cabeçalho que ordena no clique, linha clicável e teclado. |
 | `listPanel` | Lista com rolagem, seleção e clique na linha. |
@@ -241,6 +246,12 @@ vazia. Os dois componentes respondem ao clique, ao hover e à roda.
 `stateView` recebe `kind`, `title`, `message?` e uma `action` opcional com
 `key`, `label` e `onPress`. Use nos três estados de uma carga: carregando,
 vazio e erro.
+
+About usa um `scrollPanel` com Binary, Project, Credits e Standards em
+sequência no layout compacto; no médio, agrupa Binary/Project à esquerda e
+Credits/Standards à direita. No largo, mantém os quatro painéis. Na Overview
+80×24, os botões de copiar a configuração MCP e recarregar ficam visíveis
+sem rolar o painel Next steps.
 
 `clickable(renderer, node, { onClick, onHover })`, em `src/tui/pointer.ts`,
 liga o clique, o hover e o ponteiro de mão a qualquer renderable. Use nos

@@ -2,6 +2,35 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.12.1] - 2026-11-16
+
+### Corrigido
+
+- `table` alinha o cabeçalho e as células por coluna, trunca com "…" e
+  fica num painel com título.
+- A barra de baixo não sobrepõe mais itens em 80 colunas. `? help`,
+  `q quit` e `^K commands` cabem inteiros em toda largura, e o status usa
+  o espaço que sobra.
+- Painéis não transbordam: conteúdo maior que o painel rola no componente
+  novo `scrollPanel`, com barra discreta só quando precisa. About no
+  compacto vira um painel rolável único.
+- Textos cortados no Overview, no cofre (caminho abreviado no meio,
+  preservando o nome do arquivo) e no About (URLs em linha própria).
+- Docs junta as linhas quebradas da fonte em parágrafos e itens inteiros,
+  com o documento num painel com o nome do tópico.
+- About sem links duplicados. Créditos sem sobreposição em qualquer
+  largura.
+- No layout largo, os painéis dividem a largura por proporção.
+- Plural de credenciais ("1 credential") e Settings sem "Accepted" para
+  boolean.
+
+### Adicionado
+
+- `tests/tui-layout.test.ts`: cada aba em seis tamanhos, de 60×16 a
+  200×60, conferindo barra inteira, bordas sem texto, largura do frame,
+  textos-chave e ausência de segredo.
+- Skills do Termfy atualizadas para a 0.14.1.
+
 ## [0.12.0] - 2026-11-16
 
 ### Adicionado

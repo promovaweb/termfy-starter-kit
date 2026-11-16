@@ -41,6 +41,7 @@ import { currentIcons, withIcon, type IconSet } from "./icons.ts";
 import { clickable } from "./pointer.ts";
 import { Overlays, type HelpSection, type PaletteEntry } from "./overlays.ts";
 import { screens } from "./screens/index.ts";
+import { fitText } from "./components.ts";
 import type { Layout, ScreenAction, ScreenContext, Screen } from "./screen.ts";
 
 export interface TuiOptions {
@@ -217,7 +218,7 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
   const bar = new BoxRenderable(renderer, { height: 1, flexDirection: "row", backgroundColor: theme.barBackground, paddingLeft: 1, paddingRight: 1, gap: 2 });
   const statusText = new TextRenderable(renderer, { content: "", fg: theme.textDim, wrapMode: "none", flexShrink: 1, minWidth: 0, selectable: false });
   let barItems = new BoxRenderable(renderer, { flexDirection: "row", gap: 2, flexGrow: 1, flexShrink: 1, minWidth: 0 });
-  const paletteHint = new BoxRenderable(renderer, { flexDirection: "row", flexShrink: 0 });
+  const paletteHint = new BoxRenderable(renderer, { flexDirection: "row", flexShrink: 0, width: 13 });
   paletteHint.add(new TextRenderable(renderer, { content: " ^K ", fg: theme.keyText, bg: theme.keyBackground, selectable: false }));
   const paletteLabel = new TextRenderable(renderer, { content: " commands", fg: theme.barText, selectable: false });
   paletteHint.add(paletteLabel);
@@ -229,15 +230,15 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
   bar.add(statusText);
   /** Status text as the screen set it; the bar shows it whole or cut with an ellipsis. */
   let fullStatus = "";
-  /** Fits the status into 40% of the width, ending with "…" when it is cut. */
+  /** Gives status all cells left after the global hints, before screen actions. */
   const fitStatus = () => {
-    const max = Math.max(8, Math.floor(renderer.width * 0.4));
-    let shown = fullStatus;
-    if (Bun.stringWidth(shown) > max) {
-      const chars = Array.from(shown);
-      while (chars.length && Bun.stringWidth(chars.join("")) > max - 1) chars.pop();
-      shown = `${chars.join("").trimEnd()}…`;
-    }
+    const globals = globalActions.reduce((sum, action) => sum + actionWidth(action), 0)
+      + Math.max(0, globalActions.length - 1) * 2;
+    // Outer padding, palette, and the gaps around the action area and status.
+    const max = Math.max(0, renderer.width - 2 - paletteHint.width - 4 - globals);
+    const shown = fitText(fullStatus, max);
+    statusText.width = Bun.stringWidth(shown);
+    statusText.flexShrink = 0;
     statusText.content = shown;
     statusText.visible = shown.length > 0;
   };
@@ -324,7 +325,7 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
   };
 
   const barItem = (action: ScreenAction) => {
-    const item = new BoxRenderable(renderer, { flexDirection: "row", flexShrink: 0 });
+    const item = new BoxRenderable(renderer, { flexDirection: "row", flexShrink: 0, width: Bun.stringWidth(keyLabel(action)) + Bun.stringWidth(action.description) + 3 });
     const text = new TextRenderable(renderer, { content: ` ${action.description}`, fg: theme.barText, selectable: false });
     item.add(new TextRenderable(renderer, { content: ` ${keyLabel(action)} `, fg: theme.keyText, bg: theme.keyBackground, selectable: false }));
     item.add(text);
@@ -335,17 +336,22 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
     return item;
   };
 
+  /** Measures a hint exactly as barItem renders its key and description. */
+  const actionWidth = (action: ScreenAction) => Bun.stringWidth(keyLabel(action)) + Bun.stringWidth(action.description) + 3;
+
   const refreshBar = () => {
+    fitStatus();
     barItems.destroyRecursively();
     bar.remove(paletteHint);
     barItems = new BoxRenderable(renderer, { flexDirection: "row", gap: 2, flexGrow: 1, flexShrink: 1, minWidth: 0 });
     // Compact terminals keep only the global commands; the palette lists the rest.
     const own = currentLayout === "compact" ? [] : screenActions().filter((action) => !action.hidden);
-    const actionWidth = (action: ScreenAction) => Bun.stringWidth(keyLabel(action)) + Bun.stringWidth(action.description) + 5;
-    const statusWidth = statusText.visible ? Bun.stringWidth(String(statusText.content)) + 2 : 0;
-    let budget = renderer.width - 2 - 15 - 4 - statusWidth - globalActions.reduce((sum, action) => sum + actionWidth(action), 0);
+    const statusWidth = statusText.visible ? statusText.width + 2 : 0;
+    const paletteWidth = paletteHint.width;
+    const globalWidth = globalActions.reduce((sum, action) => sum + actionWidth(action), 0) + Math.max(0, globalActions.length - 1) * 2;
+    let budget = renderer.width - 2 - paletteWidth - 2 - statusWidth - globalWidth;
     for (const action of own) {
-      const width = actionWidth(action);
+      const width = actionWidth(action) + 2;
       if (width > budget) continue;
       barItems.add(barItem(action));
       budget -= width;

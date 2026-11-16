@@ -16,6 +16,38 @@ import { SKILL_TOPICS, skillText } from "../../skill/index.ts";
 import { listPanel, stateView } from "../components.ts";
 import type { Screen, ScreenContext } from "../screen.ts";
 
+/** Joins source soft wraps while retaining Markdown block and list boundaries. */
+export function normalizeMarkdown(source: string): string {
+  const result: string[] = [];
+  let fence = "";
+  let previousWasProse = false;
+  let listIndent: number | undefined;
+  for (const line of source.split("\n")) {
+    const marker = line.match(/^\s*(`{3,}|~{3,})/);
+    if (marker) {
+      if (!fence) fence = marker[1]!;
+      else if (marker[1]![0] === fence[0] && marker[1]!.length >= fence.length) fence = "";
+      result.push(line);
+      previousWasProse = false;
+      continue;
+    }
+    const item = line.match(/^(\s*)(?:[-+*]|\d+[.)])\s+/);
+    const block = !line.trim() || /^\s*(?:#{1,6}\s|\||>|[-*_]{3,}\s*$)/.test(line);
+    const indent = line.length - line.trimStart().length;
+    const code = indent >= (listIndent === undefined ? 4 : listIndent + 4);
+    if (!fence && !block && !item && !code && previousWasProse) {
+      result[result.length - 1] += ` ${line.trim()}`;
+    } else {
+      result.push(line);
+    }
+    if (item) listIndent = item[0].length;
+    else if (block) listIndent = undefined;
+    previousWasProse = !fence && !block && !code;
+    if (/ {2}$|\\$/.test(line)) previousWasProse = false;
+  }
+  return result.join("\n");
+}
+
 /** Creates a documentation reader with independent topic and load lifecycle. */
 export function createDocsScreen(): Screen {
   let topicIndex: ReturnType<typeof listPanel> | undefined;
@@ -108,6 +140,7 @@ export function createDocsScreen(): Screen {
         flexDirection: "row",
         flexGrow: 1,
         minHeight: 0,
+        gap: 1,
       });
       const host = new BoxRenderable(renderer, {
         flexDirection: "column",
@@ -168,10 +201,18 @@ export function createDocsScreen(): Screen {
           const { root: commands } = await import("../../cli/commands.ts");
           if (request !== generation || root.isDestroyed || renderer.isDestroyed) return;
 
-          const content = skillText(commands, selected);
+          const content = normalizeMarkdown(skillText(commands, selected));
           clear();
           document = new ScrollBoxRenderable(renderer, {
+            scrollbarOptions: { trackOptions: { backgroundColor: ctx.theme.border, foregroundColor: ctx.theme.textDim } },
+            title: ` ${selected} `,
+            titleColor: theme.accent,
+            borderStyle: "rounded",
+            borderColor: theme.borderActive,
+            paddingLeft: 1,
+            paddingRight: 1,
             flexGrow: 1,
+            flexBasis: 0,
             minHeight: 0,
             scrollY: true,
             scrollX: false,

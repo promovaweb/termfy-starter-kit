@@ -60,7 +60,9 @@ escolhido e verificações antes de editar.
 2. Crie uma tela por arquivo em `src/tui/screens/`. Use uma factory quando
    houver estado mutável; cada montagem de aplicação recebe suas instâncias.
 3. Reutilize `table`, `stateView`, `spinner`, `progressBar`, `link`, `panel`,
-   `keyValueTable`, `listPanel`, `button`, `heading`, `dim` e `spacer`.
+   `scrollPanel`, `keyValueTable`, `listPanel`, `button`, `heading`, `dim` e
+   `spacer`. Conteúdo que pode passar da altura do painel vai num
+   `scrollPanel`; nenhum texto cai sobre a borda nem sobrepõe outro.
    Confira assinaturas no arquivo real, sem deduí-las pelo nome.
    `spacer(renderer, height)` não recebe tema. `button` e `listPanel` já
    respondem ao clique.

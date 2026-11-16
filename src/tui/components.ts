@@ -58,9 +58,13 @@ export function panel(
     : options.title;
   return new BoxRenderable(renderer, {
     flexGrow: options.flexGrow,
+    flexBasis: options.flexGrow && options.width === undefined ? 0 : "auto",
     width: options.width,
     height: options.height,
     flexDirection: "column",
+    minWidth: 0,
+    minHeight: 0,
+    overflow: "hidden",
     borderStyle: "rounded",
     borderColor: options.active ? theme.borderActive : theme.border,
     title: ` ${title} `,
@@ -69,6 +73,53 @@ export function panel(
     paddingLeft: 1,
     paddingRight: 1,
   });
+}
+
+/** Creates a bordered, keyboard- and wheel-scrollable content viewport. */
+export function scrollPanel(
+  renderer: CliRenderer,
+  theme: Theme,
+  options: Parameters<typeof panel>[2],
+): ScrollBoxRenderable {
+  const box = new ScrollBoxRenderable(renderer, {
+    flexGrow: options.flexGrow ?? 1,
+    flexShrink: options.width === undefined ? 1 : 0,
+    flexBasis: options.width === undefined && options.height === undefined ? 0 : "auto",
+    width: options.width,
+    height: options.height,
+    minWidth: 0,
+    minHeight: 0,
+    borderStyle: "rounded",
+    borderColor: options.active ? theme.borderActive : theme.border,
+    title: ` ${options.icon ? withIcon(options.icon.icons, options.icon.name, options.title) : options.title} `,
+    titleColor: options.active ? theme.accent : theme.textDim,
+    backgroundColor: theme.surface,
+    paddingLeft: 1,
+    paddingRight: 1,
+    scrollY: true,
+    scrollX: false,
+    scrollAcceleration: new LinearScrollAccel(),
+    scrollbarOptions: { trackOptions: { backgroundColor: theme.border, foregroundColor: theme.textDim } },
+    contentOptions: { flexDirection: "column" },
+  });
+  // Automatic visibility follows the scroll range, including after resize.
+  box.verticalScrollBar.resetVisibilityControl();
+  return box;
+}
+
+/** Fits terminal cells with an ellipsis, optionally preserving the path suffix. */
+export function fitText(text: string, width: number, middle = false): string {
+  if (width <= 0) return "";
+  if (Bun.stringWidth(text) <= width) return text;
+  const chars = Array.from(text);
+  const suffix: string[] = [];
+  if (middle) {
+    while (chars.length && Bun.stringWidth(suffix.join("")) < Math.floor((width - 1) * 0.75)) {
+      suffix.unshift(chars.pop()!);
+    }
+  }
+  while (chars.length && Bun.stringWidth(chars.join("") + suffix.join("")) > width - 1) chars.pop();
+  return `${chars.join("")}…${suffix.join("")}`;
 }
 
 /** Creates one aligned key/value row. */
@@ -108,7 +159,7 @@ export function keyValueTable(
   theme: Theme,
   pairs: Array<[string, string, ColorInput?]>,
 ): BoxRenderable {
-  const box = new BoxRenderable(renderer, { flexDirection: "column" });
+  const box = new BoxRenderable(renderer, { flexDirection: "column", flexShrink: 0 });
   const width = Math.max(...pairs.map(([k]) => k.length));
   for (const [k, v, c] of pairs) box.add(keyValueRow(renderer, theme, k, v, width, c));
   return box;
@@ -232,6 +283,7 @@ export function listPanel(
     scrollY: true,
     scrollX: false,
     scrollAcceleration: new LinearScrollAccel(),
+    scrollbarOptions: { trackOptions: { backgroundColor: theme.border, foregroundColor: theme.textDim } },
     contentOptions: { flexDirection: "column" },
   });
   let index = options.items.length ? 0 : -1;
@@ -346,6 +398,7 @@ export function table(
     scrollY: true,
     scrollX: false,
     scrollAcceleration: new LinearScrollAccel(),
+    scrollbarOptions: { trackOptions: { backgroundColor: theme.border, foregroundColor: theme.textDim } },
   });
   box.add(header);
   box.add(body);
@@ -356,27 +409,58 @@ export function table(
   let descending = false;
   let rowNodes: BoxRenderable[] = [];
   const headers: TextRenderable[] = [];
-  /** Uses fixed or flexible cell width while preserving the column alignment. */
+  /** Creates a cell whose width is assigned from the shared column measurements. */
   function cell(text: string, column: TableColumn): TextRenderable {
     return new TextRenderable(renderer, {
       content: text,
-      width: column.width,
-      flexGrow: column.width ? 0 : 1,
-      flexShrink: 1,
-      minWidth: 0,
+      width: 1,
+      flexShrink: 0,
       height: 1,
       wrapMode: "none",
       selectable: false,
-      textAlign: column.align ?? "left",
       fg: theme.text,
     });
   }
+  /** Measures once per column and applies identical widths to headers and rows. */
+  function layoutColumns(): void {
+    const available = Math.max(0, Math.min(header.width, body.viewport.width || header.width));
+    const widths = options.columns.map((column) => column.width ?? Math.max(
+      Bun.stringWidth(column.title) + 2,
+      ...rows.map((row) => Bun.stringWidth(row[column.key] ?? "")),
+    ));
+    const gap = 2;
+    const budget = Math.max(0, available - gap * (widths.length - 1));
+    while (widths.reduce((sum, width) => sum + width, 0) > budget) {
+      const largest = widths.indexOf(Math.max(...widths));
+      widths[largest] = Math.max(0, widths[largest]! - 1);
+    }
+    /** Aligns a clipped string without depending on intrinsic text layout. */
+    function place(node: TextRenderable, text: string, i: number): void {
+      const column = options.columns[i]!;
+      const width = widths[i]!;
+      const clipped = fitText(text, width);
+      const padding = Math.max(0, width - Bun.stringWidth(clipped));
+      const left = column.align === "right" ? padding : column.align === "center" ? Math.floor(padding / 2) : 0;
+      node.width = width + (i < widths.length - 1 ? gap : 0);
+      node.content = " ".repeat(left) + clipped + " ".repeat(padding - left);
+    }
+    headers.forEach((node, i) => {
+      const column = options.columns[i]!;
+      place(node, column.title + (column.key === sortKey ? (descending ? " ▼" : " ▲") : ""), i);
+    });
+    rowNodes.forEach((node, row) => node.getChildren().forEach((child, i) => {
+      place(child as TextRenderable, rows[row]?.[options.columns[i]!.key] ?? "", i);
+    }));
+  }
+  header.onSizeChange = layoutColumns;
+  body.onSizeChange = layoutColumns;
   /** Applies the selected-row colors to every cell in the table. */
   function paint(): void {
     for (const [i, node] of rowNodes.entries()) {
       node.backgroundColor = i === index ? theme.surfaceHigh : theme.surface;
       for (const child of node.getChildren()) {
         (child as TextRenderable).fg = i === index ? theme.accent : theme.text;
+        (child as TextRenderable).attributes = i === index ? TextAttributes.BOLD | TextAttributes.UNDERLINE : TextAttributes.NONE;
       }
     }
   }
@@ -424,6 +508,7 @@ export function table(
     rowNodes = rows.map(createRow);
     if (!rows.length) body.add(dim(renderer, theme, options.empty ?? "No items"));
     paint();
+    layoutColumns();
   }
   /** Toggles sort direction and preserves selection by row identity. */
   function sortBy(key: string): void {
@@ -446,11 +531,12 @@ export function table(
   }
   for (const column of options.columns) {
     const node = cell(column.title, column);
-    node.fg = theme.textStrong;
+    node.fg = theme.textDim;
+    node.attributes = TextAttributes.BOLD;
     clickable(renderer, node, {
       onClick: () => sortBy(column.key),
       onHover: (inside) => {
-        node.fg = inside ? theme.accent : theme.textStrong;
+        node.fg = inside ? theme.accent : theme.textDim;
       },
     });
     headers.push(node);

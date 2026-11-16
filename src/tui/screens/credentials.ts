@@ -15,7 +15,7 @@ import {
   vaultStatus,
 } from "../../config/credentials.ts";
 import { paths } from "../../config/paths.ts";
-import { table, panel, keyValueTable, stateView } from "../components.ts";
+import { table, panel, scrollPanel, dim, fitText, keyValueTable, stateView } from "../components.ts";
 import type { Screen, ScreenContext } from "../screen.ts";
 
 /** Creates an independent credential management screen. */
@@ -152,7 +152,7 @@ export function createCredentialsScreen(): Screen {
         rows = listCredentials().map((name) => ({ name }));
         const vault = vaultStatus();
         current = rows.find((row) => row.name === current)?.name ?? rows[0]?.name ?? "";
-        ctx.status(`${rows.length} credentials · master key: ${vault.masterKeySource}`);
+        ctx.status(`${rows.length} credential${rows.length === 1 ? "" : "s"} · master key: ${vault.masterKeySource}`);
 
         const root = new BoxRenderable(renderer, {
           flexDirection: ctx.layout() === "compact" ? "column" : "row",
@@ -167,7 +167,9 @@ export function createCredentialsScreen(): Screen {
             onActivate: replace,
           });
           grid.select(rows.findIndex((row) => row.name === current));
-          root.add(grid.box);
+          const collection = panel(renderer, theme, { title: "Credentials", flexGrow: 1, active: true });
+          collection.add(grid.box);
+          root.add(collection);
         } else {
           grid = undefined;
           root.add(
@@ -181,17 +183,26 @@ export function createCredentialsScreen(): Screen {
         }
 
         if (ctx.layout() !== "compact") {
-          const detail = panel(renderer, theme, {
+          const detail = scrollPanel(renderer, theme, {
             title: "Vault",
+            flexGrow: 0,
             width: "45%",
           });
           detail.add(
             keyValueTable(renderer, theme, [
-              ["File", vault.file],
               ["Master key", vault.masterKeySource],
               ["Count", String(vault.count)],
             ]),
           );
+          detail.add(dim(renderer, theme, "File"));
+          const file = dim(renderer, theme, fitText(vault.file, Math.floor((renderer.width - 2) * 0.45) - 4, true));
+          file.width = "100%";
+          file.height = 1;
+          file.wrapMode = "none";
+          detail.onSizeChange = () => {
+            file.content = fitText(vault.file, Math.max(0, detail.width - 4), true);
+          };
+          detail.add(file);
           root.add(detail);
         }
         return root;

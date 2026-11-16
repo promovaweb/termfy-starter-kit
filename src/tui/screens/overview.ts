@@ -5,8 +5,8 @@
  * first suggested actions. It is the default initial tab and the natural
  * place for derived projects to show their own indicators.
  *
- * Wide uses fixed-width State and Next steps panels; medium uses proportional
- * widths. Compact stacks Environment and Settings and hides secondary panels.
+ * Wide and medium use proportional columns and content-sized row limits.
+ * Compact stacks Environment and Settings and hides secondary panels.
  * Watches settings.json, credentials.json and master.key for external updates.
  *
  * Actions: `r` reloads the panels from disk; `c` copies the MCP client
@@ -21,7 +21,7 @@ import { flatten, readSettings } from "../../config/settings.ts";
 import {
   spacer,
   list,
-  panel,
+  scrollPanel,
   dim,
   keyValueTable,
   heading,
@@ -78,9 +78,11 @@ export const overviewScreen: Screen = {
     const topRow = new BoxRenderable(renderer, {
       flexDirection: ctx.layout() === "compact" ? "column" : "row",
       flexShrink: 0,
+      height: 7,
+      minHeight: 0,
     });
 
-    const environment = panel(renderer, theme, {
+    const environment = scrollPanel(renderer, theme, {
       title: "Environment",
       icon: { icons, name: "terminal" },
       flexGrow: 1,
@@ -99,11 +101,12 @@ export const overviewScreen: Screen = {
 
     const vault = vaultStatus();
     const hasSettings = exists(paths.settings());
-    ctx.status(`settings: ${hasSettings ? "saved" : "defaults"} · vault: ${vault.count}`);
-    const state = panel(renderer, theme, {
+    ctx.status(`${vault.count} credential${vault.count === 1 ? "" : "s"} · settings: ${hasSettings ? "saved" : "defaults"}`);
+    const state = scrollPanel(renderer, theme, {
       title: "State",
       icon: { icons, name: "state" },
-      width: ctx.layout() === "wide" ? 46 : "45%",
+      width: "50%",
+      flexGrow: 0,
     });
     state.add(
       keyValueTable(renderer, theme, [
@@ -113,9 +116,9 @@ export const overviewScreen: Screen = {
           hasSettings ? theme.ok : theme.textDim,
         ],
         [
-          "credentials.json",
+          "Vault",
           vault.exists
-            ? `${glyphs.ok} ${vault.count} credential(s)`
+            ? `${glyphs.ok} ${vault.count} credential${vault.count === 1 ? "" : "s"}`
             : `${glyphs.bullet} empty`,
           vault.exists ? theme.ok : theme.textDim,
         ],
@@ -132,10 +135,12 @@ export const overviewScreen: Screen = {
 
     const bottomRow = new BoxRenderable(renderer, {
       flexDirection: ctx.layout() === "compact" ? "column" : "row",
-      flexGrow: 1,
+      flexGrow: 0,
+      height: Math.max(3, Math.min(ctx.layout() === "wide" ? 13 : 14, renderer.height - 11)),
+      minHeight: 0,
     });
 
-    const config = panel(renderer, theme, {
+    const config = scrollPanel(renderer, theme, {
       title: "Settings in effect",
       icon: { icons, name: "settings" },
       flexGrow: 1,
@@ -157,12 +162,13 @@ export const overviewScreen: Screen = {
     );
     bottomRow.add(config);
 
-    const next = panel(renderer, theme, {
+    const next = scrollPanel(renderer, theme, {
       title: "Next steps",
       icon: { icons, name: "docs" },
-      width: ctx.layout() === "wide" ? 46 : "45%",
+      width: "50%",
+      flexGrow: 0,
     });
-    next.add(heading(renderer, theme, "In the terminal"));
+    if (ctx.layout() === "wide") next.add(heading(renderer, theme, `In the terminal (${manifest.bin})`));
     next.add(
       list(
         renderer,
@@ -179,7 +185,7 @@ export const overviewScreen: Screen = {
     next.add(spacer(renderer));
     next.add(heading(renderer, theme, "For agents"));
     next.add(dim(renderer, theme, `MCP client: ${mcpClientConfig()}`));
-    next.add(spacer(renderer));
+    if (ctx.layout() === "wide") next.add(spacer(renderer));
     next.add(
       button(renderer, theme, {
         key: "c",
@@ -198,6 +204,9 @@ export const overviewScreen: Screen = {
     );
     if (ctx.layout() !== "compact") bottomRow.add(next);
     rootBox.add(bottomRow);
+    rootBox.onSizeChange = () => {
+      bottomRow.height = Math.max(3, Math.min(ctx.layout() === "wide" ? 13 : 14, rootBox.height - 7));
+    };
 
     return rootBox;
   },

@@ -176,8 +176,15 @@ test("Settings and Credentials focus cycles with Tab and leaves tab navigation a
       setup.mockInput.pressKey(key); await setup.renderOnce();
       setup.mockInput.pressTab(); const focused = setup.renderer.currentFocusedRenderable;
       expect(focused).not.toBeNull(); expect(focused?.constructor.name).toBe("ScrollBoxRenderable");
-      setup.mockInput.pressTab(); expect(setup.renderer.currentFocusedRenderable === focused).toBe(true);
-      setup.mockInput.pressTab({ shift: true }); expect(setup.renderer.currentFocusedRenderable === focused).toBe(true);
+      setup.mockInput.pressTab();
+      const details = setup.renderer.currentFocusedRenderable;
+      expect(details).not.toBeNull();
+      expect(details?.constructor.name).toBe("ScrollBoxRenderable");
+      expect(details).not.toBe(focused);
+      setup.mockInput.pressTab();
+      expect(setup.renderer.currentFocusedRenderable).toBe(focused);
+      setup.mockInput.pressTab({ shift: true });
+      expect(setup.renderer.currentFocusedRenderable).toBe(details);
     }
     setup.mockInput.pressKey("1"); await setup.renderOnce(); expect(setup.captureCharFrame()).toContain("Environment"); expect(setup.renderer.currentFocusedRenderable === null).toBe(true);
   });
