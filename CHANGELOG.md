@@ -2,6 +2,10 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.13.1] - 2026-11-22
+
+- Documenta a atualização das tarefas do ClickUp para pronto após o commit e publicado após o push.
+
 ## [0.13.0] - 2026-11-16
 
 ### Alterado
