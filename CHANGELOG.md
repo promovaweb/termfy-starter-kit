@@ -2,6 +2,10 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.13.3] - 2026-11-23
+
+- Passa a distribuir o projeto sob a GNU AGPL 3.0, com o arquivo `LICENSE` na raiz e o campo `license` em `AGPL-3.0-only`. O README deixa de descrever o repositório como privado.
+
 ## [0.13.2] - 2026-11-22
 
 - Atualiza a identidade visual do projeto e sua apresentação no README.

@@ -199,4 +199,5 @@ framework, não aqui.
 
 ## Licença
 
-Repositório privado da Promovaweb. Uso interno e dos alunos autorizados.
+Distribuído sob a [GNU AGPL 3.0](LICENSE). A licença não concede o uso do
+nome e do logo do Termfy nem da marca Promovaweb (AGPL 3.0, seção 7, item e).
