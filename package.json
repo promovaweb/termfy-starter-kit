@@ -1,10 +1,10 @@
 {
   "name": "termfy-starter-kit",
-  "version": "0.13.3",
+  "version": "0.13.4",
   "description": "CLI, TUI and MCP stdio server skeleton in Bun, with the Termfy framework skills installed.",
   "type": "module",
   "private": true,
-  "license": "AGPL-3.0-only",
+  "license": "MIT",
   "bin": {
     "termfy": "src/main.ts"
   },

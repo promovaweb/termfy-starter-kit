@@ -2,6 +2,10 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.13.4] - 2026-11-23
+
+- Passa a distribuir o starter kit sob a licença MIT, a regra dos templates da Promovaweb: o binário criado a partir dele pertence a quem o cria. O framework Termfy segue sob a GNU AGPL 3.0.
+
 ## [0.13.3] - 2026-11-23
 
 - Passa a distribuir o projeto sob a GNU AGPL 3.0, com o arquivo `LICENSE` na raiz e o campo `license` em `AGPL-3.0-only`. O README deixa de descrever o repositório como privado.

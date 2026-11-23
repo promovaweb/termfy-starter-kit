@@ -199,5 +199,8 @@ framework, não aqui.
 
 ## Licença
 
-Distribuído sob a [GNU AGPL 3.0](LICENSE). A licença não concede o uso do
-nome e do logo do Termfy nem da marca Promovaweb (AGPL 3.0, seção 7, item e).
+Distribuído sob a [licença MIT](LICENSE), porque o starter kit é a base do
+binário de quem usa: a ferramenta que você cria a partir dele é sua e pode ter
+a licença que você escolher. O framework [Termfy](https://github.com/promovaweb/termfy),
+com as skills e o método, segue sob a GNU AGPL 3.0. A licença não concede o uso
+do nome e do logo do Termfy nem da marca Promovaweb.
