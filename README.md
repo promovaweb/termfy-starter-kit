@@ -1,10 +1,19 @@
 # Termfy Starter Kit
 
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="brand/logo/logo-dark.png">
-    <img alt="Termfy Starter Kit" src="brand/logo/logo-light.png" width="360">
-  </picture>
+  <a href="https://promovaweb.com/termfy/">
+    <picture>
+      <source type="image/svg+xml" srcset="brand/logo/icon.svg">
+      <img alt="Termfy Starter Kit" src="brand/logo/icon.png" width="112" height="112">
+    </picture>
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://promovaweb.com/termfy/">Portal do Termfy</a> ·
+  <a href="https://promovaweb.com/docs/termfy/">Documentação</a> ·
+  <a href="https://promovaweb.com/harness/">Harness</a> ·
+  <a href="https://promovaweb.com/ferramentas/">Ferramentas</a>
 </p>
 
 <p align="center">Um projeto da <a href="https://promovaweb.com">Promovaweb</a></p>

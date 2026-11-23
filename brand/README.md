@@ -6,9 +6,7 @@ CLI com saída em texto ou `--json` e roda como servidor MCP via stdio para
 agentes. Ele já vem com as skills do framework
 [Termfy](https://github.com/promovaweb/termfy) instaladas.
 
-Esta é uma submarca do Termfy. Ela usa o mesmo símbolo e combina o petróleo e
-o turquesa da Promovaweb com lima, cor própria do conector que leva o binário
-até os agentes.
+O kit usa um módulo com prompt e acento verde-folha.
 
 ## Esta pasta é a marca do template
 
@@ -26,11 +24,7 @@ template depende dela.
 
 ## Conceito visual
 
-O símbolo é o **terminal com conector**: uma janela de terminal com o prompt
-`>` e o cursor, e um conector lima que sai da lateral da janela. A janela é o
-binário que você usa no terminal; o conector é o mesmo binário falando com
-agentes pelo MCP. O logotipo escreve **Termfy Starter Kit** ao lado do
-símbolo.
+Um módulo de terminal. A cor de identificação é `#65A30D`.
 
 ## Arquivos oficiais
 

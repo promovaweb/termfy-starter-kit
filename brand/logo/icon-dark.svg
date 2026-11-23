@@ -1,1 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title"><title id="title">Ícone do Termfy Starter Kit para fundo escuro</title><rect x="96" y="128" width="252" height="232" rx="28" fill="none" stroke="#2AD5BE" stroke-width="24"/><path d="M96 184h252" stroke="#2AD5BE" stroke-width="20"/><path d="M146 232l40 30-40 30M206 312h56" fill="none" stroke="#F2F8F9" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/><path d="M348 244h40" stroke="#A3E635" stroke-width="20" stroke-linecap="round"/><circle cx="412" cy="244" r="30" fill="#A3E635"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 64 64" role="img" aria-label="Termfy Starter Kit">
+  <title>Termfy Starter Kit</title>
+  <desc>Um módulo de terminal.</desc>
+  <g fill="none" stroke-linejoin="round" stroke-linecap="round" stroke-width="5.5">
+    <path stroke="#C6F4ED" d="M46 9H10v46h44V24"/>
+    <path stroke="#65A30D" d="m23 23 10 9-10 9M41 9h13v13"/>
+  </g>
+</svg>

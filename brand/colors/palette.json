@@ -1,4 +1,9 @@
 {
+  "projectColor": {
+    "name": "Verde-folha",
+    "hex": "#65A30D",
+    "meaning": "Um tom mais fechado do verde do Termfy identifica o template que dá origem a uma nova aplicação de terminal."
+  },
   "name": "Termfy Starter Kit",
   "families": {
     "primary": {
