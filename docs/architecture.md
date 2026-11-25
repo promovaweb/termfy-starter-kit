@@ -32,7 +32,7 @@ src/
     overlays.ts           diálogos, paleta de comandos, help e toasts
     pointer.ts            clickable: clique, hover e ponteiro de mão
     spacing.ts            tokens de margem, padding e gaps por faixa
-    theme.ts              temas terminal, night e day
+    theme.ts              cores herdadas do terminal
     icons.ts              conjuntos de ícones nerd, unicode e ascii
     screen.ts             contrato Screen e ScreenContext
     components.ts         panel, table, listPanel, stateView, spinner, link

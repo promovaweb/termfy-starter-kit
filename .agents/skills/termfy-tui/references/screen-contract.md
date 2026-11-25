@@ -58,9 +58,9 @@ valor e `validate` para devolver uma mensagem e manter o diálogo aberto.
 `choose` resolve o índice escolhido ou `undefined`. Os três respondem a
 teclado e a mouse.
 
-## Foco entre painéis
+## Foco em toda a interface
 
-`Tab` e `Shift+Tab` movem o foco entre os painéis da tela ativa. O painel em
+`Tab` e `Shift+Tab` movem o foco entre os controles da tela ativa. O painel em
 foco usa `borderActive`. Preserve o foco ao remontar e ao fechar um diálogo.
 
 ## Estado por instância

@@ -13,6 +13,8 @@
  * from `ctx.icons` and never hard-code a glyph, so changing the setting
  * changes every surface at once.
  */
+import { bg, bold, fg, reverse } from "@opentui/core";
+import type { Theme } from "./theme.ts";
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -186,4 +188,9 @@ export function currentIcons(environment: IconEnvironment = { env: process.env }
 export function withIcon(icons: IconSet, name: IconName, text: string): string {
   const icon = icons[name];
   return icon ? `${icon} ${text}` : text;
+}
+
+/** Inverts only the key cells using the terminal's own foreground and background. */
+export function shortcutBadge(key: string, theme: Theme) {
+  return reverse(bold(fg(theme.textStrong)(bg(theme.background)(key))));
 }

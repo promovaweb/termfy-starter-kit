@@ -2,6 +2,16 @@
 
 Formato baseado em Keep a Changelog. Versões seguem SemVer.
 
+## [0.14.0] - 2026-11-25
+
+### Alterado
+
+- O cabeçalho mostra nome, versão e distribuição do sistema em uma linha. O Menu agrupa as abas e mantém os nomes visíveis em terminais compactos.
+- Os atalhos aparecem em tamanho normal, em negrito e com as cores do terminal invertidas. O formulário de texto usa um fundo da paleta ANSI e destaca o campo em foco.
+- Tab e Shift+Tab percorrem menu, conteúdo e rodapé. Nos diálogos, percorrem os controles locais, e Enter aciona o item em foco.
+- A TUI herda a paleta do terminal. Configurações antigas com `night` ou `day` passam a usar `terminal`. Atualize scripts que definem o tema para usar `tui.theme terminal`.
+- As skills instaladas no template registram as convenções de cor, atalhos e navegação por teclado.
+
 ## [0.13.4] - 2026-11-23
 
 - Passa a distribuir o starter kit sob a licença MIT, a regra dos templates da Promovaweb: o binário criado a partir dele pertence a quem o cria. O framework Termfy segue sob a GNU AGPL 3.0.

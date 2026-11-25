@@ -1,7 +1,7 @@
 /**
  * Overview tab: the environment at a glance.
  *
- * Shows runtime, platform, settings and vault state, and the
+ * Shows the binary, platform, settings and vault state, and the
  * first suggested actions. It is the default initial tab and the natural
  * place for derived projects to show their own indicators.
  *
@@ -81,7 +81,6 @@ export const overviewScreen: Screen = {
     const environment = scrollPanel(renderer, theme, { title: "Environment", flexGrow: 1, active: true });
     environment.add(keyValueTable(renderer, theme, [
       ["Binary", `${manifest.bin} v${manifest.version}`],
-      ["Runtime", `Bun ${Bun.version}`],
       ["Platform", `${process.platform}-${process.arch}`],
     ]));
     topRow.add(environment);

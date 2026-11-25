@@ -149,7 +149,7 @@ Detalhes em [docs/exit-codes.md](docs/exit-codes.md).
 ## Configuração e credenciais
 
 ```bash
-termfy config set tui.theme day
+termfy config get tui.theme
 termfy credentials set openai.api_key        # digita sem eco
 printf '%s' "$TOKEN" | termfy credentials set github.token --stdin
 termfy credentials status

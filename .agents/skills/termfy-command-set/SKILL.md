@@ -11,6 +11,10 @@ recurso deve estar em inglês. Crie `<resource>.ts` nas pastas existentes
 `src/cli/commands/`, `src/mcp/tools/` e `src/tui/screens/` conforme os modos
 solicitados. Esses arquivos são novos; as pastas e os registros já existem.
 
+A navegação com `Tab` é obrigatória em toda a interface. Percorra menu, controles do conteúdo e rodapé em ordem visual, com foco visível. `Shift+Tab` percorre a ordem inversa e `Enter` ativa o controle focado. Um diálogo aberto mantém o percurso dentro dele e devolve o foco ao fechar. Teste os dois sentidos e o retorno ao início.
+
+Apresente cada atalho visível em tamanho normal, na linha do rótulo, com negrito e contraste invertido por `shortcutBadge(tecla, ctx.theme)`, inclusive nas abas, no rodapé, nos botões, na ajuda, na paleta e nos diálogos. Exemplos: `1 Overview`, `r reload` e `Esc Cancel`. A tecla registrada e os comandos para copiar continuam literais.
+
 ## Leia antes
 
 - A spec aberta em `specs/` (status `in_progress`), com Surface, Behavior,

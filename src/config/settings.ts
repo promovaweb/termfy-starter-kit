@@ -50,8 +50,8 @@ export const SETTINGS_SCHEMA: readonly SettingDefinition[] = Object.freeze([
     key: "tui.theme",
     type: "enum",
     default: "terminal",
-    values: ["terminal", "night", "day"],
-    description: "TUI palette. `terminal` (default) inherits the terminal theme colors; `night` and `day` are fixed palettes.",
+    values: ["terminal"],
+    description: "TUI colors always inherit the terminal palette.",
   },
   {
     key: "tui.icons",
@@ -108,7 +108,9 @@ export function readSettings(): Settings {
   if (!data || typeof data !== "object" || Array.isArray(data)) {
     throw error.config(`${path} must contain a JSON object.`, { path });
   }
-  return merge(defaultSettings(), data as Settings);
+  const settings = merge(defaultSettings(), data as Settings);
+  setPath(settings, "tui.theme", "terminal");
+  return settings;
 }
 
 /** Writes settings.json with two-space indentation. */

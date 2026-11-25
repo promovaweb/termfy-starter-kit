@@ -45,7 +45,7 @@ encerramento completo oferecido pelo test harness.
 | Consulta | Carregando, resposta vazia, erro, nova tentativa e resposta antiga |
 | Ciclo de vida | Sair da aba, voltar e encerrar durante uma consulta |
 | Dimensões | 80×24, 110×30, 160×40 e apresentação compacta em 40×12 |
-| Tema | `terminal`, `night` e `day`, incluindo seleção e mensagens de estado |
+| Tema | paletas claras e escuras do terminal, incluindo seleção e mensagens de estado |
 | Gráfico | Escala, rótulos, unidade, zeros, largura total e atualização |
 
 Use `mockInput` para eventos reais e `resize(width, height)` para mudança

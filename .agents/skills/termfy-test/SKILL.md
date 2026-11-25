@@ -9,6 +9,10 @@ Use esta skill para acrescentar testes, reproduzir uma falha ou atualizar
 assertions após uma mudança de contrato. Trabalhe no starter kit ou no
 projeto derivado, não no repositório do framework.
 
+A navegação com `Tab` é obrigatória em toda a interface. Percorra menu, controles do conteúdo e rodapé em ordem visual, com foco visível. `Shift+Tab` percorre a ordem inversa e `Enter` ativa o controle focado. Um diálogo aberto mantém o percurso dentro dele e devolve o foco ao fechar. Teste os dois sentidos e o retorno ao início.
+
+Apresente cada atalho visível em tamanho normal, na linha do rótulo, com negrito e contraste invertido por `shortcutBadge(tecla, ctx.theme)`, inclusive nas abas, no rodapé, nos botões, na ajuda, na paleta e nos diálogos. Exemplos: `1 Overview`, `r reload` e `Esc Cancel`. A tecla registrada e os comandos para copiar continuam literais.
+
 ## Leia antes
 
 - `AGENTS.md`, `CLISPEC.md` e `docs/architecture.md`.

@@ -22,7 +22,9 @@ import { controlSpacing } from "./spacing.ts";
  * over three short frames.
  */
 import {
+  t,
   BoxRenderable,
+  ScrollBoxRenderable,
   TextRenderable,
   TextAttributes,
   type CliRenderer,
@@ -30,7 +32,7 @@ import {
   type PasteEvent,
 } from "@opentui/core";
 import type { Theme } from "./theme.ts";
-import { withIcon, type IconName, type IconSet } from "./icons.ts";
+import { shortcutBadge, withIcon, type IconName, type IconSet } from "./icons.ts";
 import { clickable } from "./pointer.ts";
 import type { ChooseOptions, ConfirmOptions, NotifyTone, PromptOptions } from "./screen.ts";
 
@@ -97,6 +99,10 @@ export class Overlays {
     private readonly icons: IconSet,
     private readonly motion: boolean,
   ) {}
+
+  private badge(key: string) {
+    return shortcutBadge(key, this.theme);
+  }
 
   /** True while a modal (dialog, palette or help) is open. */
   get isOpen(): boolean {
@@ -170,6 +176,7 @@ export class Overlays {
       return;
     }
     this.close();
+    const previousFocus = this.renderer.currentFocusedRenderable;
     const width = Math.min(options.width, Math.max(20, this.renderer.width - 4));
     const height = Math.min(options.height, Math.max(5, this.renderer.height - 2));
     const left = Math.max(0, Math.floor((this.renderer.width - width) / 2));
@@ -201,6 +208,7 @@ export class Overlays {
       closed = true;
       if (this.modal?.backdrop === backdrop) this.modal = undefined;
       backdrop.destroyRecursively();
+      if (previousFocus && !previousFocus.isDestroyed && !this.destroyed) previousFocus.focus();
     };
     let handlers: Omit<ActiveModal, "backdrop" | "cancel">;
     try {
@@ -235,7 +243,7 @@ export class Overlays {
     const row = new BoxRenderable(this.renderer, { flexDirection: "row", gap: controlSpacing.gap, height: 1, marginTop: controlSpacing.modalY });
     const texts = items.map((item, index) => {
       const box = new BoxRenderable(this.renderer, { flexDirection: "row", flexShrink: 0 });
-      const keyText = new TextRenderable(this.renderer, { content: `[${item.key}]`, fg: item.danger ? this.theme.error : this.theme.accent, attributes: TextAttributes.BOLD, selectable: false });
+      const keyText = new TextRenderable(this.renderer, { content: t`${this.badge(item.key)}`, fg: item.danger ? this.theme.error : this.theme.accent, attributes: TextAttributes.BOLD, selectable: false });
       const label = new TextRenderable(this.renderer, { content: ` ${item.label} `, fg: this.theme.text, selectable: false });
       box.add(keyText);
       box.add(label);
@@ -298,23 +306,31 @@ export class Overlays {
   prompt(options: PromptOptions): Promise<string | undefined> {
     return new Promise((resolve) => {
       let value = options.initial ?? "";
+      let focus = 0;
       this.open({
         title: options.title,
         icon: options.secret ? "vault" : "settings",
         width: 60,
-        height: 10,
+        height: 12,
         cancel: () => resolve(undefined),
         build: (body, close) => {
-          body.add(new TextRenderable(this.renderer, { content: options.label, fg: this.theme.textDim }));
-          const field = new BoxRenderable(this.renderer, { height: 1, flexDirection: "row", backgroundColor: this.theme.background });
+          body.backgroundColor = this.theme.formBackground;
+          body.add(new TextRenderable(this.renderer, { content: options.label, fg: this.theme.formText }));
+          const field = new BoxRenderable(this.renderer, {
+            height: 3, flexShrink: 0, flexDirection: "row", paddingLeft: 1, paddingRight: 1,
+            border: true, borderColor: this.theme.borderActive, backgroundColor: this.theme.background,
+          });
           const text = new TextRenderable(this.renderer, { content: "", fg: this.theme.text, wrapMode: "none", selectable: false });
           field.add(text);
           body.add(field);
           const error = new TextRenderable(this.renderer, { content: "", fg: this.theme.error, wrapMode: "word" });
+          error.visible = false;
           body.add(error);
           const render = () => {
             const shown = options.secret ? "•".repeat(value.length) : value;
-            text.content = shown ? `${shown}▏` : `▏${options.placeholder ?? ""}`;
+            const cursor = focus === 0 ? "▏" : "";
+            field.borderColor = focus === 0 ? this.theme.borderActive : this.theme.border;
+            text.content = shown ? shown + cursor : cursor + (options.placeholder ?? "");
             text.fg = shown ? this.theme.text : this.theme.textDim;
           };
           const submit = () => {
@@ -325,6 +341,8 @@ export class Overlays {
               message = "Unable to validate this value";
             }
             if (message) {
+              setFocus(0);
+              error.visible = true;
               error.content = withIcon(this.icons, "error", message);
               return;
             }
@@ -335,21 +353,32 @@ export class Overlays {
             close();
             resolve(undefined);
           };
-          this.buttons(body, [{ key: "Enter", label: "OK", run: submit }, { key: "Esc", label: "Cancel", run: cancel }], () => 0);
+          const paint = this.buttons(body, [{ key: "Enter", label: "OK", run: submit }, { key: "Esc", label: "Cancel", run: cancel }], () => focus - 1);
+          const setFocus = (next: number) => {
+            focus = next;
+            render();
+            paint();
+          };
+          field.onMouseDown = (event) => { event.stopPropagation(); setFocus(0); };
           render();
           return {
             onKey: (key) => {
               if (key.name === "escape") return cancel();
-              if (key.name === "return" || key.name === "enter") return submit();
+              if (key.name === "tab") return setFocus((focus + (key.shift ? 2 : 1)) % 3);
+              if (key.name === "return" || key.name === "enter") return focus === 2 ? cancel() : submit();
+              if (focus !== 0) return;
               if (key.name === "backspace") value = Array.from(value).slice(0, -1).join("");
               else if (key.ctrl && key.name === "u") value = "";
               else if (!key.ctrl && !key.meta && key.sequence && key.sequence.length === 1 && key.sequence >= " ") value += key.sequence;
               else return;
+              error.visible = false;
               error.content = "";
               render();
             },
             onPaste: (pasted) => {
+              if (focus !== 0) return;
               value += pasted;
+              error.visible = false;
               error.content = "";
               render();
             },
@@ -405,7 +434,7 @@ export class Overlays {
         const item = items[offset + slot];
         const on = offset + slot === index;
         text.content = item ? `${on ? "›" : " "} ${item.text}` : "";
-        hint.content = item?.hint ? ` ${item.hint}` : "";
+        hint.content = item?.hint ? t` ${this.badge(item.hint)}` : "";
         text.fg = on ? this.theme.accent : offset + slot === hovered ? this.theme.textStrong : this.theme.text;
         row.backgroundColor = on && item ? this.theme.background : this.theme.surfaceHigh;
       });
@@ -428,6 +457,12 @@ export class Overlays {
       selected: () => (items.length ? index : -1),
       key: (key, letters) => {
         switch (key.name) {
+          case "tab":
+            if (items.length) {
+              index = (index + (key.shift ? -1 : 1) + items.length) % items.length;
+              paint();
+            }
+            return true;
           case "up": move(-1); return true;
           case "down": move(1); return true;
           case "pageup": move(-visible); return true;
@@ -464,7 +499,7 @@ export class Overlays {
           const list = this.list(body, visible, pick);
           list.setItems(options.items.map((text) => ({ text })));
           for (let i = 0; i < (options.initial ?? 0); i++) list.key({ name: "down" } as KeyEvent, false);
-          body.add(new TextRenderable(this.renderer, { content: "↑↓ move · Enter choose · Esc cancel", fg: this.theme.textDim, wrapMode: "none", selectable: false }));
+          body.add(new TextRenderable(this.renderer, { content: t`${this.badge("↑↓")} move · ${this.badge("Enter")} choose · ${this.badge("Esc")} cancel`, fg: this.theme.textDim, wrapMode: "none", selectable: false }));
           return {
             onKey: (key) => {
               if (key.name === "escape") {
@@ -494,6 +529,7 @@ export class Overlays {
         const field = new TextRenderable(this.renderer, { content: "", fg: this.theme.text, wrapMode: "none", selectable: false });
         body.add(field);
         let filtered = [...entries];
+        let searchFocused = true;
         const run = (index: number) => {
           const entry = filtered[index];
           if (!entry) return;
@@ -503,17 +539,37 @@ export class Overlays {
         const list = this.list(body, visible, run);
         const empty = new TextRenderable(this.renderer, { content: "", fg: this.theme.textDim, selectable: false });
         body.add(empty);
+        const paintSearch = () => {
+          field.content = `${this.icons.select || ">"} ${query}${searchFocused ? "▏" : ""}`;
+          field.attributes = searchFocused ? TextAttributes.BOLD : TextAttributes.NONE;
+        };
+        field.onMouseDown = (event) => { event.stopPropagation(); searchFocused = true; paintSearch(); };
         const update = () => {
-          field.content = `${this.icons.select || ">"} ${query}▏`;
+          paintSearch();
           filtered = entries.filter((entry) => matches(query, entry.label));
           list.setItems(filtered.map((entry) => ({ text: withIcon(this.icons, entry.icon ?? "select", entry.label), hint: entry.hint })));
-          empty.content = filtered.length ? `${filtered.length} command(s) · Enter run · Esc close` : "No command matches";
+          empty.content = filtered.length ? t`${filtered.length} command(s) · ${this.badge("Enter")} run · ${this.badge("Esc")} close` : "No command matches";
         };
         update();
         return {
           onKey: (key) => {
             if (key.name === "escape") return close();
+            if (key.name === "tab") {
+              if (!filtered.length) return;
+              const boundary = key.shift ? 0 : filtered.length - 1;
+              if (searchFocused) {
+                searchFocused = false;
+                list.key({ name: key.shift ? "end" : "home" } as KeyEvent, false);
+              } else if (list.selected() === boundary) {
+                searchFocused = true;
+              } else {
+                list.key(key, false);
+              }
+              paintSearch();
+              return;
+            }
             if (list.key(key, false)) return;
+            if (!searchFocused) return;
             if (key.name === "backspace") query = Array.from(query).slice(0, -1).join("");
             else if (key.ctrl && key.name === "u") query = "";
             else if (!key.ctrl && !key.meta && key.sequence && key.sequence.length === 1 && key.sequence >= " ") query += key.sequence;
@@ -521,6 +577,7 @@ export class Overlays {
             update();
           },
           onPaste: (pasted) => {
+            if (!searchFocused) return;
             query += pasted;
             update();
           },
@@ -539,15 +596,20 @@ export class Overlays {
       height: lines + 4,
       cancel: () => undefined,
       build: (body, close) => {
+        const list = new ScrollBoxRenderable(this.renderer, { maxHeight: Math.max(1, Math.min(lines, this.renderer.height - 6)), scrollY: true });
+        body.add(list);
+        const actions: Array<{ line: BoxRenderable; run: () => void }> = [];
+        let index = -1;
         for (const section of sections) {
-          body.add(new TextRenderable(this.renderer, { content: section.title, fg: this.theme.textDim, attributes: TextAttributes.BOLD, selectable: false }));
+          list.add(new TextRenderable(this.renderer, { content: section.title, fg: this.theme.textDim, attributes: TextAttributes.BOLD, selectable: false }));
           for (const row of section.rows) {
             const line = new BoxRenderable(this.renderer, { flexDirection: "row", height: 1 });
-            line.add(new TextRenderable(this.renderer, { content: row.key.padEnd(18), fg: this.theme.accent, flexShrink: 0, selectable: false }));
+            line.add(new TextRenderable(this.renderer, { width: 18, content: section.title === "Mouse" ? row.key : t`${this.badge(row.key)}`, fg: this.theme.accent, flexShrink: 0, selectable: false }));
             const text = new TextRenderable(this.renderer, { content: row.icon ? withIcon(this.icons, row.icon, row.description) : row.description, fg: this.theme.text, wrapMode: "none", selectable: false });
             line.add(text);
             const run = row.run;
             if (run) {
+              actions.push({ line, run });
               clickable(this.renderer, line, {
                 onClick: () => {
                   close();
@@ -556,11 +618,23 @@ export class Overlays {
                 onHover: (inside) => { text.fg = inside ? this.theme.accent : this.theme.text; },
               });
             }
-            body.add(line);
+            list.add(line);
           }
         }
         return {
           onKey: (key) => {
+            if (key.name === "tab" && actions.length) {
+              index = index < 0 ? (key.shift ? actions.length - 1 : 0) : (index + (key.shift ? -1 : 1) + actions.length) % actions.length;
+              const line = actions[index]!.line;
+              line.focus();
+              list.scrollChildIntoView(line);
+              return;
+            }
+            if ((key.name === "return" || key.name === "enter") && index >= 0) {
+              close();
+              actions[index]!.run();
+              return;
+            }
             if (key.name === "escape" || key.name === "?" || key.name === "q") close();
           },
         };

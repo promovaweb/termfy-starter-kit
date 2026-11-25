@@ -64,9 +64,10 @@ describe("cli", () => {
   });
 
   test("config set/get and a config error as JSON", async () => {
-    expect((await run(["config", "set", "tui.theme", "day"])).code).toBe(0);
+    expect((await run(["config", "set", "tui.theme", "day"])).code).toBe(3);
+    expect((await run(["config", "set", "tui.theme", "terminal"])).code).toBe(0);
     const get = await run(["config", "get", "tui.theme"]);
-    expect(get.stdout.trim()).toBe("day");
+    expect(get.stdout.trim()).toBe("terminal");
     const errorJson = await run(["config", "get", "does.not.exist", "--json"]);
     expect(errorJson.code).toBe(3);
     expect(JSON.parse(errorJson.stdout).error.name).toBe("CONFIG");

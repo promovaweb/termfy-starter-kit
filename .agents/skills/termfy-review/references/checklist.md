@@ -175,7 +175,7 @@ segunda busca. Cores de screens e componentes devem vir de `src/tui/theme.ts`.
 Não confunda essa regra com as sequências ANSI do CLI em `src/cli/format.ts`.
 
 No tema `terminal`, cada cor sai de `RGBA.fromIndex`, `RGBA.defaultForeground`
-ou `RGBA.defaultBackground`. Hex aparece só em `themes.night` e `themes.day`.
+ou `RGBA.defaultBackground`. Reprove cores RGB fixas na TUI.
 
 ## Ações, clique e ícones da TUI
 

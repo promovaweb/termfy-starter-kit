@@ -41,12 +41,12 @@ cuida do rename inicial; esta skill cuida de tudo que vem depois e do que o
 4. `description` é uma frase em inglês, sem ponto final duplicado, e aparece
    no `--help`, no cabeçalho da TUI e no OpenCLI. Mantenha abaixo de 80
    caracteres para caber no cabeçalho.
-5. Cores entram só em `src/tui/theme.ts`, nas três paletas, com nomes de
+5. Cores entram só em `src/tui/theme.ts`, na paleta do terminal, com nomes de
    papel. Uma cor de marca entra como `accent` (e `accentSecondary` quando
    houver duas), nunca como novo campo usado por uma screen só. No tema
    `terminal`, a identidade de cor é a escolha do slot ANSI em
    `DEFAULT_TERMINAL_SLOTS`, por exemplo `accent: ANSI.cyan`, nunca um hex.
-   Cor hex da marca entra em `night` e `day`. Mantenha contraste mínimo
+   Mantenha contraste mínimo
    4.5:1 entre `text` e `surface`.
 6. A aba About (`src/tui/screens/about.ts`) e o command `about`
    (`aboutData()` em `src/cli/commands/about.ts`) mostram os mesmos dados.

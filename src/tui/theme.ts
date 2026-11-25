@@ -1,39 +1,12 @@
-/**
- * TUI theme.
- *
- * Three palettes, chosen by `tui.theme` in settings.json:
- *
- * - `terminal` (default): inherits the colors of the terminal theme. Every
- *   token is a reference to the terminal palette (ANSI index 0-15) or to the
- *   terminal default foreground and background, never a fixed RGB value. The
- *   terminal paints them with its own theme (Ghostty, Alacritty, Kitty,
- *   Omarchy, Termius, Herdr and any other), so the TUI follows a theme switch
- *   live and keeps the terminal transparency, because the background is the
- *   terminal default background (SGR 49).
- * - `night` and `day`: fixed RGB palettes, the same on every terminal.
- *
- * When the terminal answers the OSC 4/10/11 palette query, `terminalTheme`
- * receives the real colors and only chooses WHICH palette slot fills each
- * role (dim text readable on the background, a visible selection shade,
- * accents with contrast). The result is still made of palette references.
- *
- * Color names follow their role in the interface, not the hue, so switching
- * palettes never touches the screens. Colors exist only in this file.
- */
+/** Terminal-owned colors: semantic roles use ANSI slots or the terminal defaults. */
 import { RGBA, type CliRenderer, type ColorInput, type TerminalColors } from "@opentui/core";
-import { readSettings, getPath } from "../config/settings.ts";
-
-/** Names accepted by `tui.theme`. */
-export type ThemeName = "terminal" | "night" | "day";
-
-/** Theme names, the first one is the default. */
-export const THEME_NAMES: readonly ThemeName[] = ["terminal", "night", "day"];
-
 export interface Theme {
-  name: ThemeName;
+  name: "terminal";
   background: ColorInput;
   surface: ColorInput;
   surfaceHigh: ColorInput;
+  formBackground: ColorInput;
+  formText: ColorInput;
   border: ColorInput;
   borderActive: ColorInput;
   text: ColorInput;
@@ -69,50 +42,6 @@ export const ANSI = {
   brightCyan: 14,
   brightWhite: 15,
 } as const;
-
-/** Fixed RGB palettes. */
-export const themes: Record<"night" | "day", Theme> = {
-  night: {
-    name: "night",
-    background: "#1a1b26",
-    surface: "#1f2335",
-    surfaceHigh: "#24283b",
-    border: "#3b4261",
-    borderActive: "#7aa2f7",
-    text: "#c0caf5",
-    textDim: "#565f89",
-    textStrong: "#e0e6ff",
-    accent: "#7aa2f7",
-    accentSecondary: "#bb9af7",
-    ok: "#9ece6a",
-    warn: "#e0af68",
-    error: "#f7768e",
-    barBackground: "#16161e",
-    barText: "#a9b1d6",
-    keyBackground: "#3d59a1",
-    keyText: "#ffffff",
-  },
-  day: {
-    name: "day",
-    background: "#e1e2e7",
-    surface: "#d6d8df",
-    surfaceHigh: "#c4c8da",
-    border: "#a8aecb",
-    borderActive: "#2e7de9",
-    text: "#3760bf",
-    textDim: "#848cb5",
-    textStrong: "#1b2a5e",
-    accent: "#2e7de9",
-    accentSecondary: "#9854f1",
-    ok: "#587539",
-    warn: "#8c6c3e",
-    error: "#f52a65",
-    barBackground: "#c4c8da",
-    barText: "#3760bf",
-    keyBackground: "#2e7de9",
-    keyText: "#ffffff",
-  },
-};
 
 /** Which slot fills each role of the `terminal` theme. `"bg"` and `"fg"` are the terminal defaults. */
 export interface TerminalSlots {
@@ -253,6 +182,8 @@ export function terminalTheme(colors?: TerminalColors | null): Theme {
     background,
     surface: RGBA.defaultBackground(),
     surfaceHigh: ref(slots.surfaceHigh),
+    formBackground: ref(slots.surfaceHigh === "bg" ? ANSI.black : slots.surfaceHigh),
+    formText: slots.surfaceHigh === "bg" ? ref(ANSI.brightWhite) : foreground,
     border: ref(slots.border),
     borderActive: ref(slots.accent),
     text: foreground,
@@ -270,32 +201,8 @@ export function terminalTheme(colors?: TerminalColors | null): Theme {
   };
 }
 
-/** Reads `tui.theme`. Any failure or unknown value gives `terminal`. */
-export function themeName(): ThemeName {
-  try {
-    const name = getPath(readSettings(), "tui.theme");
-    if (typeof name === "string" && (THEME_NAMES as readonly string[]).includes(name)) return name as ThemeName;
-  } catch {
-    // Without readable settings, keep the default theme.
-  }
-  return "terminal";
-}
-
-/** Returns the configured palette without asking the terminal anything. */
-export function currentTheme(): Theme {
-  const name = themeName();
-  return name === "terminal" ? terminalTheme() : themes[name];
-}
-
-/**
- * Returns the configured palette, refined by the colors the terminal reports.
- * Only the `terminal` theme asks; the query has a short timeout and any
- * failure keeps the default slots, so a silent terminal never delays or
- * breaks the TUI.
- */
+/** Refines the terminal slots when the renderer answers the palette query. */
 export async function resolveTheme(renderer: CliRenderer, timeoutMs = 300): Promise<Theme> {
-  const name = themeName();
-  if (name !== "terminal") return themes[name];
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     // getPalette may reuse an earlier detection with a longer timeout. Bound

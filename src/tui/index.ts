@@ -5,7 +5,7 @@
  *
  *   ▌ Title  v1.0                                      platform
  *    1 ⌂ Overview   2 ⚙ Settings   3 ◈ Credentials   …   (click or number)
- *   ━━━━━━━━━━━━━
+ *   (tabs are grouped inside the Menu border)
  *   active screen (or "terminal too small" below 60×16)
  *   status text   screen actions, help, quit (click runs)   ^K commands
  *
@@ -25,6 +25,7 @@
 import { watch as watchFile, existsSync, type FSWatcher } from "node:fs";
 import { basename, dirname } from "node:path";
 import {
+  t,
   BoxRenderable,
   TextRenderable,
   TextAttributes,
@@ -34,11 +35,12 @@ import {
   type PasteEvent,
   type Renderable,
 } from "@opentui/core";
+import { systemLabel } from "./system-label.ts";
 import { manifest } from "../app/manifest.ts";
 import { readSettings, getPath } from "../config/settings.ts";
-import { glyphs, currentTheme, resolveTheme, type Theme } from "./theme.ts";
-import { currentIcons, withIcon, type IconSet } from "./icons.ts";
-import { clickable } from "./pointer.ts";
+import { glyphs, terminalTheme, resolveTheme, type Theme } from "./theme.ts";
+import { currentIcons, shortcutBadge, withIcon, type IconSet } from "./icons.ts";
+import { activateFocused, clickable } from "./pointer.ts";
 import { Overlays, type HelpSection, type PaletteEntry } from "./overlays.ts";
 import { screens } from "./screens/index.ts";
 import { spacing, controlSpacing } from "./spacing.ts";
@@ -118,7 +120,7 @@ function focusables(root: Renderable): Renderable[] {
 export async function startTui(options: TuiOptions = {}): Promise<void> {
   const renderer = await createCliRenderer({
     exitOnCtrlC: true,
-    backgroundColor: currentTheme().background,
+    backgroundColor: terminalTheme().background,
     targetFps: 30,
     useMouse: mouseEnabled(),
     useKittyKeyboard: {},
@@ -132,9 +134,10 @@ export async function startTui(options: TuiOptions = {}): Promise<void> {
  * destroyed. Separated from `startTui` so tests can use the renderer from
  * `@opentui/core/testing` and capture frames without a real terminal.
  */
-export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, theme: Theme = currentTheme()): Promise<void> {
+export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, theme: Theme = terminalTheme()): Promise<void> {
   const initialSpace = spacing(layoutFor(renderer.width));
   const icons = options.icons ?? currentIcons();
+  const badge = (key: string) => shortcutBadge(key, theme);
   const motion = options.motion ?? motionEnabled();
   const overlays = new Overlays(renderer, theme, icons, motion);
   const closed = new Promise<void>((resolve) => renderer.once("destroy", () => resolve()));
@@ -149,26 +152,30 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
     backgroundColor: theme.background,
   });
 
-  // Header: brand, version, platform (the platform hides in compact).
+  // Identity and host information stay above the navigation on every tab.
   const header = new BoxRenderable(renderer, { height: 1, flexDirection: "row", paddingLeft: initialSpace.pageX, paddingRight: initialSpace.pageX, gap: controlSpacing.gap });
   const brand = new BoxRenderable(renderer, { flexDirection: "row", flexShrink: 0 });
   brand.add(new TextRenderable(renderer, { content: `${glyphs.block} `, fg: theme.accent, selectable: false }));
   brand.add(new TextRenderable(renderer, { content: manifest.title, fg: theme.textStrong, attributes: TextAttributes.BOLD }));
   brand.add(new TextRenderable(renderer, { content: `  v${manifest.version}`, fg: theme.textDim }));
   header.add(brand);
-  header.add(new BoxRenderable(renderer, { flexGrow: 1 }));
   const platform = new TextRenderable(renderer, {
-    content: `${process.platform}-${process.arch} · Bun ${Bun.version}`,
+    content: systemLabel(),
     fg: theme.textDim,
-    flexShrink: 0,
+    flexShrink: 1,
+    minWidth: 0,
+    truncate: true,
     wrapMode: "none",
   });
   header.add(platform);
   app.add(header);
-
   // Tab bar: one clickable item per screen, numbered for the 1..9 keys.
   const tabBar = new BoxRenderable(renderer, {
-    height: 1,
+    height: 3,
+    flexShrink: 0,
+    border: true,
+    title: " Menu ",
+    borderColor: theme.borderActive,
     flexDirection: "row",
     paddingLeft: initialSpace.pageX,
     gap: initialSpace.tabGap,
@@ -182,9 +189,7 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
   const tabItems = screens.map((screen, index) => {
     const label = new TextRenderable(renderer, { content: "", fg: theme.textDim, wrapMode: "none", selectable: false });
     const item = new BoxRenderable(renderer, { flexDirection: "column", flexShrink: 0 });
-    const indicator = new TextRenderable(renderer, { content: "", height: 1, fg: theme.accent, selectable: false, wrapMode: "none" });
     item.add(label);
-    item.add(indicator);
     clickable(renderer, item, {
       onClick: () => show(index),
       onHover: (inside) => {
@@ -193,10 +198,8 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
       },
     });
     tabBar.add(item);
-    return { item, label, indicator, screen, index };
+    return { item, label, screen, index };
   });
-  const headerGap = new BoxRenderable(renderer, { height: initialSpace.pageY, flexShrink: 0 });
-  app.add(headerGap);
   app.add(tabBar);
 
   const tabGap = new BoxRenderable(renderer, { height: initialSpace.pageY, flexShrink: 0 });
@@ -207,7 +210,7 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
   const tooSmall = new BoxRenderable(renderer, { flexGrow: 1, alignItems: "center", justifyContent: "center", flexDirection: "column" });
   const tooSmallText = new TextRenderable(renderer, { content: "", fg: theme.warn, selectable: false });
   tooSmall.add(tooSmallText);
-  tooSmall.add(new TextRenderable(renderer, { content: "Enlarge the window or press q to quit.", fg: theme.textDim, selectable: false }));
+  tooSmall.add(new TextRenderable(renderer, { content: t`Enlarge the window or press ${badge("q")} to quit.`, fg: theme.textDim, selectable: false }));
 
   const contentGap = new BoxRenderable(renderer, { height: initialSpace.pageY, flexShrink: 0 });
   app.add(contentGap);
@@ -217,7 +220,7 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
   const statusText = new TextRenderable(renderer, { content: "", fg: theme.textDim, wrapMode: "none", flexShrink: 1, minWidth: 0, selectable: false });
   let barItems = new BoxRenderable(renderer, { flexDirection: "row", gap: controlSpacing.gap, flexGrow: 1, flexShrink: 1, minWidth: 0 });
   const paletteHint = new BoxRenderable(renderer, { flexDirection: "row", flexShrink: 0, width: 12 });
-  paletteHint.add(new TextRenderable(renderer, { content: "^K", fg: theme.accent, attributes: TextAttributes.BOLD, selectable: false }));
+  paletteHint.add(new TextRenderable(renderer, { content: t`${badge("^K")}`, fg: theme.accent, attributes: TextAttributes.BOLD, selectable: false }));
   const paletteLabel = new TextRenderable(renderer, { content: " commands", fg: theme.textDim, selectable: false });
   paletteHint.add(paletteLabel);
   clickable(renderer, paletteHint, {
@@ -311,24 +314,21 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
   };
 
   const paintTabs = () => {
-    for (const { item, label, indicator, screen, index } of tabItems) {
+    for (const { item, label, screen, index } of tabItems) {
       const selected = index === activeIndex;
-      const number = index < 9 ? `${index + 1} ` : "";
-      // Compact terminals show the title only on the active tab.
-      const title = currentLayout === "compact" && !selected ? (icons[screen.icon ?? "list"] || screen.title.slice(0, 3)) : withIcon(icons, screen.icon ?? "list", screen.title);
-      const text = `${number}${title}`;
-      label.content = text;
-      indicator.content = selected ? "━".repeat(Bun.stringWidth(text)) : "";
-      label.fg = selected ? theme.accent : index === hovered ? theme.text : theme.textDim;
+      // Keep every destination readable on narrow terminals.
+      const title = currentLayout === "compact" ? screen.title : withIcon(icons, screen.icon ?? "list", screen.title);
+      label.content = index < 9 ? t`${badge(String(index + 1))} ${title}` : title;
+      label.fg = selected ? theme.keyText : index === hovered ? theme.accent : theme.text;
       label.attributes = selected ? TextAttributes.BOLD : TextAttributes.NONE;
-      item.backgroundColor = theme.background;
+      item.backgroundColor = selected ? theme.accent : theme.background;
     }
   };
 
   const barItem = (action: ScreenAction) => {
     const item = new BoxRenderable(renderer, { flexDirection: "row", flexShrink: 0, width: Bun.stringWidth(keyLabel(action)) + Bun.stringWidth(action.description) + 1 });
     const text = new TextRenderable(renderer, { content: ` ${action.description}`, fg: theme.textDim, selectable: false });
-    item.add(new TextRenderable(renderer, { content: keyLabel(action), fg: theme.accent, attributes: TextAttributes.BOLD, selectable: false }));
+    item.add(new TextRenderable(renderer, { content: t`${badge(keyLabel(action))}`, fg: theme.accent, attributes: TextAttributes.BOLD, selectable: false }));
     item.add(text);
     clickable(renderer, item, {
       onClick: () => runAction(action),
@@ -360,7 +360,6 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
     for (const action of globalActions) barItems.add(barItem(action));
     bar.add(barItems);
     bar.add(paletteHint);
-    platform.visible = currentLayout !== "compact";
   };
 
   /** Detaches the content of the active screen, blurring a focused child. */
@@ -429,9 +428,7 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
 
   /** Moves the focus to the next (or previous) focusable panel of the screen. */
   const cycleFocus = (delta: number) => {
-    const node = active() && mounted.get(active()!.id);
-    if (!node || small) return;
-    const list = focusables(node);
+    const list = focusables(app);
     if (!list.length) return;
     const current = list.findIndex((item) => item === renderer.currentFocusedRenderable);
     const nextIndex = current < 0 ? (delta > 0 ? 0 : list.length - 1) : (current + delta + list.length) % list.length;
@@ -484,7 +481,7 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
         { key: "Ctrl+K  :", description: "command palette", icon: "keyboard", run: () => openPalette() },
         { key: "←  →  [  ]", description: "previous / next tab", icon: "tabs", run: () => step(1) },
         { key: `1 … ${Math.min(9, screens.length)}`, description: "go to the tab with that number" },
-        { key: "Tab  Shift+Tab", description: "next / previous panel" },
+        { key: "Tab  Shift+Tab", description: "next / previous control" },
         { key: "Esc", description: "close a dialog; quit when none is open", icon: "close" },
         { key: "q  Ctrl+C", description: "quit", icon: "quit", run: () => quit() },
       ],
@@ -503,16 +500,24 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
   // Layout: recompose on width class change; replace the screen when too small.
   const applySize = () => {
     const space = spacing(layoutFor(renderer.width));
-    for (const box of [header, tabBar, content, bar]) {
+    for (const box of [header, content, bar]) {
       box.paddingLeft = space.pageX;
       box.paddingRight = space.pageX;
     }
-    header.marginTop = space.pageY;
     header.flexShrink = 0;
-    tabBar.height = 2;
-    tabBar.gap = space.tabGap;
+    header.marginBottom = renderer.height >= 20 ? 1 : 0;
+    tabBar.marginLeft = space.pageX;
+    tabBar.marginRight = space.pageX;
+    tabBar.paddingLeft = 1;
+    tabBar.paddingRight = 1;
+    const labelsWidth = screens.reduce((sum, screen, index) => {
+      const title = renderer.width < 80 ? screen.title : withIcon(icons, screen.icon ?? "list", screen.title);
+      return sum + Bun.stringWidth(title) + (index < 9 ? 2 : 0);
+    }, 0);
+    const available = renderer.width - 4 - 2 * space.pageX - labelsWidth;
+    tabBar.gap = Math.max(0, Math.min(3, Math.floor(available / Math.max(1, screens.length - 1))));
     bar.flexShrink = 0;
-    for (const gap of [headerGap, tabGap, contentGap]) gap.height = space.pageY;
+    for (const gap of [tabGap, contentGap]) gap.height = space.pageY;
     const wasSmall = small;
     const nextSmall = renderer.width < MIN_WIDTH || renderer.height < MIN_HEIGHT;
     const nextLayout = layoutFor(renderer.width);
@@ -629,10 +634,11 @@ export async function mountTui(renderer: CliRenderer, options: TuiOptions = {}, 
       run();
     };
     if (name === ":") return consume(openPalette);
+    if (name === "tab") return consume(() => cycleFocus(key.shift ? -1 : 1));
+    if ((name === "enter" || name === "return") && activateFocused(renderer.currentFocusedRenderable)) return key.preventDefault();
     if (active()?.onKey?.(name, context)) return consume(() => undefined);
     const own = active()?.actions?.find((action) => action.keys.includes(name));
     if (own) return consume(() => runAction(own));
-    if (name === "tab") return consume(() => cycleFocus(key.shift ? -1 : 1));
     if (name === "left" || name === "[") return consume(() => step(-1));
     if (name === "right" || name === "]") return consume(() => step(1));
     if (/^[1-9]$/.test(name)) {

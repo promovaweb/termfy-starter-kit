@@ -269,9 +269,9 @@ test("settings preserve a valid theme and reject an unknown enum value", () => {
   try {
     const settings = readSettings();
     expect(getPath(settings, "tui.theme")).toBe("terminal");
-    setPath(settings, "tui.theme", convertValue("tui.theme", "day"));
+    setPath(settings, "tui.theme", convertValue("tui.theme", "terminal"));
     writeSettings(settings);
-    expect(getPath(readSettings(), "tui.theme")).toBe("day");
+    expect(getPath(readSettings(), "tui.theme")).toBe("terminal");
     expect(() => convertValue("tui.theme", "unknown")).toThrow(/accepts only/);
   } finally {
     for (const [key, value] of previous) {

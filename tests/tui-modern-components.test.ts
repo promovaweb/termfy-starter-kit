@@ -2,7 +2,7 @@
 import { expect, test } from "bun:test";
 import { createTestRenderer } from "@opentui/core/testing";
 import { table, stateView, spinner, progressBar, link } from "../src/tui/components.ts";
-import { themes } from "../src/tui/theme.ts";
+import { terminalTheme } from "../src/tui/theme.ts";
 import { iconSets } from "../src/tui/icons.ts";
 
 test("table sorts headers by mouse and selects and activates by keyboard and mouse", async () => {
@@ -10,7 +10,7 @@ test("table sorts headers by mouse and selects and activates by keyboard and mou
   try {
     let activated = -1;
     const rows = [{ name: "Zulu" }, { name: "Alpha" }, { name: "Beta" }];
-    const grid = table(setup.renderer, themes.night, { columns: [{ key: "name", title: "Name" }], rows, onActivate: (i) => { activated = i; } });
+    const grid = table(setup.renderer, terminalTheme(), { columns: [{ key: "name", title: "Name" }], rows, onActivate: (i) => { activated = i; } });
     setup.renderer.root.add(grid.box); await setup.renderOnce();
     await setup.mockMouse.click(2, 0); await setup.renderOnce();
     expect(rows.map((row) => row.name)).toEqual(["Alpha", "Beta", "Zulu"]);
@@ -31,11 +31,11 @@ test("table sorts headers by mouse and selects and activates by keyboard and mou
 test("state, progress, hyperlink URL and stopped spinner render", async () => {
   const setup = await createTestRenderer({ width: 60, height: 15 });
   try {
-    const spin = spinner(setup.renderer, themes.night, { label: "Loading", ascii: true });
-    const progress = progressBar(setup.renderer, themes.night, { label: "Download", value: -2, width: 5 });
+    const spin = spinner(setup.renderer, terminalTheme(), { label: "Loading", ascii: true });
+    const progress = progressBar(setup.renderer, terminalTheme(), { label: "Download", value: -2, width: 5 });
     setup.renderer.root.add(spin.box); setup.renderer.root.add(progress.box);
-    const url = "https://example.com/docs"; const anchor = link(setup.renderer, themes.night, { url }); setup.renderer.root.add(anchor);
-    setup.renderer.root.add(stateView(setup.renderer, themes.night, iconSets.ascii, { kind: "empty", title: "Nothing here" }));
+    const url = "https://example.com/docs"; const anchor = link(setup.renderer, terminalTheme(), { url }); setup.renderer.root.add(anchor);
+    setup.renderer.root.add(stateView(setup.renderer, terminalTheme(), iconSets.ascii, { kind: "empty", title: "Nothing here" }));
     spin.start(); await Bun.sleep(95); spin.stop(); const stopped = spin.box.content;
     await Bun.sleep(95); expect(spin.box.content).toEqual(stopped);
     progress.set(3, "Done"); spin.setLabel("Idle"); await setup.renderOnce();

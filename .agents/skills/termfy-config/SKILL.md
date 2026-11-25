@@ -51,9 +51,7 @@ credenciais, mudar a política da chave mestra ou depurar a pasta
 1. Acrescente a definição em `SETTINGS_SCHEMA`.
 2. Leia o valor com `getPath(readSettings(), "group.key")`.
 3. Se a chave alimentar `--tab` ou outra opção, atualize os `values`
-   correspondentes. Para `tui.theme`, mantenha os valores do esquema
-   alinhados a `THEME_NAMES` de `src/tui/theme.ts` (`terminal`, `night` e
-   `day`).
+   correspondentes. Para `tui.theme`, aceite somente `terminal`.
 4. Teste em `tests/config.test.ts` (conversão e padrão).
 5. Atualize a tabela em `docs/configuration.md`.
 

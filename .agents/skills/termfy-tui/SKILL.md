@@ -9,6 +9,10 @@ Use esta skill para criar ou revisar telas, componentes, navegação por teclado
 foco, rolagem e carregamento de informações na TUI do Termfy. O agente conduz
 as alterações e as verificações; o usuário descreve a interface desejada.
 
+A navegação com `Tab` é obrigatória em toda a interface. Percorra menu, controles do conteúdo e rodapé em ordem visual, com foco visível. `Shift+Tab` percorre a ordem inversa e `Enter` ativa o controle focado. Um diálogo aberto mantém o percurso dentro dele e devolve o foco ao fechar. Teste os dois sentidos e o retorno ao início.
+
+Apresente cada atalho visível em tamanho normal, na linha do rótulo, com negrito e contraste invertido por `shortcutBadge(tecla, ctx.theme)`, inclusive nas abas, no rodapé, nos botões, na ajuda, na paleta e nos diálogos. Exemplos: `1 Overview`, `r reload` e `Esc Cancel`. A tecla registrada e os comandos para copiar continuam literais.
+
 ## Leia antes
 
 1. Leia `AGENTS.md`, `CLISPEC.md` e `docs/tui.md` do projeto. Leia a spec
@@ -68,10 +72,7 @@ escolhido e verificações antes de editar.
    Confira assinaturas no arquivo real, sem deduí-las pelo nome.
    `spacer(renderer, height)` não recebe tema. `button` e `listPanel` já
    respondem ao clique.
-4. Use `ctx.theme` para cores e `ctx.icons` para ícones. Mantenha as três
-   paletas (`terminal`, `night` e `day`) e o contrato visual existente. O
-   padrão de `tui.theme` continua `terminal`, que herda as cores do tema do
-   terminal. Componentes compartilhados recebem tema como parâmetro.
+4. Use `ctx.theme` para cores e `ctx.icons` para ícones. Use exclusivamente as cores do terminal. Componentes compartilhados recebem tema como parâmetro.
 5. Declare cada comando da tela como uma `ScreenAction` em `actions`, com
    `keys`, `description`, `icon` e `run`. O shell roda a ação pela tecla,
    mostra na barra inferior, no help e na paleta de comandos (`Ctrl+K` ou
@@ -94,7 +95,7 @@ escolhido e verificações antes de editar.
 9. Use `ctx.status` para o resumo da tela e `ctx.notify(message, tone)` para
    o resultado de cada ação. Os toasts se empilham no canto inferior direito.
 10. Mantenha o foco visível no painel ativo, com `borderActive` ou o papel
-    equivalente do tema. `Tab` e `Shift+Tab` movem o foco entre os painéis
+    equivalente do tema. `Tab` e `Shift+Tab` movem o foco entre os controles
     da tela, sem trocar de aba.
 11. Declare `Screen.watch()` com os arquivos que a tela lê. O shell recarrega
     a tela quando outro processo muda um desses arquivos. Não crie polling
@@ -138,7 +139,7 @@ escolhido e verificações antes de editar.
    finalmente a navegação pelo `mountTui`. Inclua saída durante uma
    requisição pendente. Use `setup.mockMouse` para o clique, o hover e a
    roda, além de `mockInput.pressKey` para a tecla da mesma ação.
-7. Confira `terminal`, `night` e `day` em 60×16, 80×24 e 120×32. Confira a
+7. Confira paletas claras e escuras do terminal em 60×16, 80×24 e 120×32. Confira a
    paleta, cada diálogo e o frame de erro.
 8. Passe a [checklist de qualidade](references/quality-checklist.md) linha a
    linha. Rode a validação do projeto e relate falhas alheias ao escopo.

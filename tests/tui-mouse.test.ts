@@ -2,7 +2,7 @@
 import { expect, test } from "bun:test";
 import { createTestRenderer } from "@opentui/core/testing";
 import { button, listPanel, panel } from "../src/tui/components.ts";
-import { themes } from "../src/tui/theme.ts";
+import { terminalTheme } from "../src/tui/theme.ts";
 import { framePoint, withTui } from "./tui-fixture.ts";
 
 test("clicking tab 5 opens About and the tab wheel moves in both directions", async () => {
@@ -49,7 +49,7 @@ test("list row clicks select and activate while right clicks and wheel do not ac
   const setup = await createTestRenderer({ width: 50, height: 10 });
   const calls: number[] = [];
   try {
-    const list = listPanel(setup.renderer, themes.night, { title: "Choices", items: ["First choice", "Second choice", "Third choice"], onSelect: (index) => calls.push(index) });
+    const list = listPanel(setup.renderer, terminalTheme(), { title: "Choices", items: ["First choice", "Second choice", "Third choice"], onSelect: (index) => calls.push(index) });
     list.box.height = 10;
     setup.renderer.root.add(list.box);
     await setup.renderOnce();
@@ -68,9 +68,9 @@ test("a nested button runs once and stops propagation to its panel", async () =>
   let presses = 0;
   let parentPresses = 0;
   try {
-    const container = panel(setup.renderer, themes.night, { title: "Actions", height: 8 });
+    const container = panel(setup.renderer, terminalTheme(), { title: "Actions", height: 8 });
     container.onMouseDown = () => { parentPresses++; };
-    container.add(button(setup.renderer, themes.night, { key: "x", label: "Do action", onPress: () => { presses++; } }));
+    container.add(button(setup.renderer, terminalTheme(), { key: "x", label: "Do action", onPress: () => { presses++; } }));
     setup.renderer.root.add(container);
     await setup.renderOnce();
     await setup.mockMouse.click(...framePoint(setup, "Do action"));

@@ -23,7 +23,7 @@ Keys em notação de ponto. O schema do esqueleto:
 | `tui.initialTab` | `overview`, `settings`, `credentials`, `docs` ou `about` | `overview` | aba aberta ao iniciar a TUI |
 | `tui.motion` | boolean | `true` | animações curtas de diálogos e toasts; `false` deixa a interface estática |
 | `tui.mouse` | boolean | `true` | mouse na TUI: clique, hover e roda. `false` devolve a seleção de texto ao terminal |
-| `tui.theme` | `terminal`, `night` ou `day` | `terminal` | paleta da TUI |
+| `tui.theme` | `terminal` | `terminal` | paleta da TUI |
 | `telemetry.enabled` | boolean | `false` | reservado para projetos derivados |
 
 Commands:

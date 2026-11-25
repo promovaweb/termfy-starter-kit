@@ -1,3 +1,4 @@
+import { t } from "@opentui/core";
 /**
  * Visual components shared by the screens.
  *
@@ -31,6 +32,7 @@ import { glyphs, type Theme } from "./theme.ts";
 import {
   withIcon,
   currentIcons,
+  shortcutBadge,
   iconSets,
   type IconName,
   type IconSet,
@@ -258,7 +260,7 @@ export function button(
   });
   box.add(
     new TextRenderable(renderer, {
-      content: `[${options.key}]`,
+      content: t`${shortcutBadge(options.key, theme)}`,
       fg: theme.accent,
       attributes: TextAttributes.BOLD,
       selectable: false,
@@ -319,6 +321,7 @@ export function listPanel(
 
     clickable(renderer, row, {
       onClick: () => select(i),
+      onFocus: () => highlight(i),
       onHover: updateHover,
     });
     box.add(row);
@@ -518,6 +521,8 @@ export function table(
 
       clickable(renderer, node, {
         onClick: clickRow,
+        onFocus: () => select(i),
+        onActivate: () => options.onActivate?.(i),
         onHover: updateHover,
       });
       body.add(node);
@@ -597,6 +602,7 @@ export function table(
   }
 
   body.handleKeyPress = handleKeyPress;
+  box.focus = () => body.focus();
   box.handleKeyPress = (key) => body.handleKeyPress(key);
   rebuild();
   return {

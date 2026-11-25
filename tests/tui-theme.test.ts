@@ -6,9 +6,9 @@ import { join } from "node:path";
 import { RGBA, type CliRenderer, type TerminalColors } from "@opentui/core";
 import { createTestRenderer } from "@opentui/core/testing";
 import { HOME_VARIABLE, MASTER_KEY_VARIABLE } from "../src/config/paths.ts";
-import { writeSettings } from "../src/config/settings.ts";
+import { readSettings, getPath, writeSettings } from "../src/config/settings.ts";
 import { mountTui } from "../src/tui/index.ts";
-import { chooseTerminalSlots, contrast, DEFAULT_TERMINAL_SLOTS, resolveTheme, terminalTheme, themeName, themes, type Theme } from "../src/tui/theme.ts";
+import { chooseTerminalSlots, contrast, DEFAULT_TERMINAL_SLOTS, resolveTheme, terminalTheme, type Theme } from "../src/tui/theme.ts";
 
 /** Builds an OSC response with only palette and default colors populated. */
 function palette(colors: string[], foreground: string, background: string): TerminalColors {
@@ -164,17 +164,17 @@ describe("theme resolution", () => {
   });
 
   for (const name of ["night", "day"] as const) {
-    test(`${name} skips the terminal query`, async () => {
+    test(`${name} from an older configuration still uses the terminal`, async () => {
       writeSettings({ tui: { theme: name } });
       const getPalette = mock(async () => tokyo);
-      expect(await resolveTheme({ getPalette } as unknown as CliRenderer)).toBe(themes[name]);
-      expect(getPalette).not.toHaveBeenCalled();
+      expect(await resolveTheme({ getPalette } as unknown as CliRenderer)).toEqual(terminalTheme(tokyo));
+      expect(getPalette).toHaveBeenCalledTimes(1);
     });
   }
 
   test("unknown settings fall back to terminal", () => {
     writeSettings({ tui: { theme: "unknown" } });
-    expect(themeName()).toBe("terminal");
+    expect(getPath(readSettings(), "tui.theme")).toBe("terminal");
   });
 
   test("mounts terminal references and displays Overview", async () => {

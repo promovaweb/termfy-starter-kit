@@ -8,7 +8,7 @@ com [os padrões de tela](screen-patterns.md).
 
 - [ ] O foco está visível no painel ativo, com `borderActive` ou equivalente
   do tema. Um frame sem indicação de foco reprova.
-- [ ] `Tab` e `Shift+Tab` movem o foco entre os painéis da tela, sem trocar
+- [ ] `Tab` e `Shift+Tab` movem o foco entre os controles da tela, sem trocar
   de aba.
 - [ ] Cada ação está em `actions` com `keys`, `description` e `icon`. A
   mesma ação roda pela tecla, pelo clique e pela paleta de comandos
@@ -59,8 +59,7 @@ com [os padrões de tela](screen-patterns.md).
 
 ## Cor, glifo e segredo
 
-- [ ] O contraste de `text` sobre `surface` passa em `terminal`, `night` e
-  `day`.
+- [ ] O contraste de `text` sobre `surface` passa em paletas claras e escuras do terminal.
 - [ ] Nenhuma cor hex aparece fora de `src/tui/theme.ts`.
 - [ ] Nenhum glifo fixo aparece fora de `src/tui/icons.ts`. A tela usa
   `ctx.icons` e `withIcon`.

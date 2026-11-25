@@ -169,24 +169,51 @@ test("small-terminal state and resize remount the screen at each layout boundary
   });
 });
 
-test("Settings and Credentials focus cycles with Tab and leaves tab navigation available", async () => {
+test("Tab traverses the menu, active screen and footer, and Enter activates the focused tab", async () => {
   await withTui(async (setup) => {
-    setCredential("service.token", "private");
-    for (const key of ["2", "3"]) {
-      setup.mockInput.pressKey(key); await setup.renderOnce();
-      setup.mockInput.pressTab(); const focused = setup.renderer.currentFocusedRenderable;
-      expect(focused).not.toBeNull(); expect(focused?.constructor.name).toBe("ScrollBoxRenderable");
+    setup.mockInput.pressTab();
+    const first = setup.renderer.currentFocusedRenderable;
+    expect(first).not.toBeNull();
+    setup.mockInput.pressTab();
+    const second = setup.renderer.currentFocusedRenderable;
+    setup.mockInput.pressEnter();
+    await setup.renderOnce();
+    expect(setup.captureCharFrame()).toContain("output.colors");
+    second!.focus();
+    const order = new Set();
+    let reachedPanel = false;
+    for (let n = 0; n < 150; n++) {
       setup.mockInput.pressTab();
-      const details = setup.renderer.currentFocusedRenderable;
-      expect(details).not.toBeNull();
-      expect(details?.constructor.name).toBe("ScrollBoxRenderable");
-      expect(details).not.toBe(focused);
-      setup.mockInput.pressTab();
-      expect(setup.renderer.currentFocusedRenderable).toBe(focused);
-      setup.mockInput.pressTab({ shift: true });
-      expect(setup.renderer.currentFocusedRenderable).toBe(details);
+      const item = setup.renderer.currentFocusedRenderable!;
+      if (order.has(item)) break;
+      order.add(item);
+      reachedPanel ||= item.constructor.name === "ScrollBoxRenderable";
     }
-    setup.mockInput.pressKey("1"); await setup.renderOnce(); expect(setup.captureCharFrame()).toContain("ENVIRONMENT"); expect(setup.renderer.currentFocusedRenderable === null).toBe(true);
+    expect(order.has(first)).toBe(true);
+    expect(reachedPanel).toBe(true);
+    first!.focus();
+    setup.mockInput.pressTab({ shift: true });
+    setup.mockInput.pressEnter();
+    await setup.renderOnce();
+    expect(setup.captureCharFrame()).toContain("Commands");
+  });
+});
+
+test("Tab stays in the form and Enter activates the focused control", async () => {
+  await fixture(async (setup, ctx) => {
+    const canceled = ctx.prompt({ title: "Edit", label: "Value" });
+    setup.mockInput.pressTab({ shift: true });
+    setup.mockInput.pressEnter();
+    expect(await canceled).toBeUndefined();
+    const accepted = ctx.prompt({ title: "Edit", label: "Value", initial: "original" });
+    setup.mockInput.pressTab();
+    await setup.mockInput.typeText("ignored");
+    setup.mockInput.pressEnter();
+    expect(await accepted).toBe("original");
+    const choice = ctx.choose({ title: "Choose", items: ["First", "Second"] });
+    setup.mockInput.pressTab();
+    setup.mockInput.pressEnter();
+    expect(await choice).toBe(1);
   });
 });
 
@@ -239,7 +266,7 @@ test("Tab includes a focusable root and Shift+Tab starts at the last actual pane
   let first: InputRenderable;
   let second: InputRenderable;
   await fixture(async (setup) => {
-    setup.mockInput.pressTab({ shift: true }); expect(second.focused).toBe(true);
+    first.focus(); setup.mockInput.pressTab(); expect(second.focused).toBe(true);
     setup.mockInput.pressTab({ shift: true }); expect(first.focused).toBe(true);
     setup.mockInput.pressTab(); expect(second.focused).toBe(true);
   }, { mount: (ctx) => {

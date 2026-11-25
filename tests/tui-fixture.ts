@@ -6,7 +6,7 @@ import { createTestRenderer, type TestRendererSetup, type TestRendererOptions } 
 import { HOME_VARIABLE, MASTER_KEY_VARIABLE } from "../src/config/paths.ts";
 import { mountTui } from "../src/tui/index.ts";
 import { iconSets } from "../src/tui/icons.ts";
-import { themes } from "../src/tui/theme.ts";
+import { terminalTheme } from "../src/tui/theme.ts";
 
 /** Runs a shell fixture and always closes native resources and restores environment. */
 export async function withTui(run: (setup: TestRendererSetup) => Promise<void>, initialTab = "overview", options: TestRendererOptions = {}): Promise<void> {
@@ -18,7 +18,7 @@ export async function withTui(run: (setup: TestRendererSetup) => Promise<void>, 
   let closed: Promise<void> | undefined;
   try {
     setup = await createTestRenderer({ width: 160, height: 36, ...options });
-    closed = mountTui(setup.renderer, { initialTab, icons: iconSets.unicode, motion: false }, themes.night);
+    closed = mountTui(setup.renderer, { initialTab, icons: iconSets.unicode, motion: false }, terminalTheme());
     await setup.renderOnce();
     await run(setup);
   } finally {

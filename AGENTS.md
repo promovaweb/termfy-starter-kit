@@ -13,6 +13,12 @@ registradas em `skills-lock.json`. Para setup ou manutenção das skills, use
 `termfy-init` no modo correspondente. Execute os comandos internos pelo
 agente; não transfira esse trabalho ao usuário.
 
+Toda cor da TUI vem da paleta do terminal. Use os 16 slots ANSI ou as cores padrão de texto e fundo, inclusive em menus, seleção e estados.
+
+A navegação com `Tab` é obrigatória em toda a interface. Percorra menu, controles do conteúdo e rodapé em ordem visual, com foco visível. `Shift+Tab` percorre a ordem inversa e `Enter` ativa o controle focado. Um diálogo aberto mantém o percurso dentro dele e devolve o foco ao fechar. Teste os dois sentidos e o retorno ao início.
+
+Apresente cada atalho visível em tamanho normal, na linha do rótulo, com negrito e contraste invertido por `shortcutBadge(tecla, ctx.theme)`, inclusive nas abas, no rodapé, nos botões, na ajuda, na paleta e nos diálogos. Exemplos: `1 Overview`, `r reload` e `Esc Cancel`. A tecla registrada e os comandos para copiar continuam literais.
+
 ## Idioma
 
 - Todo o código é em inglês: nomes de arquivos, identificadores, comentários,

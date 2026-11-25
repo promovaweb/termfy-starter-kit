@@ -14,6 +14,8 @@ decide a ordem, chama as skills certas, mantém o `CLISPEC.md` como visão
 macro do binário e cada evolução em uma spec de `specs/`, e para em poucos
 pontos para a pessoa confirmar.
 
+Toda cor da TUI vem da paleta do terminal. Use os 16 slots ANSI ou as cores padrão de texto e fundo, inclusive em menus, seleção e estados.
+
 ## Leia antes
 
 - `AGENTS.md` do repositório.

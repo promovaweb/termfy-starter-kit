@@ -64,10 +64,15 @@ for (const [width, height] of sizes) {
           for (const border of line.matchAll(/╰[^╯]*╯/g)) expect(border[0]).toMatch(/^[╰╯─]+$/);
         }
         expect(frame).not.toContain("visual-test-secret");
-        // The active tab alone owns a full-width indicator, without a background block.
-        expect(lines[width >= 80 ? 4 : 2]!.trim()).toMatch(/^━+$/);
+        const menu = lines.findIndex(line => line.includes(" Menu "));
+        expect(menu).toBeGreaterThan(0);
+        expect(lines.slice(0, menu).filter(line => line.trim())).toHaveLength(1);
+        expect(lines[0]).not.toMatch(/Local IP|Tailscale/);
+        expect(lines.slice(0, menu).join("\n")).not.toContain("Bun ");
+        expect(lines[menu]!.indexOf("┌")).toBe(lines.find(line => line.includes("▌"))!.indexOf("▌"));
+        if (height >= 20) expect(lines[menu - 1]!.trim()).toBe("");
+        expect(lines[menu + 1]).toContain("12345"[tabs.indexOf(tab)] + " ");
         if (width >= 80) {
-          expect(lines[5]!.trim()).toBe("");
           expect(lines.at(-2)!.trim()).toBe("");
           const visit = (node: Renderable): void => {
             if (node instanceof BoxRenderable && node.constructor.name === "Card") {
@@ -132,8 +137,8 @@ for (const [width, height] of sizes) {
           expect(bar).not.toContain("…");
           // Assert buttons in the content area, independently of status hints.
           const content = lines.slice(3, -1).join("\n");
-          expect(content).toMatch(/\[c\] copy MCP config/);
-          expect(content).toMatch(/\[r\] reload/);
+          expect(content).toMatch(/c copy MCP config/);
+          expect(content).toMatch(/r reload/);
           const reading = scrollPanels(setup.renderer.root).find(panel => panel.verticalScrollBar.visible)!;
           expect(reading).toBeDefined();
           expect(content).toContain("termfy --help");

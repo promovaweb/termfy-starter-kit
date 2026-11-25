@@ -60,7 +60,7 @@ Nenhuma screen escreve margem, padding ou gap com número solto.
 
 ## Paleta
 
-Três temas em `src/tui/theme.ts`: `terminal` (padrão), `night` e `day`.
+Toda cor da TUI vem da paleta do terminal. Use os 16 slots ANSI ou as cores padrão de texto e fundo, inclusive em menus, seleção e estados.
 Papéis:
 
 | Papel | Uso |
@@ -81,14 +81,12 @@ tema, é a escolha do slot ANSI em `DEFAULT_TERMINAL_SLOTS`. Não coloque hex
 no tema `terminal`.
 
 O padrão de `tui.theme` é `terminal` em todo binário derivado. Um token novo
-existe nas três paletas. No `terminal`, ele aponta para
+existe na paleta do terminal. No `terminal`, ele aponta para
 `RGBA.fromIndex(slot)`, `RGBA.defaultForeground()` ou
 `RGBA.defaultBackground()`. A escolha de slot conforme as cores reais fica em
 `chooseTerminalSlots`, nunca numa screen.
 
-As paletas `night` e `day` são fixas em RGB. A `night` parte do Tokyo Night;
-a `day` parte do Tokyo Night Day. Mantenha contraste mínimo 4.5:1 entre
-`text` e `surface`.
+Confira o contraste entre `text` e `surface` em terminais claros e escuros.
 
 ## Tipografia de terminal
 
@@ -126,4 +124,4 @@ a `day` parte do Tokyo Night Day. Mantenha contraste mínimo 4.5:1 entre
 - [ ] Margens, paddings e gaps vêm de `ctx.space`, sem número solto.
 - [ ] Linha vazia entre abas, conteúdo e barra no layout médio e largo.
 - [ ] Funciona com `tui.theme = terminal` em um tema claro e um escuro.
-- [ ] Funciona com `tui.theme = day`.
+- [ ] Funciona com `um terminal de fundo claro`.

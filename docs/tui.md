@@ -8,24 +8,29 @@ encerra com exit code 8.
 
 | Aba | Ícone | Conteúdo |
 | --- | --- | --- |
-| Overview | `overview` | Environment (binary, runtime e platform), State (settings e cofre) e Next steps com comandos de terminal, configuração MCP e ações de copiar/recarregar. |
+| Overview | `overview` | Environment (binary e platform), State (settings e cofre) e Next steps com comandos de terminal, configuração MCP e ações de copiar/recarregar. |
 | Settings | `settings` | Tabela com key, valor e padrão de cada setting, com painel de detalhe. |
 | Credentials | `vault` | Nomes das credenciais do cofre, origem da master key e total de credenciais. Valores não aparecem. |
 | Docs | `docs` | Índice dos tópicos da documentação embutida e o documento em Markdown. |
 | About | `about` | Binary, project, license, credits, standards seguidos e links. |
 
-Cada aba mostra o número e o ícone do papel: ` 1 ⌂ Overview ` e
-` 2 ⚙ Settings `. No layout compacto, a aba inativa mostra só o número e o
-ícone. O clique abre a aba. A roda do mouse sobre a barra de abas troca de
+Acima do Menu, uma linha reúne o nome, a versão do aplicativo e a distribuição Linux ou o nome do sistema operacional.
+
+Cada aba mostra a tecla numérica em tamanho normal junto ao ícone. Exemplos: ` 1 ⌂ Overview ` e
+` 2 ⚙ Settings `. No layout compacto, cada aba mantém o número e o nome. O clique abre a aba. A roda do mouse sobre a barra de abas troca de
 aba. A aba inicial vem de `tui.initialTab` em settings.json ou de `--tab`,
 com os valores `overview`, `settings`, `credentials`, `docs` e `about`.
 
 ## Teclas
 
+A navegação com `Tab` é obrigatória em toda a interface. Percorra menu, controles do conteúdo e rodapé em ordem visual, com foco visível. `Shift+Tab` percorre a ordem inversa e `Enter` ativa o controle focado. Um diálogo aberto mantém o percurso dentro dele e devolve o foco ao fechar. Teste os dois sentidos e o retorno ao início.
+
+Apresente cada atalho visível em tamanho normal, na linha do rótulo, com negrito e contraste invertido por `shortcutBadge(tecla, ctx.theme)`, inclusive nas abas, no rodapé, nos botões, na ajuda, na paleta e nos diálogos. Exemplos: `1 Overview`, `r reload` e `Esc Cancel`. A tecla registrada e os comandos para copiar continuam literais.
+
 | Tecla | Ação |
 | --- | --- |
 | `←` `→` `[` `]` | aba anterior ou seguinte |
-| `Tab` `Shift+Tab` | próximo painel ou painel anterior da tela |
+| `Tab` `Shift+Tab` | próximo controle ou controle anterior |
 | `1` … `9` | ir para a aba de mesmo número |
 | `Ctrl+K` `:` | abrir a paleta de comandos |
 | `?` | mostrar ou esconder o help |
@@ -33,7 +38,7 @@ com os valores `overview`, `settings`, `credentials`, `docs` e `about`.
 | `q` `Ctrl+C` | sair |
 
 Dentro de um campo de texto, letras e números vão para o campo. `Esc` sai do
-campo. Fora de um campo, `Tab` e `Shift+Tab` movem o foco entre os painéis
+campo. Fora de um campo, `Tab` e `Shift+Tab` movem o foco entre os controles
 da tela ativa, sem trocar de aba.
 
 Cada screen declara os próprios comandos em `actions`. O shell executa a
@@ -77,7 +82,7 @@ O shell desenha os diálogos. A tela pede o valor e recebe a resposta:
 ```ts
 const name = await ctx.prompt({ title: "Add credential", label: "Name" });
 const ok = await ctx.confirm({ title: "Remove", message: `Remove ${name}?`, danger: true });
-const index = await ctx.choose({ title: "Theme", items: ["terminal", "night", "day"] });
+const index = await ctx.choose({ title: "Icons", items: ["unicode", "ascii"] });
 ```
 
 | Diálogo | Campos | Interação |
@@ -121,13 +126,13 @@ Abaixo de 60×16 o shell troca a tela pela mensagem "Terminal too small" até
 o terminal crescer. Não repita essa mensagem na screen.
 
 O shell, as abas e a barra alinham o conteúdo na mesma margem. A aba ativa
-recebe um indicador `━` sob o rótulo. Em `medium` e `wide`, as margens
+aparece em negrito sobre um fundo de destaque dentro da borda do Menu. Em `medium` e `wide`, as margens
 laterais têm três colunas. Os cartões têm padding de duas colunas e uma
-linha. Os gaps têm quatro colunas e uma linha. Uma linha vazia separa
-cabeçalho, abas, conteúdo e barra. Em `compact`, as margens e o padding
+linha. As abas usam até três colunas de intervalo. A borda do Menu acompanha a margem dos painéis. Uma linha vazia separa
+o menu do conteúdo e o conteúdo da barra. Em `compact`, as margens e o padding
 lateral têm uma coluna, sem padding vertical nem linhas de separação.
 As screens acessam os tokens por `ctx.space`; componentes usam
-`spacingFor(renderer.width)`. Botões usam `[c] copy MCP config`, com a
+`spacingFor(renderer.width)`. Botões usam `c copy MCP config`, com a
 tecla em accent e dois espaços entre controles. Os cartões limitam a altura
 ao conteúdo ou à área de leitura disponível; conteúdo excedente rola.
 Diálogos e toasts têm padding de duas colunas e uma linha.
@@ -164,10 +169,7 @@ Nenhum glifo fixo fica no código da screen.
 
 ## Tema
 
-Três paletas em `src/tui/theme.ts`: `terminal` (padrão), `night` e `day`.
-A escolha vem de `tui.theme`. As cores têm nomes de papel (`accent`,
-`textDim`, `border`), não de matiz, para que uma troca de paleta não exija
-alterar as screens.
+Toda cor da TUI vem da paleta do terminal. Use os 16 slots ANSI ou as cores padrão de texto e fundo, inclusive em menus, seleção e estados.
 
 ### terminal
 
@@ -201,16 +203,13 @@ Mapeamento padrão:
 | `error` | ANSI 1 (vermelho) |
 | `keyText` | texto padrão do terminal |
 
-`night` (Tokyo Night) e `day` (Tokyo Night Day) são paletas fixas em RGB,
-iguais em qualquer terminal.
-
 O acento do binário, nesse tema, é um slot ANSI em
 `DEFAULT_TERMINAL_SLOTS` (`accent: ANSI.cyan`, por exemplo). Um hex ali
 deixaria a TUI fora do tema do terminal.
 
-Um token novo precisa existir nas três paletas. No `terminal`, ele aponta
+Cada token aponta
 para um slot ANSI ou para o texto ou fundo padrão do terminal. Os testes
-visuais conferem `terminal`, `night` e `day`. Para testar a escolha dos
+visuais conferem paletas claras e escuras do terminal. Para testar a escolha dos
 slots, passe uma paleta conhecida a `terminalTheme(colors)`, como faz
 `tests/tui-theme.test.ts`.
 
@@ -240,7 +239,7 @@ tema e, quando desenham ícone, um `TitleIcon` com `{ icons, name }`.
 | `spinner` | Indicador animado com `start`, `stop` e `setLabel`. |
 | `progressBar` | Barra de 0 a 1 com `set(value, label?)`. |
 | `link` | Hyperlink OSC 8; o clique copia a URL por OSC 52. |
-| `button` | `[tecla] rótulo` clicável, ligado à mesma função da ação. |
+| `button` | Atalho e rótulo clicáveis, ligado à mesma função da ação. |
 | `heading`, `dim`, `list`, `spacer` | Texto e espaçamento. `spacer` não recebe tema. |
 
 `table(renderer, theme, { columns, rows, empty?, onSelect?, onActivate? })`

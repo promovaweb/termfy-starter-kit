@@ -2,13 +2,13 @@
 import { expect, test } from "bun:test";
 import { createTestRenderer } from "@opentui/core/testing";
 import { listPanel } from "../src/tui/components.ts";
-import { themes } from "../src/tui/theme.ts";
+import { terminalTheme } from "../src/tui/theme.ts";
 
 test("selection follows movement, scrolls into view and activates on Enter", async () => {
   const setup = await createTestRenderer({ width: 40, height: 8 });
   let activated = -1;
   try {
-    const list = listPanel(setup.renderer, themes.night, {
+    const list = listPanel(setup.renderer, terminalTheme(), {
       title: "Choices", items: Array.from({ length: 20 }, (_, i) => `Item ${i}`), onSelect: (i) => { activated = i; },
     });
     list.box.height = 8;
@@ -33,7 +33,7 @@ test("selection follows movement, scrolls into view and activates on Enter", asy
 test("empty lists do not activate or move", async () => {
   const setup = await createTestRenderer({ width: 30, height: 6 });
   try {
-    const list = listPanel(setup.renderer, themes.day, { title: "Empty", items: [], onSelect: () => { throw new Error("Unexpected activation"); } });
+    const list = listPanel(setup.renderer, terminalTheme(), { title: "Empty", items: [], onSelect: () => { throw new Error("Unexpected activation"); } });
     setup.renderer.root.add(list.box);
     list.select(0); list.move(1);
     expect(list.selected()).toBe(-1);

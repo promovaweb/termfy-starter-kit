@@ -13,7 +13,7 @@
 | `license` | `package.json` → `license` | `about`, aba About, `info.license` do OpenCLI |
 | `framework` | `package.json` → `termfy.framework` | documentação; não aparece no binário |
 | créditos | `credits` em `src/app/manifest.ts` | `about`, aba About, tool MCP `about` |
-| paleta | `DEFAULT_TERMINAL_SLOTS`, `themes.night` e `themes.day` em `src/tui/theme.ts` | toda a TUI, por nome de papel |
+| paleta | `DEFAULT_TERMINAL_SLOTS` em `src/tui/theme.ts` | toda a TUI, por nome de papel |
 | glifos | `glyphs` em `src/tui/theme.ts` | cabeçalho, listas e estados da TUI |
 | ícones de papel | `iconSets` em `src/tui/icons.ts` | abas, painéis, botões, help e mensagem de `notify` |
 | padrões seguidos | painel "Standards" em `src/tui/screens/about.ts` | aba About |
@@ -50,5 +50,4 @@ e de `keyText` sobre `keyBackground`.
 
 No tema `terminal`, a marca não usa hex. A escolha é o slot ANSI em
 `DEFAULT_TERMINAL_SLOTS`, por exemplo `accent: ANSI.cyan`. O terminal pinta
-com o tema dele. Na paleta `night` e na `day`, a cor hex da marca entra em
-`borderActive`, `accent`, `accentSecondary` e `keyBackground`.
+com o tema dele. Cada papel deve apontar para uma cor do terminal.
